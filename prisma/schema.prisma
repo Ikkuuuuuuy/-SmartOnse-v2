@@ -1,0 +1,144 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String            @id @default(cuid())
+  name          String
+  email         String            @unique
+  password      String?
+  role          String            @default("resident") // admin, resident, staff, sk_official, health_worker
+  phone         String?
+  address       String?
+  isVerified    Boolean           @default(false)
+  avatarUrl     String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  requests      DocumentRequest[]
+  appointments  Appointment[]
+}
+
+model DocumentType {
+  id             String            @id @default(cuid())
+  code           String            @unique
+  name           String
+  description    String
+  fee            Float             @default(0.0)
+  processingDays Int               @default(1)
+  requirements   String
+  isActive       Boolean           @default(true)
+  requests       DocumentRequest[]
+}
+
+model DocumentRequest {
+  id             String         @id @default(cuid())
+  trackingNumber String         @unique
+  userId         String?
+  user           User?          @relation(fields: [userId], references: [id])
+  documentTypeId String
+  documentType   DocumentType   @relation(fields: [documentTypeId], references: [id])
+  fullName       String
+  contactNumber  String
+  email          String?
+  address        String
+  purpose        String
+  civilStatus    String         @default("Single")
+  yearsOfResidency Int          @default(1)
+  status         String         @default("PENDING") // PENDING, PROCESSING, READY_FOR_PICKUP, COMPLETED, REJECTED
+  remarks        String?
+  pickupDate     DateTime?
+  rating         Int?
+  feedbackComment String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Appointment {
+  id            String    @id @default(cuid())
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id])
+  patientName   String
+  serviceType   String
+  contactNumber String
+  appointmentDate DateTime
+  timeSlot      String
+  status        String    @default("SCHEDULED")
+  symptoms      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model BarangayOfficial {
+  id         String   @id @default(cuid())
+  name       String
+  position   String
+  committee  String?
+  order      Int      @default(0)
+  contact    String?
+  term       String   @default("2023 - 2026")
+  avatarUrl  String?
+  createdAt  DateTime @default(now())
+}
+
+model Service {
+  id             String   @id @default(cuid())
+  title          String
+  category       String
+  description    String
+  fee            String   @default("Free")
+  requirements   String
+  processingTime String   @default("1-2 Business Days")
+  isActive       Boolean  @default(true)
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  category    String
+  description String
+  location    String
+  eventDate   DateTime
+  imageUrl    String?
+  isFeatured  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model SkProgram {
+  id             String   @id @default(cuid())
+  title          String
+  category       String
+  objective      String
+  targetAudience String
+  budget         Float    @default(0.0)
+  status         String   @default("Ongoing")
+  schedule       String
+  createdAt      DateTime @default(now())
+}
+
+model TransparencyDocument {
+  id            String   @id @default(cuid())
+  title         String
+  category      String
+  year          Int      @default(2026)
+  quarter       String?
+  fileUrl       String?
+  publishedDate DateTime @default(now())
+  fileSize      String   @default("1.2 MB")
+  createdAt     DateTime @default(now())
+}
+
+model BarangayStatistic {
+  id               String   @id @default(cuid())
+  label            String
+  value            String
+  subtext          String?
+  icon             String
+  order            Int      @default(0)
+}

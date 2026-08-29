@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-primary: #9C2007;
+    --brand-dark: #8B1A05;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased selection:bg-[#9C2007] selection:text-white transition-colors duration-200;
+  }
+
+  html.dark body {
+    @apply bg-[#070D18] text-slate-100;
+  }
+}
+
+html.font-size-large {
+  font-size: 110%;
+}
+
+html.font-size-xlarge {
+  font-size: 120%;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(156, 32, 7, 0.1);
+}
+
+html.dark .glass-card {
+  background: rgba(11, 21, 40, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
