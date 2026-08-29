@@ -72,9 +72,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [user, isLoading, router]);
 
-  // 1. Loading or Unauthenticated: Immediately redirect to login without showing blocking screen
+  // 1. Loading or Unauthenticated: Immediately redirect to login
   if (isLoading || !user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-[#070D18] flex flex-col items-center justify-center space-y-3 font-sans">
+        <div className="w-10 h-10 border-4 border-[#9C2007] border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Redirecting to Login...
+        </p>
+      </div>
+    );
   }
 
   // 2. Resident Guard
