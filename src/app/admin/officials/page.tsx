@@ -252,19 +252,19 @@ export default function AdminOfficialsPage() {
   });
 
   return (
-    <div className="space-y-6 font-sans text-slate-800">
+    <div className="space-y-6 font-sans text-slate-800 dark:text-slate-100">
       
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#0B1528] p-6 rounded-3xl border border-slate-200/80 dark:border-blue-900/40 shadow-xs transition-colors">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#9C2007] bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 bg-rose-50 dark:bg-rose-950/70 border border-rose-200 dark:border-rose-900/50 px-2.5 py-0.5 rounded-full">
               Sangguniang Barangay &amp; Sangguniang Kabataan
             </span>
             <span className="text-[10px] font-bold text-slate-400">&bull;</span>
-            <span className="text-[10px] font-bold text-slate-500">Term 2023 &ndash; 2026</span>
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Term 2023 &ndash; 2026</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
             Barangay Council &amp; Officials Management
           </h1>
         </div>
@@ -281,14 +281,14 @@ export default function AdminOfficialsPage() {
       </div>
 
       {/* Tab Filters & Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-slate-200/80 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#0B1528] p-4 rounded-3xl border border-slate-200/80 dark:border-blue-900/40 shadow-xs">
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setActiveTab('all')}
             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer ${
               activeTab === 'all'
                 ? 'bg-[#9C2007] text-white shadow-md shadow-red-900/20'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                : 'bg-slate-100 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#152747]'
             }`}
           >
             All Officials ({officials.length})
@@ -299,7 +299,7 @@ export default function AdminOfficialsPage() {
             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer ${
               activeTab === 'barangay'
                 ? 'bg-[#9C2007] text-white shadow-md shadow-red-900/20'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                : 'bg-slate-100 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#152747]'
             }`}
           >
             🏛️ Barangay Council (8)
@@ -310,7 +310,7 @@ export default function AdminOfficialsPage() {
             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer ${
               activeTab === 'sk'
                 ? 'bg-[#9C2007] text-white shadow-md shadow-red-900/20'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                : 'bg-slate-100 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#152747]'
             }`}
           >
             🎓 Sangguniang Kabataan (10)
@@ -324,7 +324,7 @@ export default function AdminOfficialsPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search by name or committee..."
-            className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-1 focus:ring-[#9C2007] outline-none"
+            className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-[#9C2007]"
           />
         </div>
       </div>
@@ -337,12 +337,12 @@ export default function AdminOfficialsPage() {
           return (
             <div
               key={off.id}
-              className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all space-y-4 flex flex-col justify-between"
+              className="bg-white dark:bg-[#0B1528] rounded-3xl p-5 border border-slate-200/80 dark:border-blue-900/40 shadow-xs hover:shadow-lg transition-all space-y-4 flex flex-col justify-between"
             >
               <div className="space-y-3">
                 {/* Official Photo Avatar */}
                 <div className="flex items-start justify-between">
-                  <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-md bg-slate-100 shrink-0">
+                  <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-slate-100 dark:border-blue-900/50 shadow-md bg-slate-100 dark:bg-[#0E1B33] shrink-0">
                     <img
                       src={off.avatar}
                       alt={off.name}
@@ -354,8 +354,10 @@ export default function AdminOfficialsPage() {
                     />
                   </div>
 
-                  <span className={`text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full ${
-                    isSK ? 'bg-purple-100 text-purple-900 border border-purple-200' : 'bg-rose-50 text-[#9C2007] border border-rose-200'
+                  <span className={`text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
+                    isSK 
+                      ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-900 dark:text-purple-300 border-purple-200 dark:border-purple-800/40' 
+                      : 'bg-rose-50 dark:bg-rose-950/70 text-[#9C2007] dark:text-rose-300 border border-rose-200 dark:border-rose-900/50'
                   }`}>
                     {isSK ? 'SK Official' : 'Barangay'}
                   </span>
@@ -363,17 +365,17 @@ export default function AdminOfficialsPage() {
 
                 {/* Name & Position */}
                 <div>
-                  <h3 className="font-black text-sm text-slate-900 leading-snug">{off.name}</h3>
-                  <p className="text-xs text-[#9C2007] font-bold uppercase tracking-wider mt-0.5">
+                  <h3 className="font-black text-sm text-slate-900 dark:text-white leading-snug">{off.name}</h3>
+                  <p className="text-xs text-[#9C2007] dark:text-rose-400 font-bold uppercase tracking-wider mt-0.5">
                     {off.position}
                   </p>
-                  <p className="text-[11px] text-slate-500 font-medium leading-tight mt-1 line-clamp-2">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-tight mt-1 line-clamp-2">
                     {off.committee}
                   </p>
                 </div>
 
                 {/* Contact Strip */}
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-1.5 text-xs text-slate-600">
+                <div className="p-3 bg-slate-50 dark:bg-[#080E1A] rounded-2xl border border-slate-100 dark:border-blue-900/30 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
                   <div className="flex items-center gap-2">
                     <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span className="font-mono text-[11px]">{off.contact}</span>
@@ -386,11 +388,11 @@ export default function AdminOfficialsPage() {
               </div>
 
               {/* Bottom Card Footer */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <div className="pt-3 border-t border-slate-100 dark:border-blue-900/40 flex items-center justify-between text-xs">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{off.term}</span>
                 <button
                   onClick={() => alert(`Editing official ${off.name}`)}
-                  className="px-3 py-1.5 bg-slate-100 hover:bg-[#9C2007] hover:text-white rounded-xl font-bold text-[11px] transition cursor-pointer"
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-[#0E1B33] hover:bg-[#9C2007] dark:hover:bg-[#9C2007] text-slate-800 dark:text-slate-200 hover:text-white rounded-xl font-bold text-[11px] transition cursor-pointer border border-transparent dark:border-blue-900/40"
                 >
                   Edit &rarr;
                 </button>
@@ -402,17 +404,17 @@ export default function AdminOfficialsPage() {
 
       {/* Add Official Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 border border-slate-200 shadow-2xl relative animate-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#0B1528] rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 border border-slate-200 dark:border-blue-900/50 shadow-2xl relative animate-in zoom-in-95">
             <button
               onClick={() => setIsAddModalOpen(false)}
-              className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-700"
+              className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-xl font-black uppercase text-slate-900">Add Council Member / Staff</h3>
-            <p className="text-xs text-slate-500">Record a newly elected council member or appointed staff officer.</p>
+            <h3 className="text-xl font-black uppercase text-slate-900 dark:text-white">Add Council Member / Staff</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Record a newly elected council member or appointed staff officer.</p>
 
             <form
               onSubmit={(e) => {
@@ -423,18 +425,18 @@ export default function AdminOfficialsPage() {
               className="space-y-4 text-xs"
             >
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Official Name</label>
-                <input required placeholder="Hon. Juan Dela Cruz" className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
+                <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Official Name</label>
+                <input required placeholder="Hon. Juan Dela Cruz" className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-[#9C2007]" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Designation</label>
-                  <input required placeholder="Barangay Kagawad" className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
+                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Designation</label>
+                  <input required placeholder="Barangay Kagawad" className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-[#9C2007]" />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Category</label>
-                  <select className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Category</label>
+                  <select className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007] cursor-pointer">
                     <option value="barangay">Barangay Council</option>
                     <option value="sk">Sangguniang Kabataan</option>
                   </select>
@@ -442,21 +444,21 @@ export default function AdminOfficialsPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Assigned Committee</label>
-                <input required placeholder="e.g. Committee on Public Safety" className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
+                <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Assigned Committee</label>
+                <input required placeholder="e.g. Committee on Public Safety" className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-[#9C2007]" />
               </div>
 
               <div className="pt-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold uppercase"
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-[#0E1B33] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#152747] font-bold uppercase transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-[#9C2007] text-white font-black uppercase shadow-md"
+                  className="px-6 py-2.5 rounded-xl bg-[#9C2007] hover:bg-[#8B1A05] text-white font-black uppercase shadow-md transition cursor-pointer"
                 >
                   Save Official
                 </button>

@@ -108,19 +108,19 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <div className="space-y-8 font-sans text-slate-800">
+    <div className="space-y-8 font-sans text-slate-800 dark:text-slate-100">
       
-      {/* 1. Header Filter Ribbon & Action Bar (Matching Inspo) */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/80 shadow-xs">
+      {/* 1. Header Filter Ribbon & Action Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#0B1528] p-5 sm:p-6 rounded-3xl border border-slate-200/80 dark:border-blue-900/40 shadow-xs transition-colors">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#9C2007] bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 bg-rose-50 dark:bg-rose-950/70 border border-rose-200 dark:border-rose-900/50 px-2.5 py-0.5 rounded-full">
               Executive Dashboard
             </span>
             <span className="text-[10px] font-bold text-slate-400">&bull;</span>
-            <span className="text-[10px] font-bold text-slate-500">San Juan City &bull; District 1</span>
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">San Juan City &bull; District 1</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
             Dashboard Analytics &amp; Operations
           </h1>
         </div>
@@ -131,13 +131,13 @@ export default function AdminDashboardPage() {
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="appearance-none bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold py-2.5 pl-3.5 pr-8 rounded-2xl focus:outline-none focus:ring-1 focus:ring-[#9C2007] cursor-pointer shadow-2xs"
+              className="appearance-none bg-slate-50 dark:bg-[#0E1B33] hover:bg-slate-100 dark:hover:bg-[#152747] border border-slate-200 dark:border-blue-900/60 text-slate-800 dark:text-slate-100 text-xs font-bold py-2.5 pl-3.5 pr-8 rounded-2xl focus:outline-none focus:ring-1 focus:ring-[#9C2007] cursor-pointer shadow-2xs"
             >
               <option value="FY 2026 (August 2026)">This Period: FY 2026 (August 2026)</option>
               <option value="FY 2026 (Q3 July-Sept)">Quarter: Q3 (July - Sept 2026)</option>
               <option value="FY 2026 Annual">Annual: Full Year FY 2026</option>
             </select>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           <Link
@@ -150,49 +150,49 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* 2. Top KPI Cards Row (5 Cards matching Inspo 1) */}
+      {/* 2. Top KPI Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {kpiCards.map((card, idx) => (
           <div
             key={idx}
-            className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-2 relative overflow-hidden"
+            className="bg-white dark:bg-[#0B1528] rounded-3xl p-5 border border-slate-200/80 dark:border-blue-900/40 shadow-xs hover:shadow-md transition-all space-y-2 relative overflow-hidden"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate max-w-[150px]">
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate max-w-[150px]">
                 {card.label}
               </span>
-              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${card.badgeColor}`}>
+              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${card.badgeColor} dark:bg-slate-900/80 dark:border-slate-700`}>
                 {card.badge}
               </span>
             </div>
 
-            <div className={`text-2xl sm:text-3xl font-black tracking-tight ${card.color}`}>
+            <div className={`text-2xl sm:text-3xl font-black tracking-tight ${card.color} dark:text-white`}>
               {card.value}
             </div>
 
-            <p className="text-[11px] text-slate-400 font-medium leading-tight">
+            <p className="text-[11px] text-slate-400 dark:text-slate-400 font-medium leading-tight">
               {card.subtext}
             </p>
           </div>
         ))}
       </div>
 
-      {/* 3. Charts & Analytics Row (2 Columns matching Inspo 1) */}
+      {/* 3. Charts & Analytics Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left Chart (7 Cols) &bull; Monthly Request & Budget Trend */}
-        <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-5">
+        {/* Left Chart &bull; Monthly Request & Budget Trend */}
+        <div className="lg:col-span-7 bg-white dark:bg-[#0B1528] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-blue-900/40 shadow-xs space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-black text-sm uppercase text-slate-900 tracking-wider flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-[#9C2007]" />
+              <h3 className="font-black text-sm uppercase text-slate-900 dark:text-white tracking-wider flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-[#9C2007] dark:text-rose-400" />
                 <span>Barangay Clearance &amp; Budget Velocity (Last 6 Months)</span>
               </h3>
-              <p className="text-[11px] text-slate-400 font-medium">
+              <p className="text-[11px] text-slate-400 dark:text-slate-400 font-medium">
                 Volume of digital clearance issuances and monthly fund disbursement.
               </p>
             </div>
-            <span className="text-[10px] font-bold text-slate-400 border border-slate-200 px-2.5 py-1 rounded-xl bg-slate-50">
+            <span className="text-[10px] font-bold text-slate-400 border border-slate-200 dark:border-blue-900/60 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#0E1B33]">
               Monthly View
             </span>
           </div>
@@ -202,26 +202,22 @@ export default function AdminDashboardPage() {
             <svg viewBox="0 0 600 200" className="w-full h-full overflow-visible">
               <defs>
                 <linearGradient id="maroonGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#9C2007" stopOpacity="0.35" />
+                  <stop offset="0%" stopColor="#9C2007" stopOpacity="0.45" />
                   <stop offset="100%" stopColor="#9C2007" stopOpacity="0.0" />
-                </linearGradient>
-                <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#D97706" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#D97706" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
 
               {/* Grid Lines */}
-              <line x1="40" y1="30" x2="580" y2="30" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4 4" />
-              <line x1="40" y1="80" x2="580" y2="80" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4 4" />
-              <line x1="40" y1="130" x2="580" y2="130" stroke="#F1F5F9" strokeWidth="1" strokeDasharray="4 4" />
-              <line x1="40" y1="170" x2="580" y2="170" stroke="#E2E8F0" strokeWidth="1.5" />
+              <line x1="40" y1="30" x2="580" y2="30" stroke="currentColor" className="text-slate-100 dark:text-blue-950/60" strokeWidth="1" strokeDasharray="4 4" />
+              <line x1="40" y1="80" x2="580" y2="80" stroke="currentColor" className="text-slate-100 dark:text-blue-950/60" strokeWidth="1" strokeDasharray="4 4" />
+              <line x1="40" y1="130" x2="580" y2="130" stroke="currentColor" className="text-slate-100 dark:text-blue-950/60" strokeWidth="1" strokeDasharray="4 4" />
+              <line x1="40" y1="170" x2="580" y2="170" stroke="currentColor" className="text-slate-200 dark:text-blue-900/60" strokeWidth="1.5" />
 
               {/* Y-Axis Labels */}
-              <text x="30" y="35" fontSize="9" fill="#94A3B8" textAnchor="end">240</text>
-              <text x="30" y="85" fontSize="9" fill="#94A3B8" textAnchor="end">160</text>
-              <text x="30" y="135" fontSize="9" fill="#94A3B8" textAnchor="end">80</text>
-              <text x="30" y="175" fontSize="9" fill="#94A3B8" textAnchor="end">0</text>
+              <text x="30" y="35" fontSize="9" fill="currentColor" className="text-slate-400 dark:text-slate-500" textAnchor="end">240</text>
+              <text x="30" y="85" fontSize="9" fill="currentColor" className="text-slate-400 dark:text-slate-500" textAnchor="end">160</text>
+              <text x="30" y="135" fontSize="9" fill="currentColor" className="text-slate-400 dark:text-slate-500" textAnchor="end">80</text>
+              <text x="30" y="175" fontSize="9" fill="currentColor" className="text-slate-400 dark:text-slate-500" textAnchor="end">0</text>
 
               {/* Area Fill */}
               <path
@@ -233,7 +229,7 @@ export default function AdminDashboardPage() {
               <path
                 d="M 50 160 C 130 110, 190 140, 250 80 C 310 110, 370 40, 440 60 C 500 80, 540 30, 570 40"
                 fill="none"
-                stroke="#9C2007"
+                stroke="#DC2626"
                 strokeWidth="3.5"
                 strokeLinecap="round"
               />
@@ -248,8 +244,8 @@ export default function AdminDashboardPage() {
                 { x: 570, y: 40, label: 'Aug' },
               ].map((pt, i) => (
                 <g key={i}>
-                  <circle cx={pt.x} cy={pt.y} r="5" fill="#FFFFFF" stroke="#9C2007" strokeWidth="2.5" />
-                  <text x={pt.x} y="190" fontSize="10" fontWeight="bold" fill="#64748B" textAnchor="middle">
+                  <circle cx={pt.x} cy={pt.y} r="5" fill="#0B1528" stroke="#DC2626" strokeWidth="2.5" />
+                  <text x={pt.x} y="190" fontSize="10" fontWeight="bold" fill="currentColor" className="text-slate-400 dark:text-slate-400" textAnchor="middle">
                     {pt.label}
                   </text>
                 </g>
@@ -257,23 +253,23 @@ export default function AdminDashboardPage() {
             </svg>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-blue-900/40 text-xs text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-[#9C2007]" />
-              <strong>Clearance Applications</strong> (+28% MoM Growth)
+              <span className="w-3 h-3 rounded-full bg-[#9C2007] dark:bg-rose-500" />
+              <strong className="text-slate-800 dark:text-slate-200">Clearance Applications</strong> (+28% MoM Growth)
             </span>
-            <span className="font-bold text-slate-700">Total YTD: 1,842 Documents Issued</span>
+            <span className="font-bold text-slate-700 dark:text-slate-300">Total YTD: 1,842 Documents Issued</span>
           </div>
         </div>
 
-        {/* Right Chart (5 Cols) &bull; Spending Category & Service Breakdown (Donut Chart) */}
-        <div className="lg:col-span-5 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4 flex flex-col justify-between">
+        {/* Right Chart &bull; Service & Expenditure Breakdown */}
+        <div className="lg:col-span-5 bg-white dark:bg-[#0B1528] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-blue-900/40 shadow-xs space-y-4 flex flex-col justify-between">
           <div>
-            <h3 className="font-black text-sm uppercase text-slate-900 tracking-wider flex items-center gap-2">
-              <PieChart className="w-4 h-4 text-amber-600" />
+            <h3 className="font-black text-sm uppercase text-slate-900 dark:text-white tracking-wider flex items-center gap-2">
+              <PieChart className="w-4 h-4 text-amber-500" />
               <span>Service &amp; Expenditure Breakdown</span>
             </h3>
-            <p className="text-[11px] text-slate-400 font-medium">
+            <p className="text-[11px] text-slate-400 dark:text-slate-400 font-medium">
               Categorical distribution of barangay services and budget.
             </p>
           </div>
@@ -282,28 +278,23 @@ export default function AdminDashboardPage() {
           <div className="flex items-center justify-center py-2">
             <div className="relative w-44 h-44">
               <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
-                {/* Segment 1: Barangay Clearance (38%) */}
-                <circle cx="50" cy="50" r="38" fill="transparent" stroke="#9C2007" strokeWidth="18" strokeDasharray="90.5 238.7" strokeDashoffset="0" />
-                {/* Segment 2: Health & Welfare (24%) */}
+                <circle cx="50" cy="50" r="38" fill="transparent" stroke="#DC2626" strokeWidth="18" strokeDasharray="90.5 238.7" strokeDashoffset="0" />
                 <circle cx="50" cy="50" r="38" fill="transparent" stroke="#10B981" strokeWidth="18" strokeDasharray="57.2 238.7" strokeDashoffset="-90.5" />
-                {/* Segment 3: SK Youth Programs (18%) */}
                 <circle cx="50" cy="50" r="38" fill="transparent" stroke="#8B5CF6" strokeWidth="18" strokeDasharray="42.9 238.7" strokeDashoffset="-147.7" />
-                {/* Segment 4: Infra & Maintenance (12%) */}
                 <circle cx="50" cy="50" r="38" fill="transparent" stroke="#F59E0B" strokeWidth="18" strokeDasharray="28.6 238.7" strokeDashoffset="-190.6" />
-                {/* Segment 5: Peace & Order (8%) */}
                 <circle cx="50" cy="50" r="38" fill="transparent" stroke="#3B82F6" strokeWidth="18" strokeDasharray="19.1 238.7" strokeDashoffset="-219.2" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                 <span className="text-[10px] font-black uppercase text-slate-400">Total Ops</span>
-                <span className="text-xl font-black text-slate-900">100%</span>
+                <span className="text-xl font-black text-slate-900 dark:text-white">100%</span>
               </div>
             </div>
           </div>
 
           {/* Legends */}
-          <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600 pt-2 border-t border-slate-100">
+          <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-blue-900/40">
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#9C2007]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#DC2626]" />
               <span>Clearances (38%)</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -323,15 +314,15 @@ export default function AdminDashboardPage() {
 
       </div>
 
-      {/* 4. Projected Income & Realized Collections Banner (Matching Inspo 1 Bottom Section) */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-5">
+      {/* 4. Projected Income & Realized Collections Banner */}
+      <div className="bg-white dark:bg-[#0B1528] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-blue-900/40 shadow-xs space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold">
               <DollarSign className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-black text-sm uppercase text-slate-900 tracking-wider">
+              <h3 className="font-black text-sm uppercase text-slate-900 dark:text-white tracking-wider">
                 Projected Income &amp; Revenue Forecasting (Credit &amp; Collections)
               </h3>
               <p className="text-[11px] text-slate-400 font-medium">
@@ -342,7 +333,7 @@ export default function AdminDashboardPage() {
 
           <Link
             href="/admin/transparency"
-            className="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs uppercase tracking-wider transition"
+            className="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-300 font-bold text-xs uppercase tracking-wider transition"
           >
             <span>Manage Ledgers</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -350,38 +341,38 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Realization KPI Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/60 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-[#080E1A] border border-slate-200/60 dark:border-blue-900/30 text-xs">
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Annual Projected Local</span>
-            <span className="text-base sm:text-lg font-black text-slate-900">₱4,285,600.00</span>
+            <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">₱4,285,600.00</span>
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Monthly Expected Run-Rate</span>
-            <span className="text-base sm:text-lg font-black text-slate-900">₱357,133.33 <span className="text-[10px] text-slate-400 font-normal">/ mo</span></span>
+            <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">₱357,133.33 <span className="text-[10px] text-slate-400 font-normal">/ mo</span></span>
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Realized Collections YTD</span>
-            <span className="text-base sm:text-lg font-black text-emerald-700">₱2,740,500.00</span>
+            <span className="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-400">₱2,740,500.00</span>
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Realization Efficiency</span>
-            <span className="text-base sm:text-lg font-black text-[#9C2007]">64% Target Met</span>
+            <span className="text-base sm:text-lg font-black text-[#9C2007] dark:text-rose-400">64% Target Met</span>
           </div>
         </div>
       </div>
 
       {/* 5. Interactive Tabbed Data Table & Real-time Management */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">
+      <div className="bg-white dark:bg-[#0B1528] rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-blue-900/40 shadow-xs space-y-6">
         
         {/* Tab Headers */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-blue-900/40 pb-4">
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setActiveTableTab('requests')}
               className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer ${
                 activeTableTab === 'requests'
                   ? 'bg-[#9C2007] text-white shadow-md shadow-red-900/20'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-slate-100 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#152747]'
               }`}
             >
               📋 Clearance Requests ({clearanceQueue.length})
@@ -392,7 +383,7 @@ export default function AdminDashboardPage() {
               className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer ${
                 activeTableTab === 'ledgers'
                   ? 'bg-[#9C2007] text-white shadow-md shadow-red-900/20'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-slate-100 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#152747]'
               }`}
             >
               💰 Barangay Ledgers ({ledgerEntries.length})
@@ -403,7 +394,7 @@ export default function AdminDashboardPage() {
               className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer ${
                 activeTableTab === 'citizens'
                   ? 'bg-[#9C2007] text-white shadow-md shadow-red-900/20'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-slate-100 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#152747]'
               }`}
             >
               👥 Citizen Roster ({citizenList.length})
@@ -414,7 +405,7 @@ export default function AdminDashboardPage() {
               className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer ${
                 activeTableTab === 'blotter'
                   ? 'bg-[#9C2007] text-white shadow-md shadow-red-900/20'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-slate-100 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#152747]'
               }`}
             >
               ⚖️ Peace &amp; Order ({blotterCases.length})
@@ -429,7 +420,7 @@ export default function AdminDashboardPage() {
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               placeholder="Search record by code or name..."
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-1 focus:ring-[#9C2007] outline-none"
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-[#9C2007] outline-none"
             />
           </div>
         </div>
@@ -438,7 +429,7 @@ export default function AdminDashboardPage() {
         {activeTableTab === 'requests' && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100">
+              <thead className="bg-slate-50 dark:bg-[#080E1A] text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100 dark:border-blue-900/40">
                 <tr>
                   <th className="py-3 px-4">Tracking Code</th>
                   <th className="py-3 px-4">Applicant Name</th>
@@ -450,42 +441,42 @@ export default function AdminDashboardPage() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-blue-950/40 font-medium text-slate-700 dark:text-slate-300">
                 {clearanceQueue
                   .filter((item) => 
                     item.id.toLowerCase().includes(searchFilter.toLowerCase()) || 
                     item.applicant.toLowerCase().includes(searchFilter.toLowerCase())
                   )
                   .map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-50/80 transition">
-                      <td className="py-3.5 px-4 font-mono font-bold text-[#9C2007]">{row.id}</td>
-                      <td className="py-3.5 px-4 font-bold text-slate-900">{row.applicant}</td>
+                    <tr key={row.id} className="hover:bg-slate-50/80 dark:hover:bg-[#0E1B33]/60 transition">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[#9C2007] dark:text-rose-400">{row.id}</td>
+                      <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">{row.applicant}</td>
                       <td className="py-3.5 px-4">{row.type}</td>
-                      <td className="py-3.5 px-4 text-slate-500">{row.purpose}</td>
+                      <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">{row.purpose}</td>
                       <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-[#0E1B33] text-slate-700 dark:text-slate-300 border border-transparent dark:border-blue-900/40 text-[10px] font-bold">
                           {row.feeStatus}
                         </span>
                       </td>
                       <td className="py-3.5 px-4 text-slate-400">{row.date}</td>
                       <td className="py-3.5 px-4">
                         {row.status === 'READY_FOR_PICKUP' && (
-                          <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase">
+                          <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40 text-[10px] font-black uppercase">
                             Ready for Pickup
                           </span>
                         )}
                         {row.status === 'PROCESSING' && (
-                          <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black uppercase">
+                          <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40 text-[10px] font-black uppercase">
                             Processing
                           </span>
                         )}
                         {row.status === 'PENDING_REVIEW' && (
-                          <span className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-[10px] font-black uppercase">
+                          <span className="px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800/40 text-[10px] font-black uppercase">
                             Pending Review
                           </span>
                         )}
                         {row.status === 'COMPLETED' && (
-                          <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 text-[10px] font-black uppercase">
+                          <span className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 text-[10px] font-black uppercase">
                             Completed
                           </span>
                         )}
@@ -493,7 +484,7 @@ export default function AdminDashboardPage() {
                       <td className="py-3.5 px-4 text-right">
                         <Link
                           href={`/track?trackingNumber=${row.id}`}
-                          className="px-3 py-1 bg-slate-100 hover:bg-[#9C2007] hover:text-white rounded-lg font-bold text-[11px] transition inline-block"
+                          className="px-3 py-1 bg-slate-100 dark:bg-[#0E1B33] hover:bg-[#9C2007] dark:hover:bg-[#9C2007] text-slate-800 dark:text-slate-200 hover:text-white rounded-lg font-bold text-[11px] transition inline-block border border-transparent dark:border-blue-900/40"
                         >
                           Review &rarr;
                         </Link>
@@ -509,7 +500,7 @@ export default function AdminDashboardPage() {
         {activeTableTab === 'ledgers' && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100">
+              <thead className="bg-slate-50 dark:bg-[#080E1A] text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100 dark:border-blue-900/40">
                 <tr>
                   <th className="py-3 px-4">Ledger Code</th>
                   <th className="py-3 px-4">Account / Project Title</th>
@@ -520,17 +511,17 @@ export default function AdminDashboardPage() {
                   <th className="py-3 px-4">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-blue-950/40 font-medium text-slate-700 dark:text-slate-300">
                 {ledgerEntries.map((row) => (
-                  <tr key={row.code} className="hover:bg-slate-50/80 transition">
-                    <td className="py-3.5 px-4 font-mono font-bold text-slate-900">{row.code}</td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900">{row.account}</td>
-                    <td className="py-3.5 px-4 text-slate-500">{row.item}</td>
-                    <td className="py-3.5 px-4 font-mono font-bold">{row.allocated}</td>
-                    <td className="py-3.5 px-4 font-mono text-emerald-700 font-bold">{row.spent}</td>
-                    <td className="py-3.5 px-4 font-mono font-bold text-slate-800">{row.balance}</td>
+                  <tr key={row.code} className="hover:bg-slate-50/80 dark:hover:bg-[#0E1B33]/60 transition">
+                    <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">{row.code}</td>
+                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">{row.account}</td>
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">{row.item}</td>
+                    <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-slate-200">{row.allocated}</td>
+                    <td className="py-3.5 px-4 font-mono text-emerald-700 dark:text-emerald-400 font-bold">{row.spent}</td>
+                    <td className="py-3.5 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">{row.balance}</td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold">
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40 text-[10px] font-bold">
                         {row.status}
                       </span>
                     </td>
@@ -545,7 +536,7 @@ export default function AdminDashboardPage() {
         {activeTableTab === 'citizens' && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100">
+              <thead className="bg-slate-50 dark:bg-[#080E1A] text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100 dark:border-blue-900/40">
                 <tr>
                   <th className="py-3 px-4">Full Legal Name</th>
                   <th className="py-3 px-4">Precinct Number</th>
@@ -555,16 +546,16 @@ export default function AdminDashboardPage() {
                   <th className="py-3 px-4">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-blue-950/40 font-medium text-slate-700 dark:text-slate-300">
                 {citizenList.map((row) => (
-                  <tr key={row.name} className="hover:bg-slate-50/80 transition">
-                    <td className="py-3.5 px-4 font-bold text-slate-900">{row.name}</td>
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#9C2007]">{row.precinct}</td>
+                  <tr key={row.name} className="hover:bg-slate-50/80 dark:hover:bg-[#0E1B33]/60 transition">
+                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">{row.name}</td>
+                    <td className="py-3.5 px-4 font-mono font-bold text-[#9C2007] dark:text-rose-400">{row.precinct}</td>
                     <td className="py-3.5 px-4">{row.address}</td>
                     <td className="py-3.5 px-4">{row.civil}</td>
                     <td className="py-3.5 px-4 text-slate-400">{row.registered}</td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase flex items-center gap-1 w-fit">
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40 text-[10px] font-black uppercase flex items-center gap-1 w-fit">
                         <ShieldCheck className="w-3 h-3" />
                         Verified
                       </span>
@@ -580,7 +571,7 @@ export default function AdminDashboardPage() {
         {activeTableTab === 'blotter' && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100">
+              <thead className="bg-slate-50 dark:bg-[#080E1A] text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100 dark:border-blue-900/40">
                 <tr>
                   <th className="py-3 px-4">Docket No.</th>
                   <th className="py-3 px-4">Involved Parties</th>
@@ -589,15 +580,15 @@ export default function AdminDashboardPage() {
                   <th className="py-3 px-4">Lupon Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-blue-950/40 font-medium text-slate-700 dark:text-slate-300">
                 {blotterCases.map((row) => (
-                  <tr key={row.caseNo} className="hover:bg-slate-50/80 transition">
-                    <td className="py-3.5 px-4 font-mono font-bold text-slate-900">{row.caseNo}</td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900">{row.parties}</td>
+                  <tr key={row.caseNo} className="hover:bg-slate-50/80 dark:hover:bg-[#0E1B33]/60 transition">
+                    <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">{row.caseNo}</td>
+                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">{row.parties}</td>
                     <td className="py-3.5 px-4">{row.nature}</td>
                     <td className="py-3.5 px-4 text-slate-400">{row.date}</td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-[10px] font-bold">
+                      <span className="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/70 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800/40 text-[10px] font-bold">
                         {row.luponStatus}
                       </span>
                     </td>

@@ -59,16 +59,16 @@ export default function AdminRequestsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-black uppercase tracking-wider text-[#9C2007]">Document Review Pipeline</span>
-          <h1 className="text-3xl font-black text-slate-900 uppercase">Clearance Requests Queue</h1>
+          <span className="text-xs font-black uppercase tracking-wider text-[#9C2007] dark:text-rose-400">Document Review Pipeline</span>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase">Clearance Requests Queue</h1>
         </div>
       </div>
 
       {/* Table Container */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden text-xs">
+      <div className="bg-white dark:bg-[#0B1528] rounded-3xl border border-slate-200 dark:border-blue-900/40 shadow-sm overflow-hidden text-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+            <thead className="bg-slate-50 dark:bg-[#080E1A] border-b border-slate-200 dark:border-blue-900/40 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
               <tr>
                 <th className="p-4">Tracking Code</th>
                 <th className="p-4">Applicant</th>
@@ -79,25 +79,25 @@ export default function AdminRequestsPage() {
                 <th className="p-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-blue-950/40 font-medium text-slate-700 dark:text-slate-300">
               {requests.map((r) => (
-                <tr key={r.id} className="hover:bg-slate-50 transition">
-                  <td className="p-4 font-mono font-bold text-[#9C2007]">{r.trackingNumber}</td>
-                  <td className="p-4 font-bold text-slate-900">{r.fullName}</td>
+                <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-[#0E1B33]/60 transition">
+                  <td className="p-4 font-mono font-bold text-[#9C2007] dark:text-rose-400">{r.trackingNumber}</td>
+                  <td className="p-4 font-bold text-slate-900 dark:text-white">{r.fullName}</td>
                   <td className="p-4">{r.documentType}</td>
-                  <td className="p-4 max-w-xs truncate text-slate-500">{r.purpose}</td>
-                  <td className="p-4 font-bold">{r.fee === 0 ? 'FREE' : `₱${r.fee}`}</td>
+                  <td className="p-4 max-w-xs truncate text-slate-500 dark:text-slate-400">{r.purpose}</td>
+                  <td className="p-4 font-bold text-slate-900 dark:text-slate-100">{r.fee === 0 ? 'FREE' : `₱${r.fee}`}</td>
                   <td className="p-4">
                     <select
                       value={r.status}
                       onChange={(e) => updateStatus(r.id, e.target.value)}
-                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold border-none ${
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
                         r.status === 'READY_FOR_PICKUP'
-                          ? 'bg-emerald-100 text-emerald-800'
+                          ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40'
                           : r.status === 'PROCESSING'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
+                          ? 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800/40'
+                          : 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/40'
+                      } cursor-pointer`}
                     >
                       <option value="PENDING">PENDING</option>
                       <option value="PROCESSING">PROCESSING</option>
@@ -109,7 +109,7 @@ export default function AdminRequestsPage() {
                   <td className="p-4 text-right">
                     <button
                       onClick={() => setSelectedRequest(r)}
-                      className="px-3 py-1.5 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-lg font-bold text-[11px] uppercase tracking-wider inline-flex items-center gap-1 cursor-pointer"
+                      className="px-3 py-1.5 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-lg font-bold text-[11px] uppercase tracking-wider inline-flex items-center gap-1 cursor-pointer shadow-sm"
                     >
                       <Printer className="w-3.5 h-3.5" />
                       <span>Print Certificate</span>
@@ -124,20 +124,20 @@ export default function AdminRequestsPage() {
 
       {/* PRINT CERTIFICATE MODAL */}
       {selectedRequest && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 my-8">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-[#0B1528] rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 dark:border-blue-900/50 my-8">
             <div className="flex justify-between items-center no-print">
-              <h3 className="font-black text-slate-900 uppercase">Printable Official Certificate</h3>
+              <h3 className="font-black text-slate-900 dark:text-white uppercase">Printable Official Certificate</h3>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handlePrint}
-                  className="px-4 py-2 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-xl font-bold text-xs uppercase flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-xl font-bold text-xs uppercase flex items-center gap-1.5 cursor-pointer shadow-md"
                 >
                   <Printer className="w-4 h-4" /> Print / Save PDF
                 </button>
                 <button
                   onClick={() => setSelectedRequest(null)}
-                  className="p-2 text-slate-400 hover:text-slate-600 rounded-lg"
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
