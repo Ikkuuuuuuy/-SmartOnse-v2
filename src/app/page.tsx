@@ -93,10 +93,10 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* QUICK STATS & THESIS ABSTRACT DISPLAY */}
-      <section className="py-20 px-6 md:px-12 bg-white dark:bg-[#070D18] transition-colors duration-200">
+      {/* QUICK STATS DISPLAY */}
+      <section className="py-16 px-6 md:px-12 bg-white dark:bg-[#070D18] transition-colors duration-200">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat) => (
               <div
                 key={stat.label}
@@ -107,36 +107,6 @@ export default function WelcomePage() {
                 <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{stat.label}</div>
               </div>
             ))}
-          </div>
-
-          {/* Thesis Abstract Card */}
-          <div className="bg-slate-900 dark:bg-[#091120] text-white rounded-[3rem] p-10 md:p-14 shadow-2xl relative overflow-hidden border dark:border-blue-900/40">
-            <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-[#9C2007]/20 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="relative z-10 max-w-3xl">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#9C2007] dark:text-rose-400 bg-[#9C2007]/10 dark:bg-rose-950/60 border border-[#9C2007]/20 px-4 py-1.5 rounded-full inline-block mb-4">
-                Master's Thesis Project Overview
-              </span>
-              <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-6 uppercase">
-                Integrated Real-Time Document Tracking System
-              </h2>
-              <p className="text-slate-300 text-base leading-relaxed font-medium mb-8">
-                SmartOnse bridges local governance and digital transparency by providing residents of Barangay Onse with cryptographically verified document processing, automated real-time status notifications, and centralized public transparency disclosure analytics.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link 
-                  href="/services" 
-                  className="bg-[#9C2007] hover:bg-[#8B1A05] text-white px-8 py-3.5 rounded-full font-black text-xs uppercase tracking-widest transition shadow-lg shadow-[#9C2007]/30"
-                >
-                  Explore E-Services &rarr;
-                </Link>
-                <Link 
-                  href="/transparency" 
-                  className="bg-white/10 hover:bg-white/20 text-white px-8 py-3.5 rounded-full font-black text-xs uppercase tracking-widest transition border border-white/10"
-                >
-                  Public Transparency Board
-                </Link>
-              </div>
-            </div>
           </div>
         </div>
       </section>
