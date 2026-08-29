@@ -38,10 +38,10 @@ import {
   Search, 
   ExternalLink,
   ChevronUp,
-  ChevronDown,
   Sun,
   Moon
 } from 'lucide-react';
+import NotificationBellDropdown from '@/components/notifications/NotificationBellDropdown';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -465,44 +465,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {resolvedTheme === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-slate-700" />}
             </button>
 
-            {/* Notification Bell */}
-            <div className="relative">
-              <button
-                onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="relative p-2.5 rounded-xl bg-slate-50 dark:bg-[#0E1B33] hover:bg-slate-100 dark:hover:bg-[#152747] border border-slate-200 dark:border-blue-900/60 text-slate-600 dark:text-slate-200 transition cursor-pointer"
-                title="Notifications"
-              >
-                <Bell className="w-4 h-4" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#9C2007] rounded-full ring-2 ring-white dark:ring-[#0E1B33]" />
-              </button>
-
-              {notificationsOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setNotificationsOpen(false)} />
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-[#0E1B33] rounded-2xl shadow-2xl border border-slate-200 dark:border-blue-900/60 p-4 z-50 space-y-3 text-xs animate-in fade-in zoom-in-95 text-slate-800 dark:text-slate-200">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-blue-900/50">
-                      <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider">System Notifications</span>
-                      <span className="text-[10px] bg-rose-50 dark:bg-rose-950 text-[#9C2007] dark:text-rose-400 font-bold px-2 py-0.5 rounded-full">3 New</span>
-                    </div>
-
-                    <div className="space-y-2 text-slate-600 dark:text-slate-300">
-                      <div className="p-2.5 bg-slate-50 dark:bg-[#152747]/60 rounded-xl space-y-0.5">
-                        <div className="font-bold text-slate-900 dark:text-white text-[11px]">New Clearance Application</div>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400">Juan Dela Cruz filed Barangay Clearance #ONSE-2026-8891.</div>
-                      </div>
-                      <div className="p-2.5 bg-slate-50 dark:bg-[#152747]/60 rounded-xl space-y-0.5">
-                        <div className="font-bold text-slate-900 dark:text-white text-[11px]">DILG Full Disclosure Due</div>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400">Q3 Financial report upload scheduled for submission.</div>
-                      </div>
-                      <div className="p-2.5 bg-slate-50 dark:bg-[#152747]/60 rounded-xl space-y-0.5">
-                        <div className="font-bold text-slate-900 dark:text-white text-[11px]">Health Center Schedule</div>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400">28 citizen medical consultations booked for this week.</div>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
+            {/* Real Dynamic Working Notification Bell */}
+            <NotificationBellDropdown variant="admin" />
 
             {/* Quick Profile Badge */}
             <Link

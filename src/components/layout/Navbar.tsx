@@ -156,106 +156,7 @@ function AccessibilityPanel() {
   );
 }
 
-function PublicNotificationCenter() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const notifications = [
-    {
-      id: 1,
-      icon: <Calendar className="w-4 h-4 text-amber-500" />,
-      title: 'SOBA General Assembly 2026',
-      desc: 'State of the Barangay Address with Captain Roberto Alba on Sept 12, 2:00 PM at Onse Gym.',
-      tag: 'ASSEMBLY',
-      tagColor: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
-      time: 'Just now',
-    },
-    {
-      id: 2,
-      icon: <HeartPulse className="w-4 h-4 text-emerald-500" />,
-      title: 'Free Medical & Dental Mission',
-      desc: 'Free general checkups, ECG, blood sugar testing, and vitamins this Friday, 8:00 AM.',
-      tag: 'HEALTH',
-      tagColor: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
-      time: '2 hours ago',
-    },
-    {
-      id: 3,
-      icon: <Trophy className="w-4 h-4 text-purple-500" />,
-      title: 'SK Inter-Purok Youth Tournament',
-      desc: 'Basketball & Volleyball team rosters are now accepting entries at the SK Office.',
-      tag: 'SK YOUTH',
-      tagColor: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300',
-      time: 'Yesterday',
-    },
-  ];
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative flex items-center justify-center w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all cursor-pointer"
-        title="Community Announcements & Notifications"
-        aria-label="Community Notifications"
-      >
-        <Bell className="w-4 h-4" />
-        <span className="absolute top-1 right-1 w-4 h-4 bg-amber-400 text-slate-950 font-black text-[9px] rounded-full flex items-center justify-center shadow-xs">
-          3
-        </span>
-      </button>
-
-      {isOpen && (
-        <>
-          <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white dark:bg-[#0E1B33] rounded-3xl shadow-2xl border border-slate-200 dark:border-blue-900/60 overflow-hidden z-[70] p-4 text-slate-800 dark:text-slate-200 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-blue-900/50">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-rose-100 dark:bg-rose-950 text-[#9C2007] dark:text-rose-400 flex items-center justify-center">
-                  <Bell className="w-4 h-4" />
-                </div>
-                <h3 className="font-black text-slate-900 dark:text-white text-xs uppercase tracking-wider">
-                  Community Announcements
-                </h3>
-              </div>
-              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full">
-                3 Active
-              </span>
-            </div>
-
-            <div className="divide-y divide-slate-100 dark:divide-blue-900/40 my-2 max-h-72 overflow-y-auto custom-scrollbar">
-              {notifications.map((item) => (
-                <div key={item.id} className="py-3 px-1 hover:bg-slate-50 dark:hover:bg-[#152747]/60 rounded-xl transition space-y-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${item.tagColor}`}>
-                      {item.tag}
-                    </span>
-                    <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{item.time}</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                    {item.icon}
-                    <span>{item.title}</span>
-                  </h4>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed pl-5">
-                    {item.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-2 border-t border-slate-100 dark:border-blue-900/50 flex gap-2">
-              <Link
-                href="/events"
-                onClick={() => setIsOpen(false)}
-                className="flex-1 py-2 text-center text-xs font-black uppercase tracking-wider bg-[#9C2007] text-white rounded-xl hover:bg-[#8B1A05] transition shadow-xs"
-              >
-                View Community Calendar &rarr;
-              </Link>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
+import NotificationBellDropdown from '@/components/notifications/NotificationBellDropdown';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -326,7 +227,7 @@ export default function Navbar() {
 
 
           {/* Public Notification Bell on Welcome / Public Pages */}
-          <PublicNotificationCenter />
+          <NotificationBellDropdown variant="navbar" />
 
           {/* Accessibility & Language Drawer */}
           <AccessibilityPanel />

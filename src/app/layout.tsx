@@ -7,6 +7,7 @@ import BarangayAiAssistant from '@/components/chatbot/BarangayAiAssistant';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { NotificationProvider } from '@/contexts/NotificationContext';
 import PrivacyConsentModal from '@/components/modals/PrivacyConsentModal';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -51,13 +52,15 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <LanguageProvider>
-              <Navbar />
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
-              <BarangayAiAssistant />
-              <PrivacyConsentModal />
+              <NotificationProvider>
+                <Navbar />
+                <main className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+                <BarangayAiAssistant />
+                <PrivacyConsentModal />
+              </NotificationProvider>
             </LanguageProvider>
           </AuthProvider>
         </ThemeProvider>

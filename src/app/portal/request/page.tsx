@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/contexts/NotificationContext';
 import { FileText, CheckCircle2, Clock, Search, ArrowRight, ShieldCheck, Lock } from 'lucide-react';
 
 const DOC_TYPES = [
@@ -60,6 +61,8 @@ function RequestContent() {
     );
   }
 
+  const { addNotification } = useNotifications();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -67,6 +70,15 @@ function RequestContent() {
       const code = `ONSE-2026-${Math.floor(1000 + Math.random() * 9000)}`;
       setTrackingNumber(code);
       setLoading(false);
+
+      const selectedDoc = DOC_TYPES.find((d) => d.code === docType)?.name || 'Barangay Document';
+      addNotification({
+        title: `New ${selectedDoc} Application`,
+        description: `${fullName || user?.name || 'Citizen'} submitted application #${code} for ${purpose || 'verification'}.`,
+        type: 'request',
+        targetRole: 'admin',
+        href: '/admin/requests',
+      });
     }, 800);
   };
 

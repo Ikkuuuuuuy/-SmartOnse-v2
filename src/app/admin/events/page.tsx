@@ -9,12 +9,17 @@ import {
   Users, 
   Megaphone, 
   CheckCircle2, 
-  ArrowRight,
   X
 } from 'lucide-react';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 export default function AdminEventsPage() {
+  const { addNotification } = useNotifications();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newDate, setNewDate] = useState('');
+  const [newTime, setNewTime] = useState('');
+  const [newLocation, setNewLocation] = useState('');
 
   const [events, setEvents] = useState([
     {
@@ -164,30 +169,76 @@ export default function AdminEventsPage() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
+                const newEvt = {
+                  id: `EVT-${String(events.length + 1).padStart(2, '0')}`,
+                  title: newTitle,
+                  date: newDate || 'Upcoming',
+                  time: newTime || 'TBA',
+                  location: newLocation || 'Barangay Onse Hall',
+                  category: 'Community Activity',
+                  status: 'UPCOMING',
+                  attendees: '0 Registered',
+                  desc: `Public community program scheduled for ${newDate || 'soon'}.`,
+                };
+                setEvents([newEvt, ...events]);
+                addNotification({
+                  title: `New Event: ${newTitle}`,
+                  description: `${newTitle} scheduled for ${newDate || 'this week'} at ${newLocation || 'Barangay Onse'}.`,
+                  type: 'event',
+                  targetRole: 'all',
+                  href: '/events',
+                });
                 setIsAddModalOpen(false);
-                alert('Event posted successfully to public calendar!');
+                setNewTitle('');
+                setNewDate('');
+                setNewTime('');
+                setNewLocation('');
               }}
               className="space-y-4 text-xs"
             >
               <div className="space-y-1">
                 <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Event Title</label>
-                <input required placeholder="e.g. Free Anti-Rabies Vaccination" className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-[#9C2007]" />
+                <input 
+                  required 
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="e.g. Free Anti-Rabies Vaccination" 
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-[#9C2007]" 
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Date</label>
-                  <input type="date" required className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007]" />
+                  <input 
+                    type="date" 
+                    required 
+                    value={newDate}
+                    onChange={(e) => setNewDate(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007]" 
+                  />
                 </div>
                 <div className="space-y-1">
                   <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Time</label>
-                  <input required placeholder="08:00 AM - 01:00 PM" className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-[#9C2007]" />
+                  <input 
+                    required 
+                    value={newTime}
+                    onChange={(e) => setNewTime(e.target.value)}
+                    placeholder="08:00 AM - 01:00 PM" 
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-[#9C2007]" 
+                  />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Venue / Location</label>
-                <input required placeholder="Barangay Onse Hall or Covered Court" className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-[#9C2007]" />
+                <input 
+                  required 
+                  value={newLocation}
+                  onChange={(e) => setNewLocation(e.target.value)}
+                  placeholder="Barangay Onse Hall or Covered Court" 
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-[#9C2007]" 
+                />
               </div>
 
               <div className="pt-2 flex justify-end gap-2">
