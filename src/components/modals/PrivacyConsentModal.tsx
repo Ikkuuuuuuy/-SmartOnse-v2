@@ -67,45 +67,43 @@ export default function PrivacyConsentModal() {
         <div className="p-6 space-y-4 text-xs text-slate-700 leading-relaxed">
           
           {/* Welcome User Banner */}
-          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-slate-800 text-[11px]">
-            Welcome, <strong className="text-slate-900">{user.name}</strong> (<span className="text-[#9C2007] font-bold">{roleDisplay}</span>). Please review and accept the privacy notice to proceed.
+          <div className="p-3 rounded-2xl bg-rose-50/80 border border-rose-200 text-slate-800 text-[11px] flex items-center justify-between gap-2">
+            <span>
+              Signed in as <strong className="text-slate-900">{user.name}</strong> (<span className="text-[#9C2007] font-bold">{roleDisplay}</span>)
+            </span>
+            <span className="text-[9px] font-black uppercase tracking-wider bg-rose-100 text-[#9C2007] px-2 py-0.5 rounded-full">
+              R.A. 10173
+            </span>
           </div>
 
-          <p className="text-[11px] text-slate-600">
-            In compliance with the <strong className="text-slate-900">Data Privacy Act of 2012 (R.A. 10173)</strong>, Barangay Onse protects your personal identity records and ensures lawful processing:
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Barangay Onse protects your personal identity records in accordance with the <strong className="text-slate-900">Data Privacy Act of 2012 (R.A. 10173)</strong>. Your submitted data is securely processed solely for official citizen services, clearances, and community welfare.
           </p>
 
-          {/* Simple Bullet Points */}
-          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-2 text-[11px] text-slate-600">
-            <div className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#9C2007] mt-1.5 shrink-0" />
-              <span><strong className="text-slate-900">Data Collected:</strong> Name, contact details, residency address, and valid IDs.</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#9C2007] mt-1.5 shrink-0" />
-              <span><strong className="text-slate-900">Purpose:</strong> Issuing digital clearances, civil certificates, and community welfare.</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#9C2007] mt-1.5 shrink-0" />
-              <span><strong className="text-slate-900">Security Vault:</strong> Encrypted storage accessible only by authorized officers.</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#9C2007] mt-1.5 shrink-0" />
-              <span><strong className="text-slate-900">Your Rights:</strong> Right to be informed, access, or dispute data via <code className="text-[#9C2007] font-bold">privacy@onse.gov.ph</code>.</span>
-            </div>
+          {/* Quick link to full policy page */}
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+            <span className="text-slate-600 font-medium">Need complete details?</span>
+            <Link
+              href="/privacy"
+              target="_blank"
+              className="text-[#9C2007] font-bold hover:underline inline-flex items-center gap-1 text-[11px] uppercase tracking-wider"
+            >
+              <span>Read Full Privacy Policy</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
           </div>
 
           {/* Consent Checkbox */}
-          <div className="p-3.5 rounded-xl bg-rose-50/50 border border-rose-200 hover:border-[#9C2007] transition-colors">
-            <label className="flex items-start gap-2.5 cursor-pointer select-none">
+          <div className="p-3.5 rounded-2xl bg-rose-50/50 border border-rose-200 hover:border-[#9C2007] transition-colors">
+            <label className="flex items-center gap-2.5 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}
-                className="w-4 h-4 mt-0.5 accent-[#9C2007] rounded cursor-pointer shrink-0"
+                className="w-4 h-4 accent-[#9C2007] rounded cursor-pointer shrink-0"
               />
-              <span className="text-[11px] font-bold text-slate-800 leading-tight">
-                I have read and agree to the collection &amp; processing of my data under <span className="text-[#9C2007]">R.A. 10173 (Data Privacy Act)</span>.
+              <span className="text-xs font-bold text-slate-800 leading-tight">
+                I have read and agree to the Data Privacy Terms &amp; Conditions.
               </span>
             </label>
           </div>
