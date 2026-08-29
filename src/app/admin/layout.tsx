@@ -67,146 +67,41 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
     if (!isLoading && !user) {
-      timeout = setTimeout(() => {
-        router.replace('/login');
-      }, 4000);
+      router.replace('/login');
     }
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
   }, [user, isLoading, router]);
 
-  // 1. Loading State
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#070D18] flex flex-col items-center justify-center p-6 text-center space-y-4 font-sans text-white">
-        <div className="w-16 h-16 rounded-3xl bg-[#9C2007] text-white flex items-center justify-center font-black text-2xl animate-pulse shadow-2xl shadow-red-900/50">
-          O
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-lg font-black uppercase text-white tracking-wider">Securing Command Center</h2>
-          <p className="text-xs text-slate-400">Verifying security credentials &amp; session...</p>
-        </div>
-      </div>
-    );
+  // 1. Loading or Unauthenticated: Immediately redirect to login without showing blocking screen
+  if (isLoading || !user) {
+    return null;
   }
 
-  // 2. Unauthenticated State (Interactive 1-Click Access)
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#070D18] via-[#0B1528] to-[#150502] flex items-center justify-center p-6 font-sans text-white">
-        <div className="max-w-md w-full bg-[#0B1528] rounded-3xl p-8 border border-blue-900/50 shadow-2xl text-center space-y-6 animate-in fade-in zoom-in-95">
-          <div className="w-16 h-16 rounded-3xl bg-[#9C2007] text-white flex items-center justify-center font-black text-2xl mx-auto shadow-xl shadow-red-950/60">
-            O
-          </div>
-
-          <div className="space-y-2">
-            <span className="px-3 py-1 bg-amber-950/80 text-amber-300 border border-amber-800/50 text-[10px] font-black uppercase tracking-widest rounded-full">
-              Session Required
-            </span>
-            <h1 className="text-2xl font-black text-white uppercase tracking-tight">
-              Administrative Command Center
-            </h1>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Please sign in with your official Barangay Onse credentials or select a quick demo session below.
-            </p>
-          </div>
-
-          <div className="p-4 bg-[#080E1A] border border-blue-900/40 rounded-2xl text-left space-y-2.5 text-xs">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              1-Click Instant Admin Access:
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  login({
-                    id: 'admin',
-                    name: 'Hon. Roberto Alba (Captain)',
-                    email: 'captain@onse.gov.ph',
-                    role: 'admin',
-                    roleTitle: 'Admin / Captain',
-                    destination: pathname || '/admin',
-                  });
-                }}
-                className="p-3 rounded-xl border border-blue-800/60 hover:border-[#9C2007] bg-[#0E1B33] hover:bg-[#1A2E56] text-left font-bold text-slate-100 transition cursor-pointer text-xs space-y-0.5 shadow-sm"
-              >
-                <div className="text-amber-400 font-black flex items-center gap-1">👑 Captain Alba</div>
-                <div className="text-[10px] text-slate-400">Full Super Admin Access</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  login({
-                    id: 'staff',
-                    name: 'Jonathan D. Sorio',
-                    email: 'records@onse.gov.ph',
-                    role: 'staff',
-                    roleTitle: 'Desk Staff',
-                    destination: pathname || '/admin/requests',
-                  });
-                }}
-                className="p-3 rounded-xl border border-blue-800/60 hover:border-[#9C2007] bg-[#0E1B33] hover:bg-[#1A2E56] text-left font-bold text-slate-100 transition cursor-pointer text-xs space-y-0.5 shadow-sm"
-              >
-                <div className="text-blue-400 font-black flex items-center gap-1">📋 Desk Staff Sorio</div>
-                <div className="text-[10px] text-slate-400">Clearances &amp; Census</div>
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => router.push('/login')}
-              className="flex-1 py-3 rounded-xl bg-[#9C2007] hover:bg-[#8B1A05] text-white font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Lock className="w-4 h-4" />
-              <span>Go to Login Screen</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => router.push('/')}
-              className="px-4 py-3 rounded-xl bg-[#0E1B33] hover:bg-[#152747] text-slate-300 font-bold text-xs uppercase tracking-wider transition cursor-pointer border border-blue-900/40"
-            >
-              Public Portal
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-
-  // 3. Resident Guard
+  // 2. Resident Guard
   if (!isAdminUser(user.role)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-[#1F1010] to-slate-950 flex items-center justify-center p-6 font-sans">
-        <div className="max-w-lg w-full bg-white rounded-3xl sm:rounded-[2.5rem] p-8 sm:p-10 border border-slate-200 shadow-2xl text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
-          <div className="w-18 h-18 rounded-3xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-inner">
+        <div className="max-w-lg w-full bg-white dark:bg-[#0B1528] rounded-3xl sm:rounded-[2.5rem] p-8 sm:p-10 border border-slate-200 dark:border-blue-900/50 shadow-2xl text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-18 h-18 rounded-3xl bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-inner">
             <ShieldAlert className="w-8 h-8" />
           </div>
 
           <div className="space-y-2">
-            <span className="px-3 py-1 bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-widest rounded-full">
+            <span className="px-3 py-1 bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 text-[10px] font-black uppercase tracking-widest rounded-full border border-amber-200 dark:border-amber-800/40">
               403 &bull; Insufficient Privileges
             </span>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">
-              Restricted Area
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+              Restricted Admin Area
             </h1>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              You are signed in as <strong className="text-slate-900">{user.name}</strong> (<span className="text-[#9C2007] font-bold">{user.roleTitle || 'Resident Citizen'}</span>). 
-              The Administrative Command Center is restricted to Barangay Officials and Desk Staff.
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              You are signed in as <strong className="text-slate-900 dark:text-white">{user.name}</strong> (<span className="text-[#9C2007] dark:text-rose-400 font-bold">{user.roleTitle || 'Resident Citizen'}</span>). 
+              The Admin Portal is restricted to Barangay Officials and Desk Staff.
             </p>
           </div>
 
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-left space-y-2 text-xs">
+          <div className="p-4 bg-slate-50 dark:bg-[#080E1A] border border-slate-200 dark:border-blue-900/40 rounded-2xl text-left space-y-2 text-xs">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-[#9C2007]" />
+              <Sparkles className="w-3.5 h-3.5 text-[#9C2007] dark:text-rose-400" />
               Need to test Admin features? Switch role:
             </span>
             <div className="grid grid-cols-2 gap-2">
@@ -221,7 +116,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     destination: '/admin',
                   });
                 }}
-                className="p-2.5 rounded-xl border border-slate-200 hover:border-[#9C2007] hover:bg-rose-50 text-left font-bold text-slate-800 transition text-[11px]"
+                className="p-2.5 rounded-xl border border-slate-200 dark:border-blue-900/50 hover:border-[#9C2007] bg-white dark:bg-[#0E1B33] hover:bg-rose-50 dark:hover:bg-[#152747] text-left font-bold text-slate-800 dark:text-slate-200 transition text-[11px] cursor-pointer"
               >
                 👑 Captain Alba (Admin)
               </button>
@@ -236,7 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     destination: '/admin/requests',
                   });
                 }}
-                className="p-2.5 rounded-xl border border-slate-200 hover:border-[#9C2007] hover:bg-rose-50 text-left font-bold text-slate-800 transition text-[11px]"
+                className="p-2.5 rounded-xl border border-slate-200 dark:border-blue-900/50 hover:border-[#9C2007] bg-white dark:bg-[#0E1B33] hover:bg-rose-50 dark:hover:bg-[#152747] text-left font-bold text-slate-800 dark:text-slate-200 transition text-[11px] cursor-pointer"
               >
                 📋 Desk Staff Sorio
               </button>
@@ -254,7 +149,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <Link
               href="/profile"
-              className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5"
+              className="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-[#0E1B33] hover:bg-slate-200 dark:hover:bg-[#152747] text-slate-700 dark:text-slate-200 font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 border border-transparent dark:border-blue-900/40"
             >
               <User className="w-4 h-4" />
               <span>My Account</span>
@@ -262,13 +157,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <button
               onClick={() => logout()}
-              className="px-4 py-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+              className="px-4 py-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-bold text-xs uppercase tracking-wider transition cursor-pointer border border-rose-200 dark:border-rose-900/40"
             >
               Sign Out
             </button>
           </div>
         </div>
       </div>
+    );
+  }>
     );
   }
 
@@ -363,7 +260,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 SMART<span className="text-amber-300">ONSE</span>
               </h1>
               <p className="text-[9px] text-rose-200/90 font-bold uppercase tracking-widest mt-1">
-                Command Center
+                Admin Portal
               </p>
             </div>
           </div>
@@ -533,7 +430,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="hidden sm:block">
               <h2 className="text-xs font-black tracking-widest uppercase text-slate-900 dark:text-white flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Barangay Onse Administrative Command Center
+                Barangay Onse Admin Portal
               </h2>
               <p className="text-[10px] text-slate-400 dark:text-slate-400 font-semibold tracking-wider uppercase">
                 Digital E-Governance &bull; Financial &amp; Services System
