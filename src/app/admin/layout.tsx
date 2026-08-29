@@ -165,8 +165,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </div>
     );
-  }>
-    );
   }
 
   // Navigation Categorized Groups (Matching Enterprise UI Inspo)
