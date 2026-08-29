@@ -67,21 +67,115 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   useEffect(() => {
+    let timeout: NodeJS.Timeout;
     if (!isLoading && !user) {
-      router.replace('/login');
+      timeout = setTimeout(() => {
+        router.replace('/login');
+      }, 4000);
     }
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
   }, [user, isLoading, router]);
 
-  // 1. Loading / Redirecting State
-  if (isLoading || !user) {
+  // 1. Loading State
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0B1528] flex flex-col items-center justify-center p-6 text-center space-y-4 font-sans">
+      <div className="min-h-screen bg-[#070D18] flex flex-col items-center justify-center p-6 text-center space-y-4 font-sans text-white">
         <div className="w-16 h-16 rounded-3xl bg-[#9C2007] text-white flex items-center justify-center font-black text-2xl animate-pulse shadow-2xl shadow-red-900/50">
           O
         </div>
         <div className="space-y-1">
           <h2 className="text-lg font-black uppercase text-white tracking-wider">Securing Command Center</h2>
-          <p className="text-xs text-slate-400">Verifying session or redirecting to login...</p>
+          <p className="text-xs text-slate-400">Verifying security credentials &amp; session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated State (Interactive 1-Click Access)
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#070D18] via-[#0B1528] to-[#150502] flex items-center justify-center p-6 font-sans text-white">
+        <div className="max-w-md w-full bg-[#0B1528] rounded-3xl p-8 border border-blue-900/50 shadow-2xl text-center space-y-6 animate-in fade-in zoom-in-95">
+          <div className="w-16 h-16 rounded-3xl bg-[#9C2007] text-white flex items-center justify-center font-black text-2xl mx-auto shadow-xl shadow-red-950/60">
+            O
+          </div>
+
+          <div className="space-y-2">
+            <span className="px-3 py-1 bg-amber-950/80 text-amber-300 border border-amber-800/50 text-[10px] font-black uppercase tracking-widest rounded-full">
+              Session Required
+            </span>
+            <h1 className="text-2xl font-black text-white uppercase tracking-tight">
+              Administrative Command Center
+            </h1>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Please sign in with your official Barangay Onse credentials or select a quick demo session below.
+            </p>
+          </div>
+
+          <div className="p-4 bg-[#080E1A] border border-blue-900/40 rounded-2xl text-left space-y-2.5 text-xs">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              1-Click Instant Admin Access:
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  login({
+                    id: 'admin',
+                    name: 'Hon. Roberto Alba (Captain)',
+                    email: 'captain@onse.gov.ph',
+                    role: 'admin',
+                    roleTitle: 'Admin / Captain',
+                    destination: pathname || '/admin',
+                  });
+                }}
+                className="p-3 rounded-xl border border-blue-800/60 hover:border-[#9C2007] bg-[#0E1B33] hover:bg-[#1A2E56] text-left font-bold text-slate-100 transition cursor-pointer text-xs space-y-0.5 shadow-sm"
+              >
+                <div className="text-amber-400 font-black flex items-center gap-1">👑 Captain Alba</div>
+                <div className="text-[10px] text-slate-400">Full Super Admin Access</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  login({
+                    id: 'staff',
+                    name: 'Jonathan D. Sorio',
+                    email: 'records@onse.gov.ph',
+                    role: 'staff',
+                    roleTitle: 'Desk Staff',
+                    destination: pathname || '/admin/requests',
+                  });
+                }}
+                className="p-3 rounded-xl border border-blue-800/60 hover:border-[#9C2007] bg-[#0E1B33] hover:bg-[#1A2E56] text-left font-bold text-slate-100 transition cursor-pointer text-xs space-y-0.5 shadow-sm"
+              >
+                <div className="text-blue-400 font-black flex items-center gap-1">📋 Desk Staff Sorio</div>
+                <div className="text-[10px] text-slate-400">Clearances &amp; Census</div>
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => router.push('/login')}
+              className="flex-1 py-3 rounded-xl bg-[#9C2007] hover:bg-[#8B1A05] text-white font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Lock className="w-4 h-4" />
+              <span>Go to Login Screen</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push('/')}
+              className="px-4 py-3 rounded-xl bg-[#0E1B33] hover:bg-[#152747] text-slate-300 font-bold text-xs uppercase tracking-wider transition cursor-pointer border border-blue-900/40"
+            >
+              Public Portal
+            </button>
+          </div>
         </div>
       </div>
     );
