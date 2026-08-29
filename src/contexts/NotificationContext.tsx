@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface NotificationItem {
   id: string;
@@ -9,7 +10,7 @@ export interface NotificationItem {
   timestamp: string;
   createdAt: string; // ISO date
   type: 'request' | 'system' | 'event' | 'alert' | 'transparency';
-  targetRole?: 'all' | 'admin' | 'staff' | 'resident';
+  targetRole?: 'all' | 'admin' | 'staff' | 'kagawad' | 'sk' | 'resident';
   href?: string;
   read: boolean;
 }
@@ -25,98 +26,183 @@ interface NotificationContextType {
     title: string;
     description: string;
     type?: 'request' | 'system' | 'event' | 'alert' | 'transparency';
-    targetRole?: 'all' | 'admin' | 'staff' | 'resident';
+    targetRole?: 'all' | 'admin' | 'staff' | 'kagawad' | 'sk' | 'resident';
     href?: string;
   }) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
-const NOTIFICATION_STORAGE_KEY = 'smartonse_notifications_v2';
-
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'notif-1',
-    title: 'New Clearance Application',
-    description: 'Juan Dela Cruz submitted Barangay Clearance #ONSE-2026-8891 for Employment review.',
-    timestamp: '10m ago',
-    createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-    type: 'request',
-    targetRole: 'admin',
-    href: '/admin/requests',
-    read: false,
-  },
-  {
-    id: 'notif-2',
-    title: 'Community Medical Mission Scheduled',
-    description: 'Free Flu Shots & Pediatric checkups at Onse Multi-Purpose Covered Court this Saturday.',
-    timestamp: '1h ago',
-    createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-    type: 'event',
-    targetRole: 'all',
-    href: '/events',
-    read: false,
-  },
-  {
-    id: 'notif-3',
-    title: 'DILG Full Disclosure Due',
-    description: 'Q3 Financial report upload scheduled for mandatory submission under Form 83.',
-    timestamp: '3h ago',
-    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    type: 'transparency',
-    targetRole: 'admin',
-    href: '/admin/transparency',
-    read: false,
-  },
-  {
-    id: 'notif-4',
-    title: 'SK Inter-Purok Youth Tournament',
-    description: 'Basketball & Volleyball team rosters are now accepting player entries at the SK Office.',
-    timestamp: '1d ago',
-    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    type: 'event',
-    targetRole: 'all',
-    href: '/sk-programs',
-    read: false,
-  },
-  {
-    id: 'notif-5',
-    title: 'System Security Audit Completed',
-    description: 'Cryptographic SHA-256 ledger integrity check verified 100% valid with 0 tamper flags.',
-    timestamp: '2d ago',
-    createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-    type: 'system',
-    targetRole: 'admin',
-    href: '/admin/audit-logs',
-    read: true,
-  },
-];
+// Tailored initial notifications per account role
+const ROLE_NOTIFICATIONS: Record<string, NotificationItem[]> = {
+  admin: [
+    {
+      id: 'admin-1',
+      title: 'New Clearance Application',
+      description: 'Juan Dela Cruz submitted Barangay Clearance #ONSE-2026-8891 for Employment review.',
+      timestamp: '10m ago',
+      createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+      type: 'request',
+      targetRole: 'admin',
+      href: '/admin/requests',
+      read: false,
+    },
+    {
+      id: 'admin-2',
+      title: 'DILG Full Disclosure Due',
+      description: 'Q3 Financial report upload scheduled for mandatory submission under Form 83.',
+      timestamp: '2h ago',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      type: 'transparency',
+      targetRole: 'admin',
+      href: '/admin/transparency',
+      read: false,
+    },
+    {
+      id: 'admin-3',
+      title: 'System Security Audit Completed',
+      description: 'Cryptographic SHA-256 ledger integrity check verified 100% valid with 0 tamper flags.',
+      timestamp: '1d ago',
+      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      type: 'system',
+      targetRole: 'admin',
+      href: '/admin/audit-logs',
+      read: true,
+    },
+  ],
+  staff: [
+    {
+      id: 'staff-1',
+      title: 'Document Review Queue Active',
+      description: '4 pending clearance applications awaiting document verification and receipt generation.',
+      timestamp: '15m ago',
+      createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+      type: 'request',
+      targetRole: 'staff',
+      href: '/admin/requests',
+      read: false,
+    },
+    {
+      id: 'staff-2',
+      title: 'Certificates Scheduled for Pickup',
+      description: '12 approved citizen clearances printed and waiting for resident claim at Desk Window 2.',
+      timestamp: '1h ago',
+      createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+      type: 'system',
+      targetRole: 'staff',
+      href: '/admin/requests',
+      read: false,
+    },
+  ],
+  kagawad: [
+    {
+      id: 'kagawad-1',
+      title: 'Health Committee Advisory',
+      description: 'Barangay Medical & Dental mission logistics finalized for Friday at the Onse Health Center.',
+      timestamp: '30m ago',
+      createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+      type: 'event',
+      targetRole: 'kagawad',
+      href: '/admin/services',
+      read: false,
+    },
+    {
+      id: 'kagawad-2',
+      title: 'Regular Council Session Notice',
+      description: 'Sangguniang Barangay ordinance review session scheduled for Wednesday 9:00 AM.',
+      timestamp: '3h ago',
+      createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+      type: 'system',
+      targetRole: 'kagawad',
+      href: '/admin/officials',
+      read: false,
+    },
+  ],
+  sk: [
+    {
+      id: 'sk-1',
+      title: 'SK Youth Tournament Registration',
+      description: '8 Basketball & Volleyball team rosters submitted and awaiting bracket verification.',
+      timestamp: '20m ago',
+      createdAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+      type: 'event',
+      targetRole: 'sk',
+      href: '/sk-programs',
+      read: false,
+    },
+    {
+      id: 'sk-2',
+      title: 'Katipunan ng Kabataan Assembly',
+      description: 'Youth leadership workshop and educational assistance orientation set for this weekend.',
+      timestamp: '4h ago',
+      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      type: 'system',
+      targetRole: 'sk',
+      href: '/sk-programs',
+      read: false,
+    },
+  ],
+  resident: [
+    {
+      id: 'res-1',
+      title: 'Clearance Application Received',
+      description: 'Your Barangay Clearance #ONSE-2026-8891 is currently being reviewed by desk staff.',
+      timestamp: '15m ago',
+      createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+      type: 'request',
+      targetRole: 'resident',
+      href: '/track?trackingNumber=ONSE-2026-8891',
+      read: false,
+    },
+    {
+      id: 'res-2',
+      title: 'Free Medical & Flu Shots Mission',
+      description: 'Free healthcare checkups and flu vaccinations at Onse Covered Court this Saturday, 8:00 AM.',
+      timestamp: '2h ago',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      type: 'event',
+      targetRole: 'resident',
+      href: '/events',
+      read: false,
+    },
+  ],
+};
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
-  // Load from localStorage on mount
+  // Load account-specific notifications whenever user logs in, logs out, or switches accounts
   useEffect(() => {
+    if (!user) {
+      setNotifications([]);
+      return;
+    }
+
+    const userKey = `smartonse_notifs_${user.id || user.role || user.email}`;
     try {
-      const stored = localStorage.getItem(NOTIFICATION_STORAGE_KEY);
+      const stored = localStorage.getItem(userKey);
       if (stored) {
         setNotifications(JSON.parse(stored));
       } else {
-        localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(INITIAL_NOTIFICATIONS));
+        const defaultRoleNotifs = ROLE_NOTIFICATIONS[user.role] || ROLE_NOTIFICATIONS.resident;
+        setNotifications(defaultRoleNotifs);
+        localStorage.setItem(userKey, JSON.stringify(defaultRoleNotifs));
       }
     } catch (e) {
-      console.error('Failed to load notifications:', e);
-    } finally {
-      setIsInitialized(true);
+      console.error('Failed to load user notifications:', e);
+      const defaultRoleNotifs = ROLE_NOTIFICATIONS[user.role] || ROLE_NOTIFICATIONS.resident;
+      setNotifications(defaultRoleNotifs);
     }
-  }, []);
+  }, [user]);
 
-  // Save to localStorage when updated
+  // Save to current user's localStorage
   const saveNotifications = (newNotifs: NotificationItem[]) => {
     setNotifications(newNotifs);
+    if (!user) return;
+    const userKey = `smartonse_notifs_${user.id || user.role || user.email}`;
     try {
-      localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(newNotifs));
+      localStorage.setItem(userKey, JSON.stringify(newNotifs));
     } catch (e) {
       console.error('Failed to save notifications:', e);
     }
@@ -145,7 +231,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     title: string;
     description: string;
     type?: 'request' | 'system' | 'event' | 'alert' | 'transparency';
-    targetRole?: 'all' | 'admin' | 'staff' | 'resident';
+    targetRole?: 'all' | 'admin' | 'staff' | 'kagawad' | 'sk' | 'resident';
     href?: string;
   }) => {
     const newNotif: NotificationItem = {
@@ -162,12 +248,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     saveNotifications([newNotif, ...notifications]);
   };
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = user ? notifications.filter((n) => !n.read).length : 0;
 
   return (
     <NotificationContext.Provider
       value={{
-        notifications,
+        notifications: user ? notifications : [],
         unreadCount,
         markAsRead,
         markAllAsRead,

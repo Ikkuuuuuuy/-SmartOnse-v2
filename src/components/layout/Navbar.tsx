@@ -226,8 +226,8 @@ export default function Navbar() {
           </button>
 
 
-          {/* Public Notification Bell on Welcome / Public Pages */}
-          <NotificationBellDropdown variant="navbar" />
+          {/* Notification Bell (Only for Logged In Citizens / Staff) */}
+          {user && <NotificationBellDropdown variant="navbar" />}
 
           {/* Accessibility & Language Drawer */}
           <AccessibilityPanel />
