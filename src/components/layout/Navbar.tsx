@@ -182,25 +182,25 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 w-full z-[60] px-6 lg:px-10 py-5 flex justify-between items-center bg-[#800000] border-b border-[#600000] shadow-lg">
-      <div className="flex items-center gap-4 sm:gap-6">
-        <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-xl shadow-black/20 overflow-hidden shrink-0">
+    <nav className="fixed top-0 w-full z-[60] px-4 sm:px-6 lg:px-8 xl:px-10 py-4 flex justify-between items-center bg-[#800000] border-b border-[#600000] shadow-lg">
+      <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+        <div className="w-12 h-12 sm:w-13 sm:h-13 bg-white rounded-full flex items-center justify-center shadow-xl shadow-black/20 overflow-hidden shrink-0">
           <img src="/images/barangay-onse-seal.png" alt="Barangay Onse Seal" className="w-full h-full object-cover" />
         </div>
-        <Link href="/" className="text-2xl font-black uppercase tracking-normal">
+        <Link href="/" className="text-xl sm:text-2xl font-black uppercase tracking-normal select-none shrink-0">
           <span className="text-white">SMART</span><span className="text-slate-200">ONSE</span>
         </Link>
       </div>
 
       {/* Desktop Navigation */}
-      <div className="hidden lg:flex items-center gap-5 xl:gap-7">
+      <div className="hidden lg:flex items-center gap-3.5 xl:gap-6 ml-4 xl:ml-8 shrink-0">
         {navLinks.map((link) => {
           const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
           return (
             <Link
               key={link.name}
               href={link.href}
-              className={`text-[11px] font-black uppercase tracking-widest transition-all ${
+              className={`text-[10.5px] xl:text-[11px] font-black uppercase tracking-wider xl:tracking-widest whitespace-nowrap transition-all ${
                 isActive ? 'text-[#ffcccc] font-extrabold underline decoration-2 underline-offset-8' : 'text-white/80 hover:text-white'
               }`}
             >
@@ -209,12 +209,12 @@ export default function Navbar() {
           );
         })}
 
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center shrink-0 ml-2">
           {/* Quick Direct Light/Dark Mode Switcher */}
           <button
             type="button"
             onClick={toggleTheme}
-            className="flex items-center justify-center w-10 h-10 bg-white/10 hover:bg-white/20 active:scale-95 text-white rounded-full transition-all cursor-pointer shadow-xs"
+            className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-white/20 active:scale-95 text-white rounded-full transition-all cursor-pointer shadow-xs"
             title={`Current: ${resolvedTheme === 'dark' ? 'Dark Mode' : 'Light Mode'} (Click to switch)`}
             aria-label={`Switch to ${resolvedTheme === 'dark' ? 'Light' : 'Dark'} Mode`}
           >
@@ -224,7 +224,6 @@ export default function Navbar() {
               <Moon className="w-4 h-4 text-slate-100 animate-in spin-in-180 duration-200" />
             )}
           </button>
-
 
           {/* Notification Bell (Only for Logged In Citizens / Staff) */}
           {user && <NotificationBellDropdown variant="navbar" />}
@@ -240,13 +239,13 @@ export default function Navbar() {
             <>
               <Link
                 href="/login"
-                className="bg-white text-[#9C2007] px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest shadow-xl shadow-black/20 hover:bg-red-50 transition-all cursor-pointer"
+                className="bg-white text-[#9C2007] px-3.5 xl:px-4 py-2 rounded-full text-[10.5px] xl:text-[11px] font-black uppercase tracking-wider xl:tracking-widest shadow-xl shadow-black/20 hover:bg-red-50 transition-all cursor-pointer whitespace-nowrap"
               >
                 {t('nav.login')}
               </Link>
               <Link
                 href="/register"
-                className="bg-[#9C2007] text-white px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest shadow-xl shadow-[#9C2007]/30 hover:brightness-110 transition-all cursor-pointer border border-white/10"
+                className="bg-[#9C2007] text-white px-3.5 xl:px-4 py-2 rounded-full text-[10.5px] xl:text-[11px] font-black uppercase tracking-wider xl:tracking-widest shadow-xl shadow-[#9C2007]/30 hover:brightness-110 transition-all cursor-pointer border border-white/10 whitespace-nowrap"
               >
                 {t('nav.register')}
               </Link>
