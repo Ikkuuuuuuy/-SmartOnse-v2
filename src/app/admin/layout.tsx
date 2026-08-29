@@ -68,18 +68,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.replace('/login');
+      if (typeof window !== 'undefined') {
+        window.location.replace('/login');
+      } else {
+        router.replace('/login');
+      }
     }
   }, [user, isLoading, router]);
 
   // 1. Loading or Unauthenticated: Immediately redirect to login
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#070D18] flex flex-col items-center justify-center space-y-3 font-sans">
-        <div className="w-10 h-10 border-4 border-[#9C2007] border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          Redirecting to Login...
-        </p>
+      <div className="min-h-screen bg-slate-50 dark:bg-[#070D18] flex flex-col items-center justify-center p-4 space-y-4 font-sans text-center">
+        <div className="w-12 h-12 border-4 border-[#9C2007] border-t-transparent rounded-full animate-spin" />
+        <div className="space-y-1">
+          <p className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+            Redirecting to Login...
+          </p>
+          <p className="text-[11px] text-slate-500">
+            Please wait while we secure your session.
+          </p>
+        </div>
+        <a
+          href="/login"
+          className="text-xs font-bold text-[#9C2007] hover:underline pt-2 inline-block"
+        >
+          Click here if you are not redirected &rarr;
+        </a>
       </div>
     );
   }
