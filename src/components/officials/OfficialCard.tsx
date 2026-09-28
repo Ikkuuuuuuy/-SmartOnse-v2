@@ -65,14 +65,6 @@ export default function OfficialCard({
           : 'bg-white/90 dark:bg-[#0E1B33]/90 border-slate-200/90 dark:border-blue-900/50 shadow-md'
       }`}
     >
-      {/* Decorative rank ribbon for top leadership */}
-      {rank <= 3 && (
-        <div className="absolute top-4 right-4 flex items-center gap-1">
-          <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-            {rank === 1 ? 'Rank 1' : rank === 2 ? 'Rank 2' : 'Rank 3'}
-          </span>
-        </div>
-      )}
 
       {/* Avatar / Portrait */}
       <div

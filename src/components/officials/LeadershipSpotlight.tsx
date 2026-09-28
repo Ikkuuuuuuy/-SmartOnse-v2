@@ -76,7 +76,7 @@ export default function LeadershipSpotlight({ officials }: { officials: Official
       <div>
         <div className="flex items-center gap-2 mb-4">
           <span className="text-[10px] font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 bg-rose-50 dark:bg-rose-950/70 border border-rose-200 dark:border-rose-900/50 px-3 py-1 rounded-full">
-            Executive Leadership &bull; Ranks 1 to 3
+            Executive Leadership
           </span>
         </div>
 
@@ -128,9 +128,6 @@ export default function LeadershipSpotlight({ officials }: { officials: Official
                     <span className={`inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full border ${badgeConfig.badgeColor}`}>
                       {badgeConfig.icon}
                       <span>{badgeConfig.label}</span>
-                    </span>
-                    <span className="text-[10px] font-black uppercase text-slate-400 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800">
-                      Rank {rank}
                     </span>
                   </div>
 
@@ -188,7 +185,7 @@ export default function LeadershipSpotlight({ officials }: { officials: Official
       <div>
         <div className="flex items-center justify-between gap-4 mb-4">
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">
-            {activeTab === 'sk' ? 'SK Kagawads' : 'Barangay Kagawads'} &bull; Rank 4 ({kagawads.length} Members)
+            {activeTab === 'sk' ? 'SK Kagawads' : 'Barangay Kagawads'} ({kagawads.length} Members)
           </span>
           <Link
             href="/officials"

@@ -593,7 +593,7 @@ export default function AdminOfficialsPage() {
                       <span>{roleBadge.label}</span>
                     </span>
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                      {isSK ? 'SK Council' : 'Barangay'} &bull; Rank {rank}
+                      {isSK ? 'SK Council' : 'Barangay Council'}
                     </span>
                   </div>
                 </div>
