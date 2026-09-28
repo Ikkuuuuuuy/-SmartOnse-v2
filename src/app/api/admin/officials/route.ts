@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
+import { sortOfficialsByHierarchy } from '@/utils/officials';
 
 // GET /api/admin/officials - List all barangay and SK officials
 export async function GET() {
@@ -24,17 +25,19 @@ export async function GET() {
         id: off.id,
         name: off.name,
         position: off.position,
-        category: isSK ? 'sk' : 'barangay',
+        category: (isSK ? 'sk' : 'barangay') as 'barangay' | 'sk',
         committee: off.committee || 'Council Member',
         term: off.term || '2023 - 2026',
         contact: off.contact || '0917-888-0011',
         email: `${off.name.toLowerCase().replace(/[^a-z]/g, '').slice(0, 10)}@onse.gov.ph`,
-        status: 'ACTIVE',
+        status: 'ACTIVE' as const,
         avatar: off.avatarUrl || '/images/Chairman.webp',
       };
     });
 
-    return NextResponse.json({ success: true, officials: formatted });
+    const sorted = sortOfficialsByHierarchy(formatted);
+
+    return NextResponse.json({ success: true, officials: sorted });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to fetch officials';
     return NextResponse.json({ error: message }, { status: 500 });

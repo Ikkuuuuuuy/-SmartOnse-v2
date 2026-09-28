@@ -16,8 +16,17 @@ import {
   Users,
   RefreshCw,
   X,
-  Loader2
+  Loader2,
+  Landmark,
+  Wallet,
+  FileText
 } from 'lucide-react';
+import { 
+  sortOfficialsByHierarchy, 
+  getOfficialRank, 
+  BARANGAY_ROLES, 
+  SK_ROLES 
+} from '@/utils/officials';
 
 export interface OfficialItem {
   id: string;
@@ -36,7 +45,7 @@ const FALLBACK_OFFICIALS: OfficialItem[] = [
   {
     id: 'OFF-01',
     name: 'Hon. Roberto B. Alba',
-    position: 'Punong Barangay (Captain)',
+    position: 'Barangay Chairman',
     category: 'barangay',
     committee: 'Executive & Peace and Order',
     term: '2023 - 2026',
@@ -44,6 +53,30 @@ const FALLBACK_OFFICIALS: OfficialItem[] = [
     email: 'captain@onse.gov.ph',
     status: 'ACTIVE',
     avatar: '/images/Chairman.webp',
+  },
+  {
+    id: 'OFF-01B',
+    name: 'Elena V. Gutierrez',
+    position: 'Barangay Treasurer',
+    category: 'barangay',
+    committee: 'Finance, Budget & Appropriations',
+    term: '2023 - 2026',
+    contact: '0917-888-0029',
+    email: 'treasurer@onse.gov.ph',
+    status: 'ACTIVE',
+    avatar: '/images/barangay-onse-seal.png',
+  },
+  {
+    id: 'OFF-01C',
+    name: 'Maria Elena C. Gomez',
+    position: 'Barangay Secretary',
+    category: 'barangay',
+    committee: 'Secretariat & Administrative Records',
+    term: '2023 - 2026',
+    contact: '0917-888-0030',
+    email: 'secretary@onse.gov.ph',
+    status: 'ACTIVE',
+    avatar: '/images/barangay-onse-seal.png',
   },
   {
     id: 'OFF-02',
@@ -117,26 +150,43 @@ const FALLBACK_OFFICIALS: OfficialItem[] = [
     status: 'ACTIVE',
     avatar: '/images/Permato.webp',
   },
+  {
+    id: 'OFF-08',
+    name: 'Michaelito Bongalos',
+    position: 'SK Treasurer',
+    category: 'sk',
+    committee: 'Youth Budget & Appropriations',
+    term: '2023 - 2026',
+    contact: '0917-888-0020',
+    email: 'sk.bongalos@onse.gov.ph',
+    status: 'ACTIVE',
+    avatar: '/images/Bongalos.webp',
+  },
+  {
+    id: 'OFF-09',
+    name: 'Jonathan D. Sorio',
+    position: 'SK Secretary',
+    category: 'sk',
+    committee: 'Youth Records & Secretariat',
+    term: '2023 - 2026',
+    contact: '0917-888-0021',
+    email: 'sk.sorio@onse.gov.ph',
+    status: 'ACTIVE',
+    avatar: '/images/Sorio.webp',
+  },
+  {
+    id: 'OFF-10',
+    name: 'Hon. Abigail A. Reyes',
+    position: 'SK Kagawad',
+    category: 'sk',
+    committee: 'Committee on Health & Nutrition',
+    term: '2023 - 2026',
+    contact: '0917-888-0022',
+    email: 'sk.reyes@onse.gov.ph',
+    status: 'ACTIVE',
+    avatar: '/images/Mybaby.webp',
+  },
 ];
-
-// Helper to ensure Chairman / Punong Barangay is always position #1, followed by council hierarchy
-const sortOfficialsByHierarchy = (list: OfficialItem[]): OfficialItem[] => {
-  return [...list].sort((a, b) => {
-    // Punong Barangay / Chairman / Captain always #1
-    const isChairmanA = a.position.toLowerCase().includes('punong') || a.position.toLowerCase().includes('captain') || (a.position.toLowerCase().includes('chairman') && a.category === 'barangay');
-    const isChairmanB = b.position.toLowerCase().includes('punong') || b.position.toLowerCase().includes('captain') || (b.position.toLowerCase().includes('chairman') && b.category === 'barangay');
-    if (isChairmanA && !isChairmanB) return -1;
-    if (!isChairmanA && isChairmanB) return 1;
-
-    // SK Chairman at top of SK
-    const isSKChairA = a.category === 'sk' && a.position.toLowerCase().includes('sk chair');
-    const isSKChairB = b.category === 'sk' && b.position.toLowerCase().includes('sk chair');
-    if (isSKChairA && !isSKChairB) return -1;
-    if (!isSKChairA && isSKChairB) return 1;
-
-    return 0;
-  });
-};
 
 export default function AdminOfficialsPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'barangay' | 'sk'>('all');
@@ -149,16 +199,20 @@ export default function AdminOfficialsPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingOfficial, setEditingOfficial] = useState<OfficialItem | null>(null);
 
-  // Add Form (defaults to official seal rather than automatic portrait)
+  // Add Form state
   const [addForm, setAddForm] = useState({
     name: '',
-    position: '',
+    position: 'Barangay Kagawad',
     category: 'barangay' as 'barangay' | 'sk',
     committee: '',
     contact: '',
     term: '2023 - 2026',
     avatarUrl: '/images/barangay-onse-seal.png',
   });
+  const [addRoleMode, setAddRoleMode] = useState<string>('Barangay Kagawad');
+
+  // Edit Form role mode
+  const [editRoleMode, setEditRoleMode] = useState<string>('');
 
   const fetchOfficials = async () => {
     setIsLoading(true);
@@ -179,6 +233,99 @@ export default function AdminOfficialsPage() {
     fetchOfficials();
   }, []);
 
+  // When opening add modal, reset properly
+  const handleOpenAddModal = () => {
+    setAddForm({
+      name: '',
+      position: 'Barangay Kagawad',
+      category: 'barangay',
+      committee: 'Committee on Public Safety',
+      contact: '',
+      term: '2023 - 2026',
+      avatarUrl: '/images/barangay-onse-seal.png',
+    });
+    setAddRoleMode('Barangay Kagawad');
+    setIsAddModalOpen(true);
+  };
+
+  // When opening edit modal, detect role mode
+  const handleOpenEditModal = (off: OfficialItem) => {
+    setEditingOfficial({ ...off });
+    const available = off.category === 'sk' ? (SK_ROLES as readonly string[]) : (BARANGAY_ROLES as readonly string[]);
+    const isExactMatch = available.includes(off.position);
+    if (isExactMatch) {
+      setEditRoleMode(off.position);
+    } else {
+      // Check if it fits common variations
+      const p = off.position.toLowerCase();
+      if (p.includes('chair') || p.includes('punong') || p.includes('captain')) {
+        setEditRoleMode(off.category === 'sk' ? 'SK Chairperson' : 'Barangay Chairman');
+      } else if (p.includes('treasur')) {
+        setEditRoleMode(off.category === 'sk' ? 'SK Treasurer' : 'Barangay Treasurer');
+      } else if (p.includes('secretar')) {
+        setEditRoleMode(off.category === 'sk' ? 'SK Secretary' : 'Barangay Secretary');
+      } else if (p.includes('kagawad')) {
+        setEditRoleMode(off.category === 'sk' ? 'SK Kagawad' : 'Barangay Kagawad');
+      } else {
+        setEditRoleMode('other');
+      }
+    }
+  };
+
+  const handleCategoryChangeForAdd = (cat: 'barangay' | 'sk') => {
+    const defaultRole = cat === 'barangay' ? 'Barangay Kagawad' : 'SK Kagawad';
+    setAddRoleMode(defaultRole);
+    setAddForm({
+      ...addForm,
+      category: cat,
+      position: defaultRole,
+    });
+  };
+
+  const handleRoleSelectForAdd = (role: string) => {
+    setAddRoleMode(role);
+    if (role === 'other') {
+      setAddForm({ ...addForm, position: '' });
+    } else {
+      // Suggest committee based on standard role
+      let suggestedCommittee = addForm.committee;
+      if (role.includes('Chairman') || role.includes('Chairperson')) {
+        suggestedCommittee = 'Executive & Governance';
+      } else if (role.includes('Treasurer')) {
+        suggestedCommittee = 'Finance, Budget & Appropriations';
+      } else if (role.includes('Secretary')) {
+        suggestedCommittee = 'Secretariat & Administrative Records';
+      }
+      setAddForm({ 
+        ...addForm, 
+        position: role, 
+        committee: suggestedCommittee || addForm.committee 
+      });
+    }
+  };
+
+  const handleRoleSelectForEdit = (role: string) => {
+    if (!editingOfficial) return;
+    setEditRoleMode(role);
+    if (role === 'other') {
+      // Keep existing position or let them customize
+    } else {
+      let suggestedCommittee = editingOfficial.committee;
+      if (role.includes('Chairman') || role.includes('Chairperson')) {
+        suggestedCommittee = 'Executive & Governance';
+      } else if (role.includes('Treasurer')) {
+        suggestedCommittee = 'Finance, Budget & Appropriations';
+      } else if (role.includes('Secretary')) {
+        suggestedCommittee = 'Secretariat & Administrative Records';
+      }
+      setEditingOfficial({
+        ...editingOfficial,
+        position: role,
+        committee: suggestedCommittee || editingOfficial.committee,
+      });
+    }
+  };
+
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -186,6 +333,11 @@ export default function AdminOfficialsPage() {
     const digits = addForm.contact.replace(/\D/g, '');
     if (/[a-zA-Z]/.test(addForm.contact) || (addForm.contact.trim() && digits.length < 7)) {
       alert('Invalid Contact Number: Please enter numeric phone digits only (e.g., 0917-888-0000 or 09171234567). Letters are not allowed.');
+      return;
+    }
+
+    if (!addForm.position || !addForm.position.trim()) {
+      alert('Please select or specify a valid designation / position.');
       return;
     }
 
@@ -198,18 +350,8 @@ export default function AdminOfficialsPage() {
       });
       const data = await res.json();
       if (res.ok && data.success && data.official) {
-        // Append new official and maintain Punong Barangay/Chairman strictly at #1
         setOfficials((prev) => sortOfficialsByHierarchy([...prev, data.official]));
         setIsAddModalOpen(false);
-        setAddForm({
-          name: '',
-          position: '',
-          category: 'barangay',
-          committee: '',
-          contact: '',
-          term: '2023 - 2026',
-          avatarUrl: '/images/barangay-onse-seal.png',
-        });
       } else {
         alert(data.error || 'Failed to add official.');
       }
@@ -225,10 +367,15 @@ export default function AdminOfficialsPage() {
     e.preventDefault();
     if (!editingOfficial) return;
 
-    // Strict numeric validation: phone number cannot contain letters
+    // Strict numeric validation
     const digits = editingOfficial.contact.replace(/\D/g, '');
     if (/[a-zA-Z]/.test(editingOfficial.contact) || (editingOfficial.contact.trim() && digits.length < 7)) {
       alert('Invalid Contact Number: Please enter numeric phone digits only (e.g., 0917-888-0000). Letters are not allowed.');
+      return;
+    }
+
+    if (!editingOfficial.position || !editingOfficial.position.trim()) {
+      alert('Please select or specify a valid designation / position.');
       return;
     }
 
@@ -302,10 +449,10 @@ export default function AdminOfficialsPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 bg-rose-50 dark:bg-rose-950/70 border border-rose-200 dark:border-rose-900/50 px-2.5 py-0.5 rounded-full">
-              Governance &amp; Leadership Directory
+              Civic Hierarchy &amp; Leadership Directory
             </span>
             <span className="text-[10px] font-bold text-slate-400">&bull;</span>
-            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Term 2023 - 2026</span>
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Chairman &bull; Treasurer &bull; Secretary &bull; Kagawads</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
             Barangay &amp; SK Officials
@@ -322,7 +469,7 @@ export default function AdminOfficialsPage() {
             <span>{isLoading ? 'Syncing...' : 'Sync Officials'}</span>
           </button>
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={handleOpenAddModal}
             className="flex items-center gap-2 px-4 py-2.5 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-md shadow-red-900/20 transition cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
@@ -382,10 +529,48 @@ export default function AdminOfficialsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredOfficials.map((off) => {
           const isSK = off.category === 'sk';
+          const rank = getOfficialRank(off.position);
+
+          let roleBadge = {
+            label: isSK ? 'SK Kagawad' : 'Barangay Kagawad',
+            color: isSK 
+              ? 'bg-blue-100 dark:bg-blue-950/80 text-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-800/40' 
+              : 'bg-rose-50 dark:bg-rose-950/70 text-[#9C2007] dark:text-rose-300 border-rose-200 dark:border-rose-900/50',
+            icon: <Award className="w-3 h-3" />,
+          };
+
+          if (rank === 1) {
+            roleBadge = {
+              label: isSK ? 'SK Chairperson' : 'Barangay Chairman',
+              color: 'bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-700/60',
+              icon: <Landmark className="w-3 h-3 text-amber-600 dark:text-amber-400" />,
+            };
+          } else if (rank === 2) {
+            roleBadge = {
+              label: isSK ? 'SK Treasurer' : 'Barangay Treasurer',
+              color: 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800/60',
+              icon: <Wallet className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />,
+            };
+          } else if (rank === 3) {
+            roleBadge = {
+              label: isSK ? 'SK Secretary' : 'Barangay Secretary',
+              color: 'bg-indigo-100 dark:bg-indigo-950/80 text-indigo-900 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800/60',
+              icon: <FileText className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />,
+            };
+          }
+
           return (
             <div
               key={off.id}
-              className="bg-white dark:bg-[#0B1528] rounded-3xl p-6 border border-slate-200/80 dark:border-blue-900/40 shadow-xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between"
+              className={`rounded-3xl p-6 border shadow-xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between ${
+                rank === 1
+                  ? 'bg-gradient-to-b from-amber-50/40 via-white to-white dark:from-amber-950/20 dark:via-[#0B1528] dark:to-[#0B1528] border-amber-300/60 dark:border-amber-700/40 ring-1 ring-amber-400/20'
+                  : rank === 2
+                  ? 'bg-white dark:bg-[#0B1528] border-emerald-200/60 dark:border-emerald-900/40'
+                  : rank === 3
+                  ? 'bg-white dark:bg-[#0B1528] border-indigo-200/60 dark:border-indigo-900/40'
+                  : 'bg-white dark:bg-[#0B1528] border-slate-200/80 dark:border-blue-900/40'
+              }`}
             >
               <div className="space-y-4">
                 <div className="flex items-start justify-between">
@@ -402,13 +587,15 @@ export default function AdminOfficialsPage() {
                     />
                   </div>
 
-                  <span className={`text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
-                    isSK 
-                      ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-900 dark:text-purple-300 border-purple-200 dark:border-purple-800/40' 
-                      : 'bg-rose-50 dark:bg-rose-950/70 text-[#9C2007] dark:text-rose-300 border border-rose-200 dark:border-rose-900/50'
-                  }`}>
-                    {isSK ? 'SK Official' : 'Barangay'}
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className={`inline-flex items-center gap-1 text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full border ${roleBadge.color}`}>
+                      {roleBadge.icon}
+                      <span>{roleBadge.label}</span>
+                    </span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                      {isSK ? 'SK Council' : 'Barangay'} &bull; Rank {rank}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Name & Position */}
@@ -440,7 +627,7 @@ export default function AdminOfficialsPage() {
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{off.term}</span>
                 <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => setEditingOfficial({ ...off })}
+                    onClick={() => handleOpenEditModal(off)}
                     className="px-2.5 py-1.5 bg-slate-100 dark:bg-[#0E1B33] hover:bg-[#9C2007] dark:hover:bg-[#9C2007] text-slate-800 dark:text-slate-200 hover:text-white rounded-xl font-bold text-[11px] transition cursor-pointer border border-transparent dark:border-blue-900/40 inline-flex items-center gap-1"
                   >
                     <Edit3 className="w-3 h-3" />
@@ -471,8 +658,12 @@ export default function AdminOfficialsPage() {
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-xl font-black uppercase text-slate-900 dark:text-white">Add Council Member / Staff</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Record a newly elected council member or appointed staff officer.</p>
+            <div>
+              <h3 className="text-xl font-black uppercase text-slate-900 dark:text-white">Add Council Official / Staff</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Select from predefined governance roles: Chairman, Treasurer, Secretary, or Kagawad.
+              </p>
+            </div>
 
             <form onSubmit={handleAddSubmit} className="space-y-4 text-xs">
               <div className="space-y-1">
@@ -486,32 +677,57 @@ export default function AdminOfficialsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              {/* Council Category & Role Dropdown */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Designation / Position</label>
-                  <input
-                    required
-                    value={addForm.position}
-                    onChange={(e) => setAddForm({ ...addForm, position: e.target.value })}
-                    placeholder="Barangay Kagawad"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-1 focus:ring-[#9C2007]"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Category</label>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Council Category</label>
                   <select
                     value={addForm.category}
-                    onChange={(e) => setAddForm({ ...addForm, category: e.target.value as 'barangay' | 'sk' })}
+                    onChange={(e) => handleCategoryChangeForAdd(e.target.value as 'barangay' | 'sk')}
                     className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007] cursor-pointer"
                   >
                     <option value="barangay">Barangay Council</option>
-                    <option value="sk">Sangguniang Kabataan</option>
+                    <option value="sk">Sangguniang Kabataan (SK)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">
+                    Role / Position (Dropdown)
+                  </label>
+                  <select
+                    value={addRoleMode}
+                    onChange={(e) => handleRoleSelectForAdd(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007] cursor-pointer font-bold"
+                  >
+                    {(addForm.category === 'sk' ? SK_ROLES : BARANGAY_ROLES).map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                    <option value="other">Other / Custom Title...</option>
                   </select>
                 </div>
               </div>
 
+              {/* If "Other" is chosen, display text input to specify */}
+              {addRoleMode === 'other' && (
+                <div className="space-y-1 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800/40">
+                  <label className="font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider text-[10px]">
+                    Specify Custom Position Title
+                  </label>
+                  <input
+                    required
+                    value={addForm.position}
+                    onChange={(e) => setAddForm({ ...addForm, position: e.target.value })}
+                    placeholder="e.g. Chief Executive Officer / Council Clerk"
+                    className="w-full px-3.5 py-2 bg-white dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-1 focus:ring-[#9C2007]"
+                  />
+                </div>
+              )}
+
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Assigned Committee</label>
+                <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Assigned Committee / Office</label>
                 <input
                   required
                   value={addForm.committee}
@@ -621,8 +837,12 @@ export default function AdminOfficialsPage() {
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-xl font-black uppercase text-slate-900 dark:text-white">Edit Official Profile</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Update official records for {editingOfficial.name}</p>
+            <div>
+              <h3 className="text-xl font-black uppercase text-slate-900 dark:text-white">Edit Official Profile</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Modify role and assignment for {editingOfficial.name}
+              </p>
+            </div>
 
             <form onSubmit={handleEditSubmit} className="space-y-4 text-xs">
               <div className="space-y-1">
@@ -635,18 +855,62 @@ export default function AdminOfficialsPage() {
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Designation / Position</label>
-                <input
-                  required
-                  value={editingOfficial.position}
-                  onChange={(e) => setEditingOfficial({ ...editingOfficial, position: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007]"
-                />
+              {/* Role Dropdown in Edit Mode */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Council Category</label>
+                  <select
+                    value={editingOfficial.category}
+                    onChange={(e) => {
+                      const newCat = e.target.value as 'barangay' | 'sk';
+                      const defaultRole = newCat === 'barangay' ? 'Barangay Kagawad' : 'SK Kagawad';
+                      setEditingOfficial({ ...editingOfficial, category: newCat, position: defaultRole });
+                      setEditRoleMode(defaultRole);
+                    }}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007] cursor-pointer"
+                  >
+                    <option value="barangay">Barangay Council</option>
+                    <option value="sk">Sangguniang Kabataan</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">
+                    Role / Position (Dropdown)
+                  </label>
+                  <select
+                    value={editRoleMode}
+                    onChange={(e) => handleRoleSelectForEdit(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007] cursor-pointer font-bold"
+                  >
+                    {(editingOfficial.category === 'sk' ? SK_ROLES : BARANGAY_ROLES).map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                    <option value="other">Other / Custom Title...</option>
+                  </select>
+                </div>
               </div>
 
+              {/* If "other" or custom in edit mode */}
+              {editRoleMode === 'other' && (
+                <div className="space-y-1 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800/40">
+                  <label className="font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider text-[10px]">
+                    Custom Position Title
+                  </label>
+                  <input
+                    required
+                    value={editingOfficial.position}
+                    onChange={(e) => setEditingOfficial({ ...editingOfficial, position: e.target.value })}
+                    placeholder="Enter custom position"
+                    className="w-full px-3.5 py-2 bg-white dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007]"
+                  />
+                </div>
+              )}
+
               <div className="space-y-1">
-                <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Assigned Committee</label>
+                <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Assigned Committee / Office</label>
                 <input
                   value={editingOfficial.committee}
                   onChange={(e) => setEditingOfficial({ ...editingOfficial, committee: e.target.value })}
