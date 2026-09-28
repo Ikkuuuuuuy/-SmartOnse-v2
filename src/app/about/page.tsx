@@ -327,11 +327,8 @@ export default async function AboutPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Mandate */}
-            <div className="bg-white/80 dark:bg-[#0E1B33]/80 backdrop-blur-xl p-8 sm:p-9 rounded-[3rem] border border-white dark:border-blue-900/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+            <div className="bg-white/80 dark:bg-[#0E1B33]/80 backdrop-blur-xl p-8 sm:p-9 rounded-[3rem] border border-white dark:border-blue-900/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
               <div>
-                <div className="w-14 h-14 bg-gradient-to-br from-[#9C2007] to-rose-700 rounded-2xl flex items-center justify-center mb-6 shadow-md shadow-red-900/20 text-white">
-                  <FileText className="w-7 h-7" />
-                </div>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400">
                     Republic Act 7160 &bull; RA 11032
@@ -344,19 +341,11 @@ export default async function AboutPage() {
                   Under the Local Government Code of 1991 and the Ease of Doing Business &amp; Efficient Government Services Delivery Act of 2018 (RA 11032), Barangay Onse delivers statutory community services, promotes general welfare, maintains public safety, and safeguards community rights with utmost transparency and accountability.
                 </p>
               </div>
-
-              <div className="pt-6 mt-6 border-t border-slate-100 dark:border-blue-900/40 flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>Statutory front-line governance</span>
-              </div>
             </div>
 
             {/* Vision */}
-            <div className="bg-white/80 dark:bg-[#0E1B33]/80 backdrop-blur-xl p-8 sm:p-9 rounded-[3rem] border border-white dark:border-blue-900/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+            <div className="bg-white/80 dark:bg-[#0E1B33]/80 backdrop-blur-xl p-8 sm:p-9 rounded-[3rem] border border-white dark:border-blue-900/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
               <div>
-                <div className="w-14 h-14 bg-gradient-to-br from-[#000055] to-blue-700 rounded-2xl flex items-center justify-center mb-6 shadow-md shadow-blue-900/20 text-white">
-                  <Eye className="w-7 h-7" />
-                </div>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
                     Smart San Juan Future
@@ -369,19 +358,11 @@ export default async function AboutPage() {
                   Barangay Onse envisions itself as a benchmark smart community in San Juan City—an empowered, resilient, and inclusive barangay where frontline services are automated, neighborhood safety is guaranteed, youth leadership flourishes, and every family experiences dignity and progress.
                 </p>
               </div>
-
-              <div className="pt-6 mt-6 border-t border-slate-100 dark:border-blue-900/40 flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>Citizen-empowered ecosystem</span>
-              </div>
             </div>
 
             {/* Mission */}
-            <div className="bg-white/80 dark:bg-[#0E1B33]/80 backdrop-blur-xl p-8 sm:p-9 rounded-[3rem] border border-white dark:border-blue-900/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+            <div className="bg-white/80 dark:bg-[#0E1B33]/80 backdrop-blur-xl p-8 sm:p-9 rounded-[3rem] border border-white dark:border-blue-900/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
               <div>
-                <div className="w-14 h-14 bg-gradient-to-br from-[#9C2007] via-amber-600 to-[#000055] rounded-2xl flex items-center justify-center mb-6 shadow-md shadow-red-900/20 text-white">
-                  <Target className="w-7 h-7" />
-                </div>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
                     Frontline Action Plan
@@ -393,11 +374,6 @@ export default async function AboutPage() {
                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-medium text-sm">
                   To eliminate red tape through digital innovation, maintain 24/7 peace and disaster preparedness, provide prompt assistance for senior citizens, solo parents, and indigent families, and maintain an open-door policy where citizen voices actively shape local governance.
                 </p>
-              </div>
-
-              <div className="pt-6 mt-6 border-t border-slate-100 dark:border-blue-900/40 flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>Transparent public delivery</span>
               </div>
             </div>
           </div>
@@ -415,9 +391,6 @@ export default async function AboutPage() {
                 Barangay &amp; SK Leadership
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md font-medium">
-              Governed according to civic leadership hierarchy: <span className="font-bold text-slate-800 dark:text-slate-200">Chairman &bull; Treasurer &bull; Secretary &bull; Kagawads</span>.
-            </p>
           </div>
 
           {/* Interactive Component */}
@@ -428,9 +401,6 @@ export default async function AboutPage() {
         <section id="service-charter" className="scroll-mt-32">
           <div className="bg-white/80 dark:bg-[#0E1B33]/80 backdrop-blur-xl p-8 sm:p-14 rounded-[3.5rem] border border-white dark:border-blue-900/50 shadow-2xl space-y-12">
             <div className="text-center max-w-2xl mx-auto space-y-3">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#9C2007] to-[#000055] rounded-2xl mb-2 text-white shadow-lg">
-                <ShieldCheck className="w-7 h-7" />
-              </div>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
                 Citizens&apos; Service Charter
               </h2>
@@ -441,9 +411,6 @@ export default async function AboutPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-slate-50/80 dark:bg-[#152747]/70 backdrop-blur-md p-6 rounded-[2rem] border border-slate-200/60 dark:border-blue-900/40 hover:shadow-lg transition-all duration-300 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/80 text-[#9C2007] dark:text-rose-400 flex items-center justify-center font-black text-base">
-                  01
-                </div>
                 <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white">
                   Tapat na Serbisyo, Para sa Tao
                 </h4>
@@ -453,9 +420,6 @@ export default async function AboutPage() {
               </div>
 
               <div className="bg-slate-50/80 dark:bg-[#152747]/70 backdrop-blur-md p-6 rounded-[2rem] border border-slate-200/60 dark:border-blue-900/40 hover:shadow-lg transition-all duration-300 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 flex items-center justify-center font-black text-base">
-                  02
-                </div>
                 <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white">
                   Mabilis, Malinis, Makataong Serbisyo
                 </h4>
@@ -465,9 +429,6 @@ export default async function AboutPage() {
               </div>
 
               <div className="bg-slate-50/80 dark:bg-[#152747]/70 backdrop-blur-md p-6 rounded-[2rem] border border-slate-200/60 dark:border-blue-900/40 hover:shadow-lg transition-all duration-300 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-black text-base">
-                  03
-                </div>
                 <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white">
                   Barangay Mo, Kaagapay Mo
                 </h4>
@@ -477,9 +438,6 @@ export default async function AboutPage() {
               </div>
 
               <div className="bg-slate-50/80 dark:bg-[#152747]/70 backdrop-blur-md p-6 rounded-[2rem] border border-slate-200/60 dark:border-blue-900/40 hover:shadow-lg transition-all duration-300 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 flex items-center justify-center font-black text-base">
-                  04
-                </div>
                 <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white">
                   Digital na Pamamahala
                 </h4>
