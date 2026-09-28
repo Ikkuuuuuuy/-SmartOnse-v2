@@ -8,19 +8,70 @@ generator client {
 }
 
 model User {
-  id            String            @id @default(cuid())
+  id            String              @id @default(cuid())
   name          String
-  email         String            @unique
+  email         String              @unique
   password      String?
-  role          String            @default("resident") // admin, resident, staff, sk_official, health_worker
+  role          String              @default("resident") // super_admin, barangay_captain, barangay_councilor, sk_chairperson, sk_councilor, staff, resident
   phone         String?
   address       String?
-  isVerified    Boolean           @default(false)
+  isVerified    Boolean             @default(false)
   avatarUrl     String?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
   requests      DocumentRequest[]
   appointments  Appointment[]
+  inhabitant    BarangayInhabitant?
+}
+
+model BarangayInhabitant {
+  id                    String   @id @default(cuid())
+  rbiNumber             String   @unique // e.g. "RBI-2024-00001"
+
+  // Personal Information
+  firstName             String
+  middleName            String?
+  lastName              String
+  suffix                String?  // Jr., Sr., III
+  birthDate             DateTime
+  age                   Int
+  sex                   String   // Male, Female
+  civilStatus           String   // Single, Married, Widowed, Separated, Annulled
+  nationality           String   @default("Filipino")
+  religion              String?
+  bloodType             String?
+
+  // Address
+  houseNumber           String?
+  street                String
+  precinct              String?  // COMELEC precinct code e.g. PRECINCT-0042A
+  yearsOfResidency      Int      @default(1)
+
+  // Household
+  householdRole         String   @default("Member") // Head, Spouse, Child, Member, Boarder
+
+  // Socioeconomic
+  educationalAttainment String?  // Elementary, High School, Vocational, College Graduate, Post-Graduate
+  occupation            String?
+  employmentStatus      String?  // Employed, Self-Employed, Unemployed, Student, Retired, OFW
+  monthlyIncome         String?  // e.g. "₱5,000-₱10,000"
+
+  // Special Classifications
+  isRegisteredVoter     Boolean  @default(false)
+  isPwd                 Boolean  @default(false)  // Person with Disability
+  isSeniorCitizen       Boolean  @default(false)  // Age 60+
+  is4psBeneficiary      Boolean  @default(false)  // DSWD 4Ps
+  isSoloParent          Boolean  @default(false)
+
+  // Record Status
+  status                String   @default("ACTIVE") // ACTIVE, TRANSFERRED, DECEASED
+
+  // Optional link to User portal account
+  userId                String?  @unique
+  user                  User?    @relation(fields: [userId], references: [id])
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
 
 model DocumentType {
@@ -142,3 +193,21 @@ model BarangayStatistic {
   icon             String
   order            Int      @default(0)
 }
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String
+  actor     String
+  ip        String?
+  timestamp DateTime @default(now())
+}
+

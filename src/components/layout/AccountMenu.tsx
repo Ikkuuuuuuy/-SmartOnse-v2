@@ -36,15 +36,37 @@ export default function AccountMenu() {
   const roleConfigs: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string; dest: string }> = {
     admin: { label: 'Barangay Captain / Admin', icon: <Crown className="w-4 h-4 text-[#9C2007]" />, color: 'text-[#9C2007]', bg: 'bg-rose-50', dest: '/admin' },
     captain: { label: 'Barangay Captain / Admin', icon: <Crown className="w-4 h-4 text-[#9C2007]" />, color: 'text-[#9C2007]', bg: 'bg-rose-50', dest: '/admin' },
-    staff: { label: 'Desk & Document Staff', icon: <FileText className="w-4 h-4 text-amber-600" />, color: 'text-amber-700', bg: 'bg-amber-50', dest: '/admin/requests' },
-    kagawad: { label: 'Barangay Kagawad', icon: <Award className="w-4 h-4 text-blue-600" />, color: 'text-blue-700', bg: 'bg-blue-50', dest: '/admin/services' },
-    sk: { label: 'SK Chairman / Youth Leader', icon: <Users className="w-4 h-4 text-purple-600" />, color: 'text-purple-700', bg: 'bg-purple-50', dest: '/sk-programs' },
+    super_admin: { label: 'Super Admin / Captain', icon: <Crown className="w-4 h-4 text-[#9C2007]" />, color: 'text-[#9C2007]', bg: 'bg-rose-50', dest: '/admin' },
+    barangay_captain: { label: 'Barangay Captain / Admin', icon: <Crown className="w-4 h-4 text-[#9C2007]" />, color: 'text-[#9C2007]', bg: 'bg-rose-50', dest: '/admin' },
+    barangay_councilor: { label: 'Barangay Kagawad', icon: <Award className="w-4 h-4 text-blue-600" />, color: 'text-blue-700', bg: 'bg-blue-50', dest: '/admin' },
+    sk_chairperson: { label: 'SK Chairperson', icon: <Users className="w-4 h-4 text-purple-600" />, color: 'text-purple-700', bg: 'bg-purple-50', dest: '/admin' },
+    sk_councilor: { label: 'SK Kagawad', icon: <Users className="w-4 h-4 text-purple-600" />, color: 'text-purple-700', bg: 'bg-purple-50', dest: '/admin' },
+    staff: { label: 'Desk & Document Staff', icon: <FileText className="w-4 h-4 text-amber-600" />, color: 'text-amber-700', bg: 'bg-amber-50', dest: '/admin' },
+    kagawad: { label: 'Barangay Kagawad', icon: <Award className="w-4 h-4 text-blue-600" />, color: 'text-blue-700', bg: 'bg-blue-50', dest: '/admin' },
+    sk: { label: 'SK Chairman / Youth Leader', icon: <Users className="w-4 h-4 text-purple-600" />, color: 'text-purple-700', bg: 'bg-purple-50', dest: '/admin' },
     resident: { label: 'Verified Resident', icon: <UserCheck className="w-4 h-4 text-emerald-600" />, color: 'text-emerald-700', bg: 'bg-emerald-50', dest: '/portal/request' },
   };
 
   const currentRole = roleConfigs[user.role] || roleConfigs.admin;
 
-  const switchRole = (roleKey: string, name: string, email: string, dest: string, title: string) => {
+  const switchRole = async (roleKey: string, name: string, email: string, dest: string, title: string) => {
+    try {
+      const res = await fetch('/api/auth/demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roleId: roleKey }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        login(data.user);
+        setIsDropdownOpen(false);
+        router.push(data.user.destination || dest);
+        return;
+      }
+    } catch (e) {
+      console.error('Role switch failed:', e);
+    }
+
     login({
       id: roleKey,
       name,
@@ -54,6 +76,7 @@ export default function AccountMenu() {
       destination: dest,
     });
     setIsDropdownOpen(false);
+    router.push(dest);
   };
 
   const handleLogout = () => {
@@ -62,20 +85,27 @@ export default function AccountMenu() {
     router.push('/');
   };
 
-  const isStaffOrAdmin = ['admin', 'captain', 'staff', 'kagawad'].includes(user.role);
-  const portalLabel = isStaffOrAdmin ? 'Admin Portal' : user.role === 'sk' ? 'SK Portal' : 'Resident Portal';
+  // Only residents get "Document Tracking". All administrators and officials get "Admin Portal".
+  const isResident = user.role === 'resident';
+  const portalLabel = isResident ? 'Document Tracking' : 'Admin Portal';
+  const portalMobile = isResident ? 'Tracking' : 'Admin Portal';
+  const portalHref = isResident ? '/track' : (user.destination || '/admin');
 
   return (
     <>
       <div className="relative flex items-center gap-2">
-        {/* Direct Official Portal Button */}
+        {/* Direct Action Button */}
         <Link
-          href={user.destination || '/admin'}
+          href={portalHref}
           className="flex items-center gap-2 bg-white text-[#9C2007] hover:bg-rose-50 px-4 py-2.5 rounded-full text-xs font-black uppercase tracking-wider shadow-lg shadow-black/20 transition-all cursor-pointer border border-white/20"
         >
-          <LayoutDashboard className="w-4 h-4 text-[#9C2007]" />
+          {isResident ? (
+            <FileText className="w-4 h-4 text-[#9C2007]" />
+          ) : (
+            <LayoutDashboard className="w-4 h-4 text-[#9C2007]" />
+          )}
           <span className="hidden sm:inline">{portalLabel}</span>
-          <span className="sm:hidden">Portal</span>
+          <span className="sm:hidden">{portalMobile}</span>
         </Link>
 
         {/* User Profile Pill & Dropdown Toggle */}
@@ -132,13 +162,13 @@ export default function AccountMenu() {
               {/* Primary Launch Portal Action */}
               <div className="py-3 space-y-2">
                 <Link
-                  href={user.destination || '/admin'}
+                  href={portalHref}
                   onClick={() => setIsDropdownOpen(false)}
                   className="w-full flex items-center justify-between p-3 rounded-2xl bg-[#9C2007] hover:bg-[#8B1A05] text-white font-black text-xs uppercase tracking-wider shadow-md shadow-red-900/20 transition-all group"
                 >
                   <span className="flex items-center gap-2">
-                    <LayoutDashboard className="w-4 h-4" />
-                    <span>Launch {portalLabel}</span>
+                    {isResident ? <FileText className="w-4 h-4" /> : <LayoutDashboard className="w-4 h-4" />}
+                    <span>{isResident ? 'Track Requested Documents' : 'Launch Admin Portal'}</span>
                   </span>
                   <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </Link>

@@ -81,27 +81,35 @@ export default function LoginPage() {
     },
   ];
 
-  const handle1ClickLogin = (role: DemoRole) => {
+  const handle1ClickLogin = async (role: DemoRole) => {
     setError('');
     setActiveRole(role.id);
     setEmail(role.email);
-    setPassword('••••••••••••');
+    setPassword('password123');
     setCaptchaAnswer('11');
     setLoading(true);
 
-    login({
-      id: role.id,
-      name: role.name,
-      email: role.email,
-      role: role.id,
-      roleTitle: role.role,
-      destination: role.destination,
-    });
+    try {
+      const res = await fetch('/api/auth/demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roleId: role.id }),
+      });
 
-    setTimeout(() => {
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setError(data.error || 'Demo login failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      login(data.user);
+      router.push(data.user.destination || role.destination);
+    } catch {
+      setError('Network error during demo login. Please try again.');
       setLoading(false);
-      router.push(role.destination);
-    }, 450);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -114,20 +122,34 @@ export default function LoginPage() {
     }
 
     setLoading(true);
-    login({
-      id: 'logged_user',
-      name: email.split('@')[0].toUpperCase(),
-      email: email,
-      role: 'resident',
-      roleTitle: 'Resident Citizen',
-      destination: '/admin',
-    });
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    setTimeout(() => {
+      const data = await res.json();
+
+      if (!res.ok) {
+        // Special handling for unverified accounts
+        if (data.code === 'UNVERIFIED') {
+          setError('__UNVERIFIED__'); // sentinel for yellow banner
+        } else {
+          setError(data.error || 'Login failed. Please try again.');
+        }
+        setLoading(false);
+        return;
+      }
+
+      login(data.user);
+      router.push(data.user.destination);
+    } catch {
+      setError('Network error. Please check your connection and try again.');
       setLoading(false);
-      router.push('/admin');
-    }, 700);
+    }
   };
+
 
   return (
     <div className="min-h-screen py-20 md:py-28 bg-gradient-to-br from-[#9C2007]/10 via-slate-50 to-slate-100 dark:from-[#330A04] dark:via-[#070D18] dark:to-[#0B1528] flex items-center justify-center px-4 transition-colors duration-200">
@@ -142,7 +164,7 @@ export default function LoginPage() {
             SmartOnse Login
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-            Barangay Onse Digital E-Governance Portal
+            Barangay Onse Digital E-Governance Website
           </p>
         </div>
 
@@ -196,12 +218,25 @@ export default function LoginPage() {
           </span>
         </div>
 
-        {error && (
+        {error === '__UNVERIFIED__' && (
+          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs space-y-1">
+            <div className="flex items-center gap-2 font-black uppercase tracking-wider">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>Account Pending Verification</span>
+            </div>
+            <p className="text-amber-700 dark:text-amber-400 leading-relaxed pl-6">
+              Your account is awaiting barangay staff approval. Please visit the Barangay Hall or wait 1–2 business days for verification.
+            </p>
+          </div>
+        )}
+
+        {error && error !== '__UNVERIFIED__' && (
           <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
+
 
         {/* Manual Login Form */}
         <form onSubmit={handleLogin} className="space-y-4 text-xs sm:text-sm">
@@ -259,7 +294,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full py-4 rounded-2xl bg-[#9C2007] hover:bg-[#8B1A05] text-white font-extrabold uppercase tracking-wider shadow-lg shadow-[#9C2007]/30 transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer text-sm"
           >
-            <span>{loading ? 'Authenticating...' : 'Sign In to Portal'}</span>
+            <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
             <ArrowRight className="w-5 h-5" />
           </button>
         </form>

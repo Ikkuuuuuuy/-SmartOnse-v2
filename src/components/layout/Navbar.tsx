@@ -177,7 +177,7 @@ export default function Navbar() {
     { name: t('nav.services'), href: '/services' },
     { name: t('nav.transparency'), href: '/transparency' },
     { name: t('nav.events'), href: '/events' },
-    { name: 'SK Portal', href: '/sk-programs' },
+    { name: 'SK Programs', href: '/sk-programs' },
     { name: t('nav.contact'), href: '/contact' },
   ];
 
@@ -329,7 +329,7 @@ export default function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                   className="w-full block text-center bg-white text-[#9C2007] py-3.5 rounded-full text-xs font-black uppercase tracking-widest shadow-xl"
                 >
-                  Launch Portal
+                  {user.role === 'resident' ? 'Resident Services' : 'Admin Portal'}
                 </Link>
                 <button
                   onClick={() => {

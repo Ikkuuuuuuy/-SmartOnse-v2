@@ -9,6 +9,7 @@ export default function ServicesPage() {
   const services = [
     {
       id: 1,
+      code: 'BRGY_CLEARANCE',
       title: 'Barangay Clearance',
       description: 'Official clearance certifying residency and good moral standing for employment, legal needs, or business requirements.',
       icon_svg: '📄',
@@ -22,6 +23,7 @@ export default function ServicesPage() {
     },
     {
       id: 2,
+      code: 'CERT_RESIDENCY',
       title: 'Certificate of Residency',
       description: 'Official certificate verifying that the applicant is a bonafide resident of Barangay Onse.',
       icon_svg: '🏠',
@@ -34,6 +36,7 @@ export default function ServicesPage() {
     },
     {
       id: 3,
+      code: 'CERT_INDIGENCY',
       title: 'Certificate of Indigency',
       description: 'Official certificate issued to low-income residents for medical, educational, legal, or financial assistance.',
       icon_svg: '📝',
@@ -46,8 +49,23 @@ export default function ServicesPage() {
     },
     {
       id: 4,
-      title: 'Barangay Business Permit',
-      description: 'Required clearance for commercial establishments and micro-businesses operating within Barangay Onse.',
+      code: 'FIRST_TIME_JOBSEEKER',
+      title: 'First-Time Jobseeker Certificate',
+      description: 'Waives government pre-employment document fees under Republic Act No. 11261 for entry-level applicants.',
+      icon_svg: '🎓',
+      fee: 'FREE (R.A. 11261)',
+      turnaround: 'Same Day',
+      requirements: [
+        'Barangay Oath of Undertaking (signed on-site)',
+        'Valid School ID or PSA Birth Certificate',
+        'Proof of Barangay Onse residency',
+      ],
+    },
+    {
+      id: 5,
+      code: 'BUSINESS_CLEARANCE',
+      title: 'Barangay Business Clearance',
+      description: 'Required commercial clearance for business establishments and micro-enterprises operating within Barangay Onse.',
       icon_svg: '💼',
       fee: '₱250.00',
       turnaround: '2 Business Days',
@@ -55,6 +73,20 @@ export default function ServicesPage() {
         'DTI or SEC Certificate of Registration',
         'Contract of Lease or Proof of Property Ownership',
         'Sanitary and Fire Safety Inspection clearance',
+      ],
+    },
+    {
+      id: 6,
+      code: 'BLOTTER_REPORT',
+      title: 'Barangay Incident / Blotter Certification',
+      description: 'Official certification of recorded blotter, incident entry, or settlement before the Lupong Tagapamayapa.',
+      icon_svg: '⚖️',
+      fee: '₱100.00',
+      turnaround: '24 Hours',
+      requirements: [
+        'Valid Government ID of complainant or authorized party',
+        'Blotter Case / Docket reference number',
+        'Personal appearance or verification with Desk Officer',
       ],
     },
   ];
@@ -77,7 +109,7 @@ export default function ServicesPage() {
         </header>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {services.map((service) => (
             <div
               key={service.id}
@@ -107,7 +139,7 @@ export default function ServicesPage() {
 
                 <div className="flex flex-col gap-2">
                   <Link
-                    href={`/portal/request?type=${encodeURIComponent(service.title)}`}
+                    href={`/portal/request?type=${service.code}`}
                     className="w-full text-center bg-[#9C2007] text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider hover:brightness-110 transition shadow-lg shadow-[#9C2007]/20"
                   >
                     Request Online &rarr;
@@ -151,7 +183,7 @@ export default function ServicesPage() {
 
               <div className="flex gap-3">
                 <Link
-                  href={`/portal/request?type=${encodeURIComponent(selectedService.title)}`}
+                  href={`/portal/request?type=${selectedService.code}`}
                   className="flex-1 text-center bg-[#9C2007] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-wider hover:brightness-110 transition shadow-lg shadow-[#9C2007]/20"
                 >
                   Proceed to Request

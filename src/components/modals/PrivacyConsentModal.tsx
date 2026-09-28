@@ -65,7 +65,7 @@ export default function PrivacyConsentModal() {
             Data Privacy Advisory &amp; Consent
           </h2>
           <p className="text-[11px] text-rose-100/90 font-medium">
-            Barangay Onse Digital E-Governance Portal
+            Barangay Onse Digital E-Governance Website
           </p>
         </div>
 

@@ -13,8 +13,8 @@ import PrivacyConsentModal from '@/components/modals/PrivacyConsentModal';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'SmartOnse - Barangay Onse Digital E-Governance Portal',
-  description: 'Official citizen portal for Barangay Onse, San Juan City. Request clearances, track documents, book health appointments, and view public transparency records.',
+  title: 'SmartOnse - Barangay Onse Digital E-Governance Website',
+  description: 'Official website for Barangay Onse, San Juan City. Request clearances, track documents, book health appointments, and view public transparency records.',
   keywords: ['Barangay Onse', 'San Juan City', 'Barangay Clearance', 'Smart Governance', 'SK Onse', 'Transparency'],
 };
 

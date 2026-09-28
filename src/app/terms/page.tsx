@@ -13,7 +13,7 @@ export default function TermsOfServicePage() {
             
             <div>
               <h2 className="text-xl font-black text-[#9C2007] uppercase tracking-tight mb-2">1. Acceptance of Terms</h2>
-              <p>By accessing and using the SmartOnse portal, you accept and agree to be bound by the terms and provision of this agreement.</p>
+              <p>By accessing and using the SmartOnse website, you accept and agree to be bound by the terms and provision of this agreement.</p>
             </div>
             
             <div>
@@ -28,12 +28,12 @@ export default function TermsOfServicePage() {
 
             <div>
               <h2 className="text-xl font-black text-[#9C2007] uppercase tracking-tight mb-2">4. Document Requests & Falsification Penalties</h2>
-              <p>Documents requested through this portal are official barangay records. Any falsification of information provided during a request is punishable under Philippine law (Article 171 & 172 of the Revised Penal Code). We reserve the right to deny requests that fail verification.</p>
+              <p>Documents requested through this website are official barangay records. Any falsification of information provided during a request is punishable under Philippine law (Article 171 & 172 of the Revised Penal Code). We reserve the right to deny requests that fail verification.</p>
             </div>
 
             <div>
               <h2 className="text-xl font-black text-[#9C2007] uppercase tracking-tight mb-2">5. Code of Conduct</h2>
-              <p>You agree to use the portal only for lawful purposes. You are prohibited from violating or attempting to violate the security of the website.</p>
+              <p>You agree to use the website only for lawful purposes. You are prohibited from violating or attempting to violate the security of the website.</p>
             </div>
 
             <div className="mt-12 pt-8 border-t border-slate-100">

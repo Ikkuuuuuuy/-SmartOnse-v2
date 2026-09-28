@@ -91,12 +91,12 @@ export default function WelcomePage() {
       icon: <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />,
     },
     {
-      title: 'Lupon Tagapamayapa Assistance',
-      desc: 'Community dispute resolution, conciliation mediation, and barangay blotter recording.',
-      fee: 'FREE',
-      time: 'By Schedule',
+      title: 'Barangay Incident / Blotter Certification',
+      desc: 'Official certification of recorded blotter, incident extract, or conciliation settlement before the Lupong Tagapamayapa.',
+      fee: '₱100.00',
+      time: '24 Hours',
       badge: 'Peace & Order',
-      code: 'BLOTTER',
+      code: 'BLOTTER_REPORT',
       icon: <Scale className="w-6 h-6 text-rose-600 dark:text-rose-400" />,
     },
   ];
@@ -130,8 +130,6 @@ export default function WelcomePage() {
 
   const stats = [
     { label: 'Registered Constituents', value: '4,850+', sub: 'Census Verified', icon: '👥' },
-    { label: 'Avg Turnaround Time', value: '3.5 Hrs', sub: 'Anti-Red Tape Certified', icon: '⚡' },
-    { label: 'Cryptographic Security', value: '100% SHA-256', sub: 'Tamper-Proof QR', icon: '🛡️' },
     { label: 'Youth Scholars Supported', value: '180+', sub: 'SK Onse Program', icon: '🎓' },
   ];
 
@@ -196,7 +194,7 @@ export default function WelcomePage() {
               </span>
             </h1>
             <p className="max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-              Welcome to the official digital portal of <strong>Barangay Onse</strong>. Request civil clearances online, verify documents with anti-counterfeit QR codes, track public finances, and access 24/7 community services.
+              Welcome to the official website of <strong>Barangay Onse</strong>. Request civil clearances online, verify documents with anti-counterfeit QR codes, track public finances, and access 24/7 community services.
             </p>
           </div>
 
@@ -223,7 +221,7 @@ export default function WelcomePage() {
                 href={user.destination || '/admin'} 
                 className="bg-slate-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-wider shadow-md transition-all flex items-center gap-2 cursor-pointer"
               >
-                <span>Launch Portal &rarr;</span>
+                <span>{user.role === 'resident' ? 'Resident Services' : 'Admin Portal'} &rarr;</span>
               </Link>
             ) : (
               <Link 
@@ -259,10 +257,10 @@ export default function WelcomePage() {
       </section>
 
 
-      {/* 2. LIVE SYSTEM TELEMETRY STRIP */}
+      {/* 2. COMMUNITY METRICS STRIP */}
       <section className="py-10 px-4 sm:px-6 lg:px-12 bg-white dark:bg-[#0B1528] border-b border-slate-200 dark:border-blue-900/40 transition-colors duration-200">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6">
             {stats.map((stat) => (
               <div
                 key={stat.label}

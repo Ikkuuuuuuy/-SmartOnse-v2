@@ -79,7 +79,7 @@ export default function Footer() {
             </li>
             <li>
               <Link href="/sk-programs" className="hover:text-white hover:underline transition">
-                &bull; SK Youth Development Portal
+                &bull; SK Youth Development Programs
               </Link>
             </li>
             <li>

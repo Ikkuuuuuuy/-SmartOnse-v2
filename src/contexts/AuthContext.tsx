@@ -75,6 +75,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.error('Failed to remove auth user:', e);
     }
+    // Clear server-side httpOnly session cookie
+    fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
   };
 
   return (
