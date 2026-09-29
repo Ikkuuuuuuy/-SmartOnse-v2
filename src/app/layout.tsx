@@ -16,6 +16,14 @@ export const metadata: Metadata = {
   title: 'SmartOnse - Barangay Onse Digital E-Governance Website',
   description: 'Official website for Barangay Onse, San Juan City. Request clearances, track documents, book health appointments, and view public transparency records.',
   keywords: ['Barangay Onse', 'San Juan City', 'Barangay Clearance', 'Smart Governance', 'SK Onse', 'Transparency'],
+  icons: {
+    icon: [
+      { url: '/images/barangay-onse-seal.png', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    shortcut: '/images/barangay-onse-seal.png',
+    apple: '/images/barangay-onse-seal.png',
+  },
 };
 
 export default function RootLayout({
@@ -26,6 +34,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/images/barangay-onse-seal.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/images/barangay-onse-seal.png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
