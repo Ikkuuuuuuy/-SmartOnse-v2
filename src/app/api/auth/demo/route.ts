@@ -108,13 +108,27 @@ const DEMO_ACCOUNTS: Record<string, DemoAccount> = {
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const key = (body.roleId || body.role || body.email || 'admin').toString().toLowerCase().trim();
+    const rawKey = body.roleId || body.role || body.email;
 
-    // Match by key or by email
+    if (typeof rawKey !== 'string' && rawKey !== undefined) {
+      return NextResponse.json({ error: 'Invalid input parameter.' }, { status: 400 });
+    }
+
+    const key = (rawKey || 'resident').toString().toLowerCase().trim();
+
+    // Security Guard: Disallow super_admin bypass via demo endpoint
+    if (key.includes('super_admin') || key.includes('superadmin')) {
+      return NextResponse.json(
+        { error: 'Super Administrator accounts require explicit credential authentication.' },
+        { status: 403 }
+      );
+    }
+
+    // Match by key or by email (ignoring super_admin)
     const target =
-      DEMO_ACCOUNTS[key] ||
-      Object.values(DEMO_ACCOUNTS).find((acc) => acc.email.toLowerCase() === key) ||
-      DEMO_ACCOUNTS.admin;
+      (key !== 'super_admin' && DEMO_ACCOUNTS[key]) ||
+      Object.values(DEMO_ACCOUNTS).find((acc) => acc.role !== 'super_admin' && acc.email.toLowerCase() === key) ||
+      DEMO_ACCOUNTS.resident;
 
     // Ensure account exists and is verified in Prisma DB
     let user = await prisma.user.findUnique({

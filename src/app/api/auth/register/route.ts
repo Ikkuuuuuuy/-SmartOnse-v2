@@ -5,6 +5,7 @@ import { hashPassword } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
+    const body = await req.json().catch(() => ({}));
     const {
       name,
       email,
@@ -15,23 +16,37 @@ export async function POST(req: Request) {
       gender,
       idType,
       idCardImage,
-    } = await req.json();
+    } = body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
       return NextResponse.json(
-        { error: 'Name, email, and password are required.' },
+        { error: 'Valid name, email, and password strings are required.' },
         { status: 400 }
       );
     }
 
-    if (password.length < 8) {
+    if (password.length < 8 || password.length > 128) {
       return NextResponse.json(
-        { error: 'Password must be at least 8 characters long.' },
+        { error: 'Password must be between 8 and 128 characters.' },
         { status: 400 }
       );
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const cleanEmail = email.trim().toLowerCase();
+    if (!emailRegex.test(cleanEmail) || cleanEmail.length > 255) {
+      return NextResponse.json(
+        { error: 'Invalid email address format.' },
+        { status: 400 }
+      );
+    }
+
+    if (name.trim().length > 120) {
+      return NextResponse.json(
+        { error: 'Name exceeds maximum allowed length.' },
+        { status: 400 }
+      );
+    }
 
     // Check for existing email
     const existing = await prisma.user.findUnique({ where: { email: cleanEmail } });

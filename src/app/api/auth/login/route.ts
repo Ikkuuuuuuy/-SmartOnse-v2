@@ -25,11 +25,19 @@ const ROLE_TITLES: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { email, password } = body;
 
-    if (!email || !password) {
+    if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
       return NextResponse.json(
-        { error: 'Email and password are required.' },
+        { error: 'Valid email and password strings are required.' },
+        { status: 400 }
+      );
+    }
+
+    if (email.length > 255 || password.length > 255) {
+      return NextResponse.json(
+        { error: 'Input exceeds maximum allowed length.' },
         { status: 400 }
       );
     }
