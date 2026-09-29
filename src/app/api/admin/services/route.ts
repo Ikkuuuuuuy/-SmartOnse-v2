@@ -76,6 +76,32 @@ export async function POST(req: Request) {
       },
     });
 
+    // Automatically sync into DocumentType catalog so residents can request it immediately
+    const cleanDocCode = name.toUpperCase().replace(/[^A-Z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 30) || 'SERVICE_DOC';
+    const parsedFee = (!fee || fee.toLowerCase().includes('free')) ? 0.0 : (parseFloat(fee.replace(/[^0-9.]/g, '')) || 0.0);
+    const parsedDays = (turnaround && turnaround.toLowerCase().includes('2 day')) ? 2 : (turnaround && turnaround.toLowerCase().includes('3 day')) ? 3 : 1;
+
+    await prisma.documentType.upsert({
+      where: { code: cleanDocCode },
+      update: {
+        name: name.trim(),
+        description: description ? description.trim() : `Official certificate for ${name.trim()}`,
+        fee: parsedFee,
+        processingDays: parsedDays,
+        requirements: requirements.trim(),
+        isActive: true,
+      },
+      create: {
+        code: cleanDocCode,
+        name: name.trim(),
+        description: description ? description.trim() : `Official certificate for ${name.trim()}`,
+        fee: parsedFee,
+        processingDays: parsedDays,
+        requirements: requirements.trim(),
+        isActive: true,
+      },
+    });
+
     const formatted = {
       id: newService.id,
       code: `SRV-${String(count + 1).padStart(3, '0')}`,

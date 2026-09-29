@@ -45,6 +45,28 @@ export async function GET() {
       };
     });
 
+    // Also include any active services created in admin portal that are not yet in DocumentType
+    for (const s of services) {
+      const alreadyIncluded = certificates.some(
+        (c) =>
+          c.name.toLowerCase() === s.title.toLowerCase() ||
+          c.name.toLowerCase().includes(s.title.toLowerCase()) ||
+          s.title.toLowerCase().includes(c.name.toLowerCase())
+      );
+      if (!alreadyIncluded) {
+        const code = s.title.toUpperCase().replace(/[^A-Z0-9]+/g, '_').slice(0, 30);
+        certificates.push({
+          id: s.id,
+          code,
+          name: s.title,
+          description: s.description,
+          fee: s.fee,
+          time: s.processingTime,
+          requirements: s.requirements,
+        });
+      }
+    }
+
     // Format all public services
     const publicServices = services.map((s) => ({
       id: s.id,
