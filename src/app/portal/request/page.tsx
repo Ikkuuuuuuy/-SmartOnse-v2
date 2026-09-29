@@ -13,24 +13,22 @@ const DOC_TYPES = [
   { code: 'CERT_INDIGENCY', name: 'Certificate of Indigency', fee: 'FREE', time: 'Same Day' },
   { code: 'FIRST_TIME_JOBSEEKER', name: 'First-Time Jobseeker Certificate', fee: 'FREE (R.A. 11261)', time: 'Same Day' },
   { code: 'BUSINESS_CLEARANCE', name: 'Barangay Business Clearance', fee: '₱250.00', time: '2 Days' },
-  { code: 'BLOTTER_REPORT', name: 'Barangay Incident / Blotter Certification', fee: '₱100.00', time: '24 Hours' },
 ];
 
-function resolveDocTypeCode(typeParam: string | null): string {
-  if (!typeParam) return 'BRGY_CLEARANCE';
+function resolveDocTypeCode(typeParam: string | null, available = DOC_TYPES): string {
+  if (!typeParam) return available[0]?.code || 'BRGY_CLEARANCE';
   const param = typeParam.trim().toLowerCase();
 
-  const matchByCode = DOC_TYPES.find((d) => d.code.toLowerCase() === param);
+  const matchByCode = available.find((d) => d.code.toLowerCase() === param);
   if (matchByCode) return matchByCode.code;
 
-  const matchByName = DOC_TYPES.find((d) => {
+  const matchByName = available.find((d) => {
     const dName = d.name.toLowerCase();
     return (
       dName === param ||
       dName.includes(param) ||
       param.includes(dName) ||
       (param.includes('jobseeker') && d.code === 'FIRST_TIME_JOBSEEKER') ||
-      (param.includes('blotter') && d.code === 'BLOTTER_REPORT') ||
       (param.includes('indigency') && d.code === 'CERT_INDIGENCY') ||
       (param.includes('residency') && d.code === 'CERT_RESIDENCY') ||
       (param.includes('business') && d.code === 'BUSINESS_CLEARANCE') ||
@@ -38,7 +36,7 @@ function resolveDocTypeCode(typeParam: string | null): string {
     );
   });
 
-  return matchByName ? matchByName.code : 'BRGY_CLEARANCE';
+  return matchByName ? matchByName.code : (available[0]?.code || 'BRGY_CLEARANCE');
 }
 
 function RequestContent() {
@@ -47,6 +45,7 @@ function RequestContent() {
   const { user, isLoading } = useAuth();
   const { addNotification } = useNotifications();
 
+  const [availableDocTypes, setAvailableDocTypes] = useState(DOC_TYPES);
   const [docType, setDocType] = useState(() => resolveDocTypeCode(searchParams.get('type')));
   const [fullName, setFullName] = useState('');
   const [contactNumber, setContactNumber] = useState('');
@@ -58,6 +57,30 @@ function RequestContent() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [trackingNumber, setTrackingNumber] = useState<string | null>(null);
+
+  // Dynamically load active certificate types from database
+  useEffect(() => {
+    async function loadActiveCertificates() {
+      try {
+        const res = await fetch('/api/services');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.certificates && data.certificates.length > 0) {
+            setAvailableDocTypes(data.certificates);
+            // If current selected docType is not in the active list, switch to first active
+            const currentParam = searchParams.get('type');
+            setDocType((prev) => {
+              const exists = data.certificates.some((c: { code: string }) => c.code === prev);
+              return exists ? prev : resolveDocTypeCode(currentParam, data.certificates);
+            });
+          }
+        }
+      } catch {
+        // Fallback initialized
+      }
+    }
+    loadActiveCertificates();
+  }, [searchParams]);
 
   // Require Login / Auto-Redirect for Non-Registered Users
   useEffect(() => {
@@ -223,7 +246,7 @@ function RequestContent() {
               1. Select Certificate Type *
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {DOC_TYPES.map((type) => {
+              {availableDocTypes.map((type) => {
                 const isSelected = docType === type.code;
                 return (
                   <button

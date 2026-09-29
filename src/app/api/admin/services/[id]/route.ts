@@ -35,6 +35,19 @@ export async function PATCH(
       data: updateData,
     });
 
+    // Sync isActive state with DocumentType if status was modified
+    if (status) {
+      await prisma.documentType.updateMany({
+        where: {
+          OR: [
+            { name: { equals: updated.title, mode: 'insensitive' } },
+            { name: { contains: updated.title, mode: 'insensitive' } },
+          ],
+        },
+        data: { isActive: status === 'ACTIVE' },
+      });
+    }
+
     return NextResponse.json({
       success: true,
       service: {
@@ -70,7 +83,20 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await prisma.service.delete({ where: { id } });
+    const service = await prisma.service.findUnique({ where: { id } });
+    if (service) {
+      // Deactivate corresponding DocumentType in certificate request catalog
+      await prisma.documentType.updateMany({
+        where: {
+          OR: [
+            { name: { equals: service.title, mode: 'insensitive' } },
+            { name: { contains: service.title, mode: 'insensitive' } },
+          ],
+        },
+        data: { isActive: false },
+      });
+      await prisma.service.delete({ where: { id } });
+    }
 
     return NextResponse.json({ success: true, message: 'Service removed successfully!' });
   } catch (err: unknown) {

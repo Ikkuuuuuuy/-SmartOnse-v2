@@ -6,7 +6,7 @@ import Link from 'next/link';
 export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState<any | null>(null);
 
-  const services = [
+  const INITIAL_SERVICES = [
     {
       id: 1,
       code: 'BRGY_CLEARANCE',
@@ -75,21 +75,47 @@ export default function ServicesPage() {
         'Sanitary and Fire Safety Inspection clearance',
       ],
     },
-    {
-      id: 6,
-      code: 'BLOTTER_REPORT',
-      title: 'Barangay Incident / Blotter Certification',
-      description: 'Official certification of recorded blotter, incident entry, or settlement before the Lupong Tagapamayapa.',
-      icon_svg: '⚖️',
-      fee: '₱100.00',
-      turnaround: '24 Hours',
-      requirements: [
-        'Valid Government ID of complainant or authorized party',
-        'Blotter Case / Docket reference number',
-        'Personal appearance or verification with Desk Officer',
-      ],
-    },
   ];
+
+  const [servicesList, setServicesList] = useState(INITIAL_SERVICES);
+
+  React.useEffect(() => {
+    async function loadServices() {
+      try {
+        const res = await fetch('/api/services');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.services && data.services.length > 0) {
+            setServicesList(
+              data.services.map((s: { id: string; title: string; description: string; fee: string; turnaround: string; requirements: string }, idx: number) => ({
+                id: s.id || idx + 1,
+                code: s.title.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+                title: s.title,
+                description: s.description,
+                icon_svg: s.title.includes('Clearance')
+                  ? '📄'
+                  : s.title.includes('Residency')
+                  ? '🏠'
+                  : s.title.includes('Indigency')
+                  ? '📝'
+                  : s.title.includes('Jobseeker')
+                  ? '🎓'
+                  : s.title.includes('Business')
+                  ? '💼'
+                  : '📋',
+                fee: s.fee,
+                turnaround: s.turnaround,
+                requirements: s.requirements ? s.requirements.split(',').map((r: string) => r.trim()).filter(Boolean) : [],
+              }))
+            );
+          }
+        }
+      } catch {
+        // Fallback initialized
+      }
+    }
+    loadServices();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#FDF8F6] dark:bg-[#070D18] text-slate-900 dark:text-slate-100 pt-32 md:pt-40 pb-20 px-6 lg:px-10 font-sans transition-colors duration-200">
@@ -110,7 +136,7 @@ export default function ServicesPage() {
 
         {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {services.map((service) => (
+          {servicesList.map((service) => (
             <div
               key={service.id}
               className="bg-white dark:bg-[#0E1B33] p-8 rounded-[3.5rem] shadow-xl border border-slate-100 dark:border-blue-900/50 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group"
