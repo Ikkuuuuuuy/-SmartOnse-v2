@@ -19,6 +19,7 @@ import {
 import TablePagination from '@/components/ui/TablePagination';
 import TableSortHeader from '@/components/ui/TableSortHeader';
 import { useNotifications } from '@/contexts/NotificationContext';
+import QRCodeImage from '@/components/ui/QRCodeImage';
 
 export interface ClearanceRequest {
   id: string;
@@ -841,15 +842,40 @@ export default function AdminRequestsPage() {
                 </p>
               </div>
 
-              {/* Signatures */}
-              <div className="pt-8 grid grid-cols-2 gap-8 text-center text-xs">
-                <div>
-                  <div className="w-32 border-b border-slate-400 mx-auto mb-1"></div>
-                  <p className="font-bold uppercase">Applicant Signature</p>
+              {/* Signatures & Anti-Counterfeit Verification QR Code */}
+              <div className="pt-8 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-3 items-end gap-4 text-xs">
+                {/* Official Scannable QR Code */}
+                <div className="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                  <div className="bg-white p-1 rounded-lg border border-slate-200 shrink-0 shadow-xs">
+                    <QRCodeImage
+                      value={`https://smartonse.vercel.app/verify/${selectedRequest.trackingNumber}`}
+                      size={76}
+                      alt={`QR Code for ${selectedRequest.trackingNumber}`}
+                    />
+                  </div>
+                  <div className="text-left text-[10px] space-y-0.5">
+                    <p className="font-black text-[#9C2007] uppercase flex items-center gap-1">
+                      <QrCode className="w-3 h-3" /> Scan to Verify
+                    </p>
+                    <p className="font-mono font-bold text-slate-800">{selectedRequest.trackingNumber}</p>
+                    <p className="text-[9px] text-slate-500 leading-tight">
+                      Authenticity Registry: smartonse.vercel.app
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-black text-sm uppercase text-[#9C2007]">HON. ALEJANDRO SANTOS</p>
-                  <p className="text-[11px] font-bold text-slate-600 uppercase">Punong Barangay</p>
+
+                {/* Applicant Signature */}
+                <div className="text-center pb-1">
+                  <div className="w-28 border-b border-slate-400 mx-auto mb-1"></div>
+                  <p className="font-bold uppercase text-[11px]">Applicant Signature</p>
+                  <p className="text-[9px] text-slate-400">Right Thumbmark / Signature</p>
+                </div>
+
+                {/* Punong Barangay */}
+                <div className="text-center pb-1">
+                  <p className="font-black text-xs sm:text-sm uppercase text-[#9C2007]">HON. ALEJANDRO SANTOS</p>
+                  <p className="text-[10px] font-bold text-slate-600 uppercase">Punong Barangay</p>
+                  <p className="text-[9px] text-slate-400">Barangay Onse, San Juan City</p>
                 </div>
               </div>
             </div>

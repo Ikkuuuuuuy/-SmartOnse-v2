@@ -22,6 +22,7 @@ import {
   HelpCircle,
   MessageSquare
 } from 'lucide-react';
+import QRCodeImage from '@/components/ui/QRCodeImage';
 
 interface TrackedDocument {
   id: string;
@@ -537,14 +538,26 @@ function TrackContent() {
               )}
             </div>
 
-            <div className="px-6 pb-6 border-t border-slate-100 dark:border-blue-900/40 pt-4 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
-              <Link
-                href={`/verify/${docData.trackingNumber}`}
-                className="text-[#9C2007] dark:text-rose-400 font-bold flex items-center gap-1.5 hover:underline"
-              >
-                <QrCode className="w-4 h-4" /> View Digital Verification Record
-              </Link>
-              <span className="text-slate-400 text-[11px]">
+            <div className="px-6 pb-6 border-t border-slate-100 dark:border-blue-900/40 pt-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+              <div className="flex items-center gap-3">
+                <div className="p-1 bg-white dark:bg-white rounded-lg border border-slate-200 dark:border-slate-300 shrink-0 shadow-xs">
+                  <QRCodeImage
+                    value={`https://smartonse.vercel.app/verify/${docData.trackingNumber}`}
+                    size={48}
+                    alt={`Verification QR Code for ${docData.trackingNumber}`}
+                  />
+                </div>
+                <div>
+                  <Link
+                    href={`/verify/${docData.trackingNumber}`}
+                    className="text-[#9C2007] dark:text-rose-400 font-bold flex items-center gap-1.5 hover:underline"
+                  >
+                    <QrCode className="w-4 h-4" /> View Digital Verification Record
+                  </Link>
+                  <p className="text-[10px] text-slate-400">Scan QR or click to check civil registry authenticity</p>
+                </div>
+              </div>
+              <span className="text-slate-400 text-[11px] text-center sm:text-right">
                 Barangay Hall Window 2 &bull; Mon-Fri 8:00 AM - 5:00 PM
               </span>
             </div>
