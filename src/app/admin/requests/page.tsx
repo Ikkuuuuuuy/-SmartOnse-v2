@@ -1,9 +1,24 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { FileText, Printer, CheckCircle2, Search, X, QrCode, Filter, RefreshCw, Trash2 } from 'lucide-react';
+import { 
+  FileText, 
+  Printer, 
+  CheckCircle2, 
+  Search, 
+  X, 
+  QrCode, 
+  Filter, 
+  RefreshCw, 
+  Trash2, 
+  Clock,
+  AlertTriangle,
+  XCircle,
+  MessageSquare
+} from 'lucide-react';
 import TablePagination from '@/components/ui/TablePagination';
 import TableSortHeader from '@/components/ui/TableSortHeader';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 export interface ClearanceRequest {
   id: string;
@@ -18,6 +33,15 @@ export interface ClearanceRequest {
   createdAt: string;
   remarks?: string | null;
 }
+
+const PRESET_REJECTION_REASONS = [
+  'Incomplete supporting requirements or invalid identification submitted.',
+  'Applicant residency could not be verified in Barangay Onse Registry (RBI).',
+  'Discrepancy found in applicant personal details and official records.',
+  'Derogatory record or unresolved Lupong Tagapamayapa case pending.',
+  'Commercial clearance requires DTI/SEC business registration and lease contract.',
+  'Duplicate request is already currently active under another tracking code.',
+];
 
 const INITIAL_REQUESTS: ClearanceRequest[] = [
   {
@@ -159,6 +183,7 @@ const INITIAL_REQUESTS: ClearanceRequest[] = [
     documentType: 'Barangay Business Clearance',
     fee: 250.0,
     status: 'REJECTED',
+    remarks: 'Lacked DTI Business Name Registration and Commercial Lease Contract proof.',
     purpose: 'Commercial Space Sublease Permit',
     address: '60 Blumentritt St., Barangay Onse',
     contactNumber: '0919-777-8899',
@@ -288,20 +313,27 @@ const INITIAL_REQUESTS: ClearanceRequest[] = [
 ];
 
 export default function AdminRequestsPage() {
+  const { addNotification } = useNotifications();
   const [requests, setRequests] = useState<ClearanceRequest[]>(INITIAL_REQUESTS);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [sortField, setSortField] = useState('createdAt');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // default new to old
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc'); // Default: FIFO (First-In, First-Out: Oldest First)
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
   const [selectedRequest, setSelectedRequest] = useState<ClearanceRequest | null>(null);
 
+  // Rejection Feedback Modal State
+  const [rejectModalRequest, setRejectModalRequest] = useState<ClearanceRequest | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [rejectionError, setRejectionError] = useState<string | null>(null);
+  const [isSubmittingRejection, setIsSubmittingRejection] = useState(false);
+
   const fetchRequests = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/admin/requests');
+      const res = await fetch('/api/admin/requests?sort=asc');
       const data = await res.json();
       if (res.ok && data.success && Array.isArray(data.requests)) {
         setRequests(data.requests);
@@ -317,23 +349,79 @@ export default function AdminRequestsPage() {
     fetchRequests();
   }, []);
 
-  const updateStatus = async (id: string, newStatus: any) => {
+  const updateStatus = async (id: string, newStatus: any, remarks?: string) => {
     // Optimistic UI update
     setRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
+      prev.map((r) =>
+        r.id === id
+          ? { ...r, status: newStatus, ...(remarks !== undefined ? { remarks } : {}) }
+          : r
+      )
     );
     if (selectedRequest && selectedRequest.id === id) {
-      setSelectedRequest((prev) => (prev ? { ...prev, status: newStatus } : null));
+      setSelectedRequest((prev) =>
+        prev
+          ? { ...prev, status: newStatus, ...(remarks !== undefined ? { remarks } : {}) }
+          : null
+      );
     }
 
     try {
+      const payload: Record<string, any> = { id, status: newStatus };
+      if (remarks !== undefined) payload.remarks = remarks;
       await fetch('/api/admin/requests', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: newStatus }),
+        body: JSON.stringify(payload),
       });
     } catch (err) {
       console.error('Failed to persist status change:', err);
+    }
+  };
+
+  const handleStatusSelect = (r: ClearanceRequest, newStatus: string) => {
+    if (newStatus === 'REJECTED') {
+      setRejectModalRequest(r);
+      setRejectionReason(r.remarks || '');
+      setRejectionError(null);
+    } else {
+      updateStatus(r.id, newStatus);
+    }
+  };
+
+  const handleConfirmRejection = async () => {
+    if (!rejectModalRequest) return;
+    const trimmed = rejectionReason.trim();
+    if (!trimmed) {
+      setRejectionError('Please provide a specific message or feedback explaining why this certificate request is rejected.');
+      return;
+    }
+
+    setIsSubmittingRejection(true);
+    try {
+      await updateStatus(rejectModalRequest.id, 'REJECTED', trimmed);
+
+      // Send real-time notification to resident
+      try {
+        addNotification({
+          title: 'Certificate Request Disapproved',
+          description: `Application #${rejectModalRequest.trackingNumber} (${rejectModalRequest.documentType}) was rejected. Reason: ${trimmed}`,
+          type: 'alert',
+          targetRole: 'resident',
+          href: `/track?trackingNumber=${rejectModalRequest.trackingNumber}`,
+        });
+      } catch (e) {
+        console.error('Failed to push resident notification:', e);
+      }
+
+      setRejectModalRequest(null);
+      setRejectionReason('');
+      setRejectionError(null);
+    } catch (err) {
+      console.error('Failed to reject request:', err);
+      setRejectionError('An error occurred while saving rejection feedback.');
+    } finally {
+      setIsSubmittingRejection(false);
     }
   };
 
@@ -367,12 +455,12 @@ export default function AdminRequestsPage() {
       setSortDirection((prev) => (prev === 'desc' ? 'asc' : 'desc'));
     } else {
       setSortField(field);
-      setSortDirection('desc'); // default new to old
+      setSortDirection(field === 'createdAt' ? 'asc' : 'desc');
     }
     setCurrentPage(1);
   };
 
-  // Filtering + Sorting
+  // Filtering + Sorting (FIFO default for createdAt)
   const processedRequests = useMemo(() => {
     return requests
       .filter((r) => {
@@ -387,6 +475,12 @@ export default function AdminRequestsPage() {
         return matchesStatus && matchesSearch;
       })
       .sort((a: any, b: any) => {
+        if (sortField === 'createdAt') {
+          const timeA = new Date(a.createdAt).getTime();
+          const timeB = new Date(b.createdAt).getTime();
+          return sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
+        }
+
         let valA = a[sortField];
         let valB = b[sortField];
 
@@ -411,14 +505,15 @@ export default function AdminRequestsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#0B1528] p-6 rounded-3xl border border-slate-200/80 dark:border-blue-900/40 shadow-xs transition-colors">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 bg-rose-50 dark:bg-rose-950/70 border border-rose-200 dark:border-rose-900/50 px-2.5 py-0.5 rounded-full">
-              Document Review Pipeline
+            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-900/50 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              FIFO Priority Queue • Oldest First
             </span>
             <span className="text-[10px] font-bold text-slate-400">&bull;</span>
             <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Barangay Onse</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-            Clearance Requests Queue
+            Certificate Requests Queue
           </h1>
         </div>
 
@@ -489,6 +584,28 @@ export default function AdminRequestsPage() {
                 <option value="REJECTED">Rejected</option>
               </select>
             </div>
+
+            {/* FIFO Queue Mode Indicator / Quick Toggle */}
+            <button
+              onClick={() => {
+                setSortField('createdAt');
+                setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+                setCurrentPage(1);
+              }}
+              className={`px-3 py-2 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                sortField === 'createdAt' && sortDirection === 'asc'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
+                  : 'bg-slate-50 dark:bg-[#0E1B33] border-slate-200 dark:border-blue-900/60 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#152747]'
+              }`}
+              title="Click to toggle between FIFO (Oldest First) and Newest First"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>
+                {sortField === 'createdAt' && sortDirection === 'asc'
+                  ? 'FIFO Active (Oldest First)'
+                  : 'Newest First'}
+              </span>
+            </button>
           </div>
         </div>
 
@@ -516,7 +633,7 @@ export default function AdminRequestsPage() {
                   currentField={sortField}
                   currentDirection={sortDirection}
                   onSort={handleSort}
-                  label="Document Type"
+                  label="Certificate Type"
                 />
                 <TableSortHeader
                   field="purpose"
@@ -553,7 +670,7 @@ export default function AdminRequestsPage() {
               {paginatedRequests.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-slate-400">
-                    No clearance requests found matching your filter.
+                    No certificate requests found matching your filter.
                   </td>
                 </tr>
               ) : (
@@ -566,7 +683,7 @@ export default function AdminRequestsPage() {
                       <div className="font-bold text-slate-900 dark:text-white">{r.fullName}</div>
                       <div className="text-[10px] text-slate-400">{r.contactNumber}</div>
                     </td>
-                    <td className="py-3.5 px-4">{r.documentType}</td>
+                    <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200">{r.documentType}</td>
                     <td className="py-3.5 px-4 max-w-xs truncate text-slate-500 dark:text-slate-400" title={r.purpose}>
                       {r.purpose}
                     </td>
@@ -577,34 +694,57 @@ export default function AdminRequestsPage() {
                       {r.createdAt}
                     </td>
                     <td className="py-3.5 px-4 whitespace-nowrap">
-                      <select
-                        value={r.status}
-                        onChange={(e) => updateStatus(r.id, e.target.value)}
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold border whitespace-nowrap inline-block ${
-                          r.status === 'READY_FOR_PICKUP'
-                            ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40'
-                            : r.status === 'PROCESSING'
-                            ? 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800/40'
-                            : r.status === 'COMPLETED'
-                            ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800/40'
-                            : r.status === 'REJECTED'
-                            ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800/40'
-                            : 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/40'
-                        } cursor-pointer outline-none`}
-                      >
-                        <option value="PENDING">PENDING</option>
-                        <option value="PROCESSING">PROCESSING</option>
-                        <option value="READY_FOR_PICKUP">READY FOR PICKUP</option>
-                        <option value="COMPLETED">COMPLETED</option>
-                        <option value="REJECTED">REJECTED</option>
-                      </select>
+                      <div>
+                        <select
+                          value={r.status}
+                          onChange={(e) => handleStatusSelect(r, e.target.value)}
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-bold border whitespace-nowrap inline-block ${
+                            r.status === 'READY_FOR_PICKUP'
+                              ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40'
+                              : r.status === 'PROCESSING'
+                              ? 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800/40'
+                              : r.status === 'COMPLETED'
+                              ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800/40'
+                              : r.status === 'REJECTED'
+                              ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800/40'
+                              : 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/40'
+                          } cursor-pointer outline-none`}
+                        >
+                          <option value="PENDING">PENDING</option>
+                          <option value="PROCESSING">PROCESSING</option>
+                          <option value="READY_FOR_PICKUP">READY FOR PICKUP</option>
+                          <option value="COMPLETED">COMPLETED</option>
+                          <option value="REJECTED">REJECTED</option>
+                        </select>
+
+                        {/* If rejected, show rejection feedback pill and edit button */}
+                        {r.status === 'REJECTED' && (
+                          <div className="mt-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRejectModalRequest(r);
+                                setRejectionReason(r.remarks || '');
+                                setRejectionError(null);
+                              }}
+                              className="text-[10px] text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-200 font-bold inline-flex items-center gap-1 cursor-pointer bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-900/50 hover:bg-rose-100 dark:hover:bg-rose-900/80 transition"
+                              title={r.remarks ? `Rejection feedback: "${r.remarks}" (Click to view/edit)` : 'Click to add rejection feedback'}
+                            >
+                              <MessageSquare className="w-3 h-3 shrink-0" />
+                              <span className="truncate max-w-[130px]">
+                                {r.remarks ? r.remarks : 'Add reason'}
+                              </span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3.5 px-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setSelectedRequest(r)}
                           className="px-3 py-1.5 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-lg font-bold text-[11px] uppercase tracking-wider inline-flex items-center gap-1 cursor-pointer shadow-xs transition"
-                          title="Print official document certificate"
+                          title="Print official certificate"
                         >
                           <Printer className="w-3.5 h-3.5" />
                           <span>Print</span>
@@ -712,6 +852,134 @@ export default function AdminRequestsPage() {
                   <p className="text-[11px] font-bold text-slate-600 uppercase">Punong Barangay</p>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* REJECTION FEEDBACK MODAL */}
+      {rejectModalRequest && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-[#0B1528] rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-rose-200 dark:border-rose-900/50 my-8 animate-in zoom-in-95">
+            {/* Modal Header */}
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                  <XCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 dark:text-white uppercase text-base">
+                    Reject Certificate Request
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Provide feedback explaining why this request cannot be approved.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setRejectModalRequest(null);
+                  setRejectionReason('');
+                  setRejectionError(null);
+                }}
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Target Application Summary */}
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/40 text-xs space-y-1.5">
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-bold uppercase text-[10px]">Applicant:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{rejectModalRequest.fullName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-bold uppercase text-[10px]">Certificate:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{rejectModalRequest.documentType}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-bold uppercase text-[10px]">Tracking Code:</span>
+                <span className="font-mono font-bold text-[#9C2007] dark:text-rose-400">{rejectModalRequest.trackingNumber}</span>
+              </div>
+            </div>
+
+            {/* Presets */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                Quick Preset Reasons (Click to use):
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {PRESET_REJECTION_REASONS.map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setRejectionReason(preset);
+                      if (rejectionError) setRejectionError(null);
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl text-[11px] font-medium bg-slate-100 dark:bg-[#152747] hover:bg-rose-50 hover:text-[#9C2007] dark:hover:bg-rose-950/40 dark:hover:text-rose-300 border border-slate-200 dark:border-blue-900/40 text-slate-700 dark:text-slate-300 transition text-left cursor-pointer"
+                  >
+                    &bull; {preset}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Rejection Message & Feedback Input */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-[11px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  Citizen Feedback Message *
+                </label>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {rejectionReason.length} characters
+                </span>
+              </div>
+              <textarea
+                rows={3}
+                value={rejectionReason}
+                onChange={(e) => {
+                  setRejectionReason(e.target.value);
+                  if (rejectionError) setRejectionError(null);
+                }}
+                placeholder="State the clear reason why the certificate request was disapproved..."
+                className="w-full p-3.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/50 rounded-2xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-1 focus:ring-rose-500 transition resize-none"
+              />
+              {rejectionError && (
+                <p className="text-[11px] text-rose-600 dark:text-rose-400 font-semibold flex items-center gap-1">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  {rejectionError}
+                </p>
+              )}
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                This message will be visible to the applicant on their tracking timeline and sent as an in-app notification.
+              </p>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-blue-900/40">
+              <button
+                type="button"
+                onClick={() => {
+                  setRejectModalRequest(null);
+                  setRejectionReason('');
+                  setRejectionError(null);
+                }}
+                disabled={isSubmittingRejection}
+                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-blue-900/40 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#152747] transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmRejection}
+                disabled={isSubmittingRejection || !rejectionReason.trim()}
+                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-rose-900/20 transition cursor-pointer disabled:opacity-50"
+              >
+                <XCircle className="w-4 h-4" />
+                <span>{isSubmittingRejection ? 'Rejecting...' : 'Confirm Rejection'}</span>
+              </button>
             </div>
           </div>
         </div>

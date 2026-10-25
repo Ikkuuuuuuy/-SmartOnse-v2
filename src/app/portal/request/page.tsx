@@ -195,7 +195,7 @@ function RequestContent() {
               }}
               className="flex-1 py-3 bg-slate-100 dark:bg-[#152747] hover:bg-slate-200 dark:hover:bg-[#1C335C] text-slate-700 dark:text-slate-200 rounded-xl font-bold text-xs uppercase cursor-pointer transition"
             >
-              New Request
+              New Certificate Request
             </button>
           </div>
         </div>
@@ -211,7 +211,7 @@ function RequestContent() {
             Citizen E-Services &bull; R.A. 11032
           </span>
           <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-            Request Document Online
+            Request for Certificate
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
             Submit your official barangay certificate or clearance application directly to desk officers.
@@ -376,7 +376,7 @@ function RequestContent() {
             className="w-full py-3.5 rounded-xl bg-[#9C2007] hover:bg-[#8B1A05] text-white font-black uppercase tracking-wider shadow-md shadow-[#9C2007]/20 transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
           >
             <FileText className="w-4 h-4" />
-            <span>{loading ? 'Submitting Application...' : 'Submit Clearance Request'}</span>
+            <span>{loading ? 'Submitting Application...' : 'Submit Certificate Request'}</span>
           </button>
         </form>
       </div>

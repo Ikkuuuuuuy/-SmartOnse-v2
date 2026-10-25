@@ -524,7 +524,7 @@ export default function ProfilePage() {
         {activeTab === 'requests' && (
           <div className="rounded-3xl border border-slate-200/80 dark:border-blue-900/50 bg-white dark:bg-[#0E1B33] p-6 sm:p-10 shadow-xs space-y-6 transition-colors">
             <div>
-              <h2 className="text-xl font-black uppercase text-slate-900 dark:text-white">Your Document Applications</h2>
+              <h2 className="text-xl font-black uppercase text-slate-900 dark:text-white">Your Certificate Applications</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">Track and manage your submitted certificate requests.</p>
             </div>
 
@@ -533,7 +533,7 @@ export default function ProfilePage() {
                 <thead className="bg-slate-50 dark:bg-[#152747] text-slate-400 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100 dark:border-blue-900/40">
                   <tr>
                     <th className="py-3 px-4">Tracking Code</th>
-                    <th className="py-3 px-4">Document Type</th>
+                    <th className="py-3 px-4">Certificate Type</th>
                     <th className="py-3 px-4">Date Filed</th>
                     <th className="py-3 px-4">Fee</th>
                     <th className="py-3 px-4">Status</th>
@@ -562,11 +562,18 @@ export default function ProfilePage() {
                               ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300'
                               : req.status === 'PROCESSING'
                               ? 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300'
+                              : req.status === 'REJECTED'
+                              ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40'
                               : 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300'
                           }`}
                         >
-                          {req.status.replace(/_/g, ' ')}
+                          {req.status === 'REJECTED' ? 'DISAPPROVED' : req.status.replace(/_/g, ' ')}
                         </span>
+                        {req.status === 'REJECTED' && req.remarks && (
+                          <div className="mt-1 text-[10px] text-rose-600 dark:text-rose-400 font-medium max-w-[180px] truncate" title={req.remarks}>
+                            <span className="font-bold">Reason:</span> &ldquo;{req.remarks}&rdquo;
+                          </div>
+                        )}
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <Link href={`/track?trackingNumber=${req.trackingNumber}`} className="text-[#9C2007] dark:text-rose-400 hover:underline font-bold">

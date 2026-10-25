@@ -128,7 +128,7 @@ export default function ServicesPage() {
               Barangay <span className="text-[#9C2007] dark:text-rose-500">E-Services</span>
             </h1>
             <p className="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-[0.4em] mb-2">
-              Digitized &amp; Streamlined Resident Document Requests
+              Digitized &amp; Streamlined Resident Certificate Requests
             </p>
             <div className="h-1 w-20 bg-[#9C2007] mx-auto rounded-full"></div>
           </div>

@@ -168,7 +168,7 @@ export default function AccountMenu() {
                 >
                   <span className="flex items-center gap-2">
                     {isResident ? <FileText className="w-4 h-4" /> : <LayoutDashboard className="w-4 h-4" />}
-                    <span>{isResident ? 'Track Requested Documents' : 'Launch Admin Portal'}</span>
+                    <span>{isResident ? 'Track Certificate Requests' : 'Launch Admin Portal'}</span>
                   </span>
                   <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </Link>

@@ -32,11 +32,37 @@ export default function BarangayAiAssistant() {
   }, [messages, isOpen]);
 
   const quickQuestions = [
+    'Who is the SK Chairperson?',
+    'Who is the Barangay Captain?',
+    'What are the events in October?',
     'Requirements for Barangay Clearance?',
     'How to request Certificate of Indigency?',
     'Health Center vaccination schedule?',
     'Emergency Hotlines in Barangay Onse?',
   ];
+
+  // Formats text with **bold** annotations into strong tags
+  const renderFormattedText = (rawText: string) => {
+    const lines = rawText.split('\n');
+    return lines.map((line, lineIdx) => {
+      // Split by **bold** syntax
+      const parts = line.split(/(\*\*.*?\*\*)/g);
+      return (
+        <span key={lineIdx} className="block min-h-[1.15em]">
+          {parts.map((part, partIdx) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              return (
+                <strong key={partIdx} className="font-bold text-slate-900">
+                  {part.slice(2, -2)}
+                </strong>
+              );
+            }
+            return part;
+          })}
+        </span>
+      );
+    });
+  };
 
   const handleSend = async (textToSend?: string) => {
     const text = textToSend || input;
@@ -142,7 +168,9 @@ export default function BarangayAiAssistant() {
                       : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none shadow-2xs'
                   }`}
                 >
-                  <p className="whitespace-pre-line">{msg.text}</p>
+                  <div className="space-y-1">
+                    {renderFormattedText(msg.text)}
+                  </div>
                   <span
                     className={`block text-[9px] mt-1 text-right ${
                       msg.sender === 'user' ? 'text-rose-200' : 'text-slate-400'

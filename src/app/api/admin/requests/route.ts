@@ -16,6 +16,8 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const statusFilter = searchParams.get('status');
+    const sortParam = searchParams.get('sort');
+    const sortOrder = sortParam === 'desc' ? 'desc' : 'asc'; // Default: FIFO (First-In, First-Out)
 
     const whereClause: Record<string, unknown> = {};
     if (statusFilter && statusFilter !== 'ALL') {
@@ -37,7 +39,7 @@ export async function GET(req: Request) {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: sortOrder,
       },
     });
 

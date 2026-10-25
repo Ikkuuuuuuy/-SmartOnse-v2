@@ -18,7 +18,7 @@ export default function TermsOfServicePage() {
             
             <div>
               <h2 className="text-xl font-black text-[#9C2007] uppercase tracking-tight mb-2">2. Description of Service</h2>
-              <p>SmartOnse provides residents of Barangay Onse with access to online services, announcements, document requests, and a transparency board. We reserve the right to modify or discontinue any part of the service at any time.</p>
+              <p>SmartOnse provides residents of Barangay Onse with access to online services, announcements, certificate requests, and a transparency board. We reserve the right to modify or discontinue any part of the service at any time.</p>
             </div>
 
             <div>
@@ -27,8 +27,8 @@ export default function TermsOfServicePage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-black text-[#9C2007] uppercase tracking-tight mb-2">4. Document Requests & Falsification Penalties</h2>
-              <p>Documents requested through this website are official barangay records. Any falsification of information provided during a request is punishable under Philippine law (Article 171 & 172 of the Revised Penal Code). We reserve the right to deny requests that fail verification.</p>
+              <h2 className="text-xl font-black text-[#9C2007] uppercase tracking-tight mb-2">4. Certificate Requests & Falsification Penalties</h2>
+              <p>Certificates requested through this website are official barangay records. Any falsification of information provided during a request is punishable under Philippine law (Article 171 & 172 of the Revised Penal Code). We reserve the right to deny requests that fail verification.</p>
             </div>
 
             <div>

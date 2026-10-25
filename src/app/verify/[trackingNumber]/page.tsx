@@ -59,7 +59,7 @@ export default async function VerifyCertificatePage({
                   <span className="font-mono font-bold text-slate-900 dark:text-white">{request.trackingNumber}</span>
                 </div>
                 <div className="flex justify-between py-1.5">
-                  <span className="text-slate-400 dark:text-slate-400 font-bold uppercase text-[10px]">Document Type:</span>
+                  <span className="text-slate-400 dark:text-slate-400 font-bold uppercase text-[10px]">Certificate Type:</span>
                   <span className="font-bold text-slate-900 dark:text-white">{request.documentType.name}</span>
                 </div>
                 <div className="flex justify-between py-1.5">
@@ -78,6 +78,8 @@ export default async function VerifyCertificatePage({
                         ? 'text-emerald-700 dark:text-emerald-400'
                         : request.status === 'READY_FOR_PICKUP'
                         ? 'text-blue-700 dark:text-blue-400'
+                        : request.status === 'REJECTED'
+                        ? 'text-rose-700 dark:text-rose-400'
                         : 'text-amber-700 dark:text-amber-400'
                     }`}
                   >
@@ -85,9 +87,17 @@ export default async function VerifyCertificatePage({
                       ? 'SEALED & ISSUED'
                       : request.status === 'READY_FOR_PICKUP'
                       ? 'VERIFIED & READY'
+                      : request.status === 'REJECTED'
+                      ? 'DISAPPROVED / REJECTED'
                       : 'UNDER VERIFICATION'}
                   </span>
                 </div>
+                {request.status === 'REJECTED' && request.remarks && (
+                  <div className="flex flex-col py-2 text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 p-3 rounded-xl border border-rose-200 dark:border-rose-900/40">
+                    <span className="font-bold uppercase text-[10px]">Rejection Reason / Feedback:</span>
+                    <span className="font-semibold text-xs mt-0.5">&ldquo;{request.remarks}&rdquo;</span>
+                  </div>
+                )}
                 <div className="flex justify-between py-1.5">
                   <span className="text-slate-400 dark:text-slate-400 font-bold uppercase text-[10px]">Date Filed:</span>
                   <span className="font-medium text-slate-600 dark:text-slate-400">

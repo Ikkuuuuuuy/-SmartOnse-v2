@@ -59,12 +59,12 @@ export default function Footer() {
           <ul className="space-y-2.5 text-xs text-slate-400">
             <li>
               <Link href="/portal/request" className="hover:text-white hover:underline transition">
-                &bull; Request Barangay Clearance
+                &bull; Request for Certificate
               </Link>
             </li>
             <li>
               <Link href="/track" className="hover:text-white hover:underline transition">
-                &bull; Track Document Application
+                &bull; Track Certificate Application
               </Link>
             </li>
             <li>

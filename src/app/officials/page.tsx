@@ -299,7 +299,7 @@ export default async function OfficialsPage() {
             </span>
             <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight">Need assistance from the Barangay Council?</h3>
             <p className="text-white/80 text-sm max-w-xl">
-              File document requests, inquiries, or blotter concerns directly online through our 24/7 SmartOnse citizen portal.
+              File certificate requests, inquiries, or blotter concerns directly online through our 24/7 SmartOnse citizen portal.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 shrink-0">

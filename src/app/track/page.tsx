@@ -4,8 +4,24 @@ import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { Search, CheckCircle2, Clock, QrCode, AlertCircle, Calendar, User, FileText, ArrowRight, PlusCircle, Filter, X } from 'lucide-react';
 import TablePagination from '@/components/ui/TablePagination';
+import { 
+  Search, 
+  CheckCircle2, 
+  Clock, 
+  QrCode, 
+  AlertCircle, 
+  Calendar, 
+  User, 
+  FileText, 
+  ArrowRight, 
+  PlusCircle, 
+  Filter, 
+  X,
+  XCircle,
+  HelpCircle,
+  MessageSquare
+} from 'lucide-react';
 
 interface TrackedDocument {
   id: string;
@@ -72,13 +88,13 @@ function TrackContent() {
 
       if (!res.ok || !data.success || !data.request) {
         setDocData(null);
-        setErrorMsg(`No document request found for tracking code "${val}". Please double check your code or file a new request.`);
+        setErrorMsg(`No certificate request found for tracking code "${val}". Please double check your code or file a new request.`);
       } else {
         setDocData(data.request);
       }
     } catch (err: unknown) {
       setDocData(null);
-      setErrorMsg('Failed to look up document tracking. Please try again.');
+      setErrorMsg('Failed to look up certificate tracking. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +114,11 @@ function TrackContent() {
     if (!docData) return 'upcoming';
     const status = docData.status;
 
-    if (status === 'REJECTED') return 'rejected';
+    if (status === 'REJECTED') {
+      if (step === 1) return 'completed';
+      if (step === 2) return 'rejected';
+      return 'upcoming';
+    }
 
     if (step === 1) return 'completed'; // Received
     if (step === 2) return ['PROCESSING', 'READY_FOR_PICKUP', 'COMPLETED'].includes(status) ? 'completed' : 'active';
@@ -152,7 +172,7 @@ function TrackContent() {
           <span className="text-xs font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 bg-[#9C2007]/10 dark:bg-rose-950/60 px-3 py-1 rounded-full">
             Real-Time Tracking &bull; Central Registry
           </span>
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase">Track Document Request</h1>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase">Track Certificate Request</h1>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
             Enter your ONSE tracking number to view real-time verification and release status.
           </p>
@@ -166,7 +186,7 @@ function TrackContent() {
               <div>
                 <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
                   <FileText className="w-5 h-5 text-[#9C2007] dark:text-rose-400" />
-                  <span>Your Requested Documents</span>
+                  <span>Your Certificate Requests</span>
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Select any of your applications below to view real-time tracking progress.
@@ -177,7 +197,7 @@ function TrackContent() {
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition shrink-0"
               >
                 <PlusCircle className="w-4 h-4" />
-                <span>Request New Document</span>
+                <span>Request for Certificate</span>
               </Link>
             </div>
 
@@ -234,17 +254,17 @@ function TrackContent() {
             {/* Requested Documents Table */}
             {userRequests.length === 0 ? (
               <div className="py-8 text-center space-y-2">
-                <p className="text-xs text-slate-500 dark:text-slate-400">You haven&apos;t filed any document requests yet.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">You haven&apos;t filed any certificate requests yet.</p>
                 <Link
                   href="/portal/request"
                   className="text-xs font-bold text-[#9C2007] dark:text-rose-400 hover:underline inline-block"
                 >
-                  File your first document request &rarr;
+                  Request for Certificate &rarr;
                 </Link>
               </div>
             ) : filteredUserRequests.length === 0 ? (
               <div className="py-8 text-center text-xs text-slate-400">
-                No requested documents match your search or status filter.
+                No certificate requests match your search or status filter.
               </div>
             ) : (
               <div className="space-y-3">
@@ -253,7 +273,7 @@ function TrackContent() {
                     <thead className="bg-slate-50 dark:bg-[#080E1A] text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100 dark:border-blue-900/40">
                       <tr>
                         <th className="py-3 px-4">Tracking Code</th>
-                        <th className="py-3 px-4">Document Type</th>
+                        <th className="py-3 px-4">Certificate Type</th>
                         <th className="py-3 px-4">Purpose</th>
                         <th className="py-3 px-4">Date Filed</th>
                         <th className="py-3 px-4">Status</th>
@@ -286,6 +306,11 @@ function TrackContent() {
                             </td>
                             <td className="py-3.5 px-4 whitespace-nowrap">
                               {getStatusBadge(req.status)}
+                              {req.status === 'REJECTED' && req.remarks && (
+                                <div className="mt-1 text-[10px] text-rose-600 dark:text-rose-400 font-medium max-w-[200px] truncate" title={req.remarks}>
+                                  <span className="font-bold">Reason:</span> &ldquo;{req.remarks}&rdquo;
+                                </div>
+                              )}
                             </td>
                             <td className="py-3.5 px-4 text-right whitespace-nowrap">
                               <button
@@ -377,6 +402,53 @@ function TrackContent() {
               </div>
             </div>
 
+            {/* Prominent Rejection & Feedback Notice for Rejected Certificates */}
+            {docData.status === 'REJECTED' && (
+              <div className="mx-6 p-6 rounded-3xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-300 dark:border-rose-800/80 shadow-md space-y-4 animate-in zoom-in-95">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-rose-600/30">
+                    <XCircle className="w-7 h-7" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700">
+                      Application Disapproved
+                    </div>
+                    <h4 className="text-lg font-black uppercase text-rose-950 dark:text-rose-100">
+                      Request for Certificate Rejected
+                    </h4>
+                    <p className="text-xs text-rose-800 dark:text-rose-300">
+                      Your application for <strong className="font-bold">{docData.documentType}</strong> (Tracking #{docData.trackingNumber}) could not be approved by desk officers.
+                    </p>
+                  </div>
+                </div>
+
+                {/* The Reason / Feedback Section */}
+                <div className="p-4 rounded-2xl bg-white dark:bg-[#0B1528] border border-rose-200 dark:border-rose-900/50 shadow-inner space-y-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    Official Feedback &amp; Reason for Rejection:
+                  </span>
+                  <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 leading-relaxed pl-1">
+                    &ldquo;{docData.remarks || 'Application did not meet verification criteria or lacked required documentation. Please contact the barangay hall for details.'}&rdquo;
+                  </p>
+                </div>
+
+                {/* Corrective Actions / Next Steps */}
+                <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs border-t border-rose-200 dark:border-rose-900/40">
+                  <div className="text-rose-900 dark:text-rose-300 text-[11px] font-medium flex items-center gap-1.5">
+                    <HelpCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>You may address the feedback noted above and submit a new request, or visit Window 2 at Barangay Hall.</span>
+                  </div>
+                  <Link
+                    href={`/portal/request?type=${docData.documentTypeCode || ''}`}
+                    className="px-4 py-2 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-xl font-bold text-xs uppercase tracking-wider text-center shrink-0 shadow-md transition"
+                  >
+                    Submit New Request &rarr;
+                  </Link>
+                </div>
+              </div>
+            )}
+
             {/* 4 Step Progress Flow */}
             <div className="px-6 py-2">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px]">
@@ -391,14 +463,16 @@ function TrackContent() {
                 </div>
                 <div
                   className={`p-3 rounded-xl border font-bold transition ${
-                    getStepStatus(2) === 'completed'
+                    getStepStatus(2) === 'rejected'
+                      ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800/60 text-rose-800 dark:text-rose-300 ring-2 ring-rose-500/20'
+                      : getStepStatus(2) === 'completed'
                       ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300'
                       : getStepStatus(2) === 'active'
                       ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-800/60 text-blue-800 dark:text-blue-300 ring-2 ring-blue-400/20'
                       : 'bg-slate-50 dark:bg-[#152747] border-slate-200 dark:border-blue-900/40 text-slate-400'
                   }`}
                 >
-                  2. Processing
+                  {getStepStatus(2) === 'rejected' ? '2. Disapproved' : '2. Processing'}
                 </div>
                 <div
                   className={`p-3 rounded-xl border font-bold transition ${
@@ -421,7 +495,7 @@ function TrackContent() {
               </div>
             </div>
 
-            {/* Document Details Table */}
+            {/* Certificate Details Table */}
             <div className="mx-6 p-4 rounded-2xl bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-xs space-y-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -451,9 +525,14 @@ function TrackContent() {
               </div>
 
               {docData.remarks && (
-                <div className="pt-3 border-t border-slate-200 dark:border-blue-900/40">
-                  <span className="font-bold text-slate-700 dark:text-slate-200 uppercase text-[10px]">Desk Officer Remarks:</span>
-                  <p className="text-slate-600 dark:text-slate-300 mt-0.5 italic">{docData.remarks}</p>
+                <div className={`pt-3 border-t ${docData.status === 'REJECTED' ? 'border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/30 -mx-4 -mb-4 p-4 rounded-b-2xl' : 'border-slate-200 dark:border-blue-900/40'}`}>
+                  <span className={`font-bold uppercase text-[10px] flex items-center gap-1.5 ${docData.status === 'REJECTED' ? 'text-rose-700 dark:text-rose-400' : 'text-slate-700 dark:text-slate-200'}`}>
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    {docData.status === 'REJECTED' ? 'Official Rejection Feedback / Reason:' : 'Desk Officer Remarks:'}
+                  </span>
+                  <p className={`${docData.status === 'REJECTED' ? 'text-rose-900 dark:text-rose-200 font-semibold' : 'text-slate-600 dark:text-slate-300 italic'} mt-0.5`}>
+                    &ldquo;{docData.remarks}&rdquo;
+                  </p>
                 </div>
               )}
             </div>
