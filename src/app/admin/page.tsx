@@ -495,6 +495,7 @@ export default function AdminDashboardPage() {
                   { key: 'PROCESSING', label: 'Processing' },
                   { key: 'READY_FOR_PICKUP', label: 'Ready for Pickup' },
                   { key: 'COMPLETED', label: 'Completed' },
+                  { key: 'REJECTED', label: 'Disapproved' },
                 ].map((st) => (
                   <button
                     key={st.key}
@@ -639,6 +640,11 @@ export default function AdminDashboardPage() {
                         {row.status === 'COMPLETED' && (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 text-[10px] font-black uppercase whitespace-nowrap">
                             Completed
+                          </span>
+                        )}
+                        {row.status === 'REJECTED' && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40 text-[10px] font-black uppercase whitespace-nowrap">
+                            Disapproved
                           </span>
                         )}
                       </td>
