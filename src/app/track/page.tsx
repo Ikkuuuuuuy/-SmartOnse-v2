@@ -540,10 +540,10 @@ function TrackContent() {
 
             <div className="px-6 pb-6 border-t border-slate-100 dark:border-blue-900/40 pt-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
               <div className="flex items-center gap-3">
-                <div className="p-1 bg-white dark:bg-white rounded-lg border border-slate-200 dark:border-slate-300 shrink-0 shadow-xs">
+                <div className="p-1 bg-white dark:bg-white rounded-lg border border-slate-200 dark:border-slate-300 shrink-0 shadow-2xs">
                   <QRCodeImage
                     value={`https://smartonse.vercel.app/verify/${docData.trackingNumber}`}
-                    size={48}
+                    size={46}
                     alt={`Verification QR Code for ${docData.trackingNumber}`}
                   />
                 </div>

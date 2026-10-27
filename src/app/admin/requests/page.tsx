@@ -348,6 +348,13 @@ export default function AdminRequestsPage() {
 
   useEffect(() => {
     fetchRequests();
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const search = params.get('search');
+      const status = params.get('status');
+      if (search) setSearchTerm(search);
+      if (status) setStatusFilter(status);
+    }
   }, []);
 
   const updateStatus = async (id: string, newStatus: any, remarks?: string) => {
@@ -842,40 +849,33 @@ export default function AdminRequestsPage() {
                 </p>
               </div>
 
-              {/* Signatures & Anti-Counterfeit Verification QR Code */}
-              <div className="pt-8 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-3 items-end gap-4 text-xs">
-                {/* Official Scannable QR Code */}
-                <div className="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                  <div className="bg-white p-1 rounded-lg border border-slate-200 shrink-0 shadow-xs">
+              {/* Signatures & Anti-Counterfeiting QR Code */}
+              <div className="pt-8 grid grid-cols-1 sm:grid-cols-3 gap-6 items-end text-center text-xs">
+                <div className="order-1">
+                  <div className="w-32 border-b border-slate-400 mx-auto mb-1"></div>
+                  <p className="font-bold uppercase text-[10px] text-slate-700">Applicant Signature</p>
+                </div>
+                
+                {/* Official Scannable Anti-Counterfeit QR Code */}
+                <div className="order-2 flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 bg-slate-50/80">
+                  <div className="p-1 bg-white rounded-lg border border-slate-200 shadow-2xs">
                     <QRCodeImage
                       value={`https://smartonse.vercel.app/verify/${selectedRequest.trackingNumber}`}
-                      size={76}
-                      alt={`QR Code for ${selectedRequest.trackingNumber}`}
+                      size={68}
+                      alt={`Verification QR Code for ${selectedRequest.trackingNumber}`}
                     />
                   </div>
-                  <div className="text-left text-[10px] space-y-0.5">
-                    <p className="font-black text-[#9C2007] uppercase flex items-center gap-1">
-                      <QrCode className="w-3 h-3" /> Scan to Verify
-                    </p>
-                    <p className="font-mono font-bold text-slate-800">{selectedRequest.trackingNumber}</p>
-                    <p className="text-[9px] text-slate-500 leading-tight">
-                      Authenticity Registry: smartonse.vercel.app
-                    </p>
-                  </div>
+                  <span className="font-mono text-[9px] font-black text-slate-800 mt-1 uppercase tracking-wider">
+                    SCAN TO VERIFY
+                  </span>
+                  <span className="text-[8px] text-slate-500 font-mono font-bold">
+                    {selectedRequest.trackingNumber}
+                  </span>
                 </div>
 
-                {/* Applicant Signature */}
-                <div className="text-center pb-1">
-                  <div className="w-28 border-b border-slate-400 mx-auto mb-1"></div>
-                  <p className="font-bold uppercase text-[11px]">Applicant Signature</p>
-                  <p className="text-[9px] text-slate-400">Right Thumbmark / Signature</p>
-                </div>
-
-                {/* Punong Barangay */}
-                <div className="text-center pb-1">
-                  <p className="font-black text-xs sm:text-sm uppercase text-[#9C2007]">HON. ALEJANDRO SANTOS</p>
-                  <p className="text-[10px] font-bold text-slate-600 uppercase">Punong Barangay</p>
-                  <p className="text-[9px] text-slate-400">Barangay Onse, San Juan City</p>
+                <div className="order-3">
+                  <p className="font-black text-sm uppercase text-[#9C2007]">HON. ALEJANDRO SANTOS</p>
+                  <p className="text-[11px] font-bold text-slate-600 uppercase">Punong Barangay</p>
                 </div>
               </div>
             </div>
