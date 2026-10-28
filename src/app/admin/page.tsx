@@ -33,7 +33,7 @@ import DashboardCharts from '@/components/admin/DashboardCharts';
 
 export default function AdminDashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('FY 2026 (August 2026)');
-  const [activeTableTab, setActiveTableTab] = useState<'requests' | 'citizens' | 'blotter'>('requests');
+  const [activeTableTab, setActiveTableTab] = useState<'requests' | 'citizens' | 'audit'>('requests');
   const [searchFilter, setSearchFilter] = useState('');
   const [sortField, setSortField] = useState('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // default new to old
@@ -42,6 +42,7 @@ export default function AdminDashboardPage() {
 
   const [requestStatusFilter, setRequestStatusFilter] = useState<string>('ALL');
   const [registeredCitizensCount, setRegisteredCitizensCount] = useState<number>(3824);
+  const [dashboardLogs, setDashboardLogs] = useState<any[]>([]);
 
   // 2. Sample Data for Interactive Tabs (Expanded for Multi-Page Testing)
   const clearanceQueue = [
@@ -125,9 +126,10 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const fetchLatest = async () => {
       try {
-        const [resRequests, resResidents] = await Promise.all([
+        const [resRequests, resResidents, resLogs] = await Promise.all([
           fetch('/api/admin/requests'),
-          fetch('/api/admin/residents').catch(() => null)
+          fetch('/api/admin/residents').catch(() => null),
+          fetch('/api/admin/audit-logs').catch(() => null),
         ]);
         
         if (resRequests.ok) {
@@ -149,8 +151,28 @@ export default function AdminDashboardPage() {
 
         if (resResidents && resResidents.ok) {
           const resData = await resResidents.json();
-          if (resData.success && (resData.totalResidents || resData.stats?.totalRegistered)) {
-            setRegisteredCitizensCount(resData.totalResidents || resData.stats?.totalRegistered || 3824);
+          if (resData.success) {
+            if (resData.totalResidents !== undefined) {
+              setRegisteredCitizensCount(resData.totalResidents);
+            }
+            if (Array.isArray(resData.residents) && resData.residents.length > 0) {
+              const mappedCitizens = resData.residents.map((r: any) => ({
+                name: r.name,
+                precinct: r.precinct || 'PRECINCT-0042A',
+                address: r.address || 'Barangay Onse',
+                civil: r.civil || 'Single',
+                registered: r.registered || '2026-01-01',
+                verified: Boolean(r.verified),
+              }));
+              setCitizens(mappedCitizens);
+            }
+          }
+        }
+
+        if (resLogs && resLogs.ok) {
+          const logData = await resLogs.json();
+          if (logData.success && Array.isArray(logData.logs)) {
+            setDashboardLogs(logData.logs);
           }
         }
       } catch (err) {
@@ -160,7 +182,7 @@ export default function AdminDashboardPage() {
     fetchLatest();
   }, []);
 
-  const citizenList = [
+  const INITIAL_CITIZENS = [
     { name: 'Alfonso V. Quintero', precinct: 'PRECINCT-0042A', address: '188 Lt. Artiaga St.', civil: 'Single', registered: '2026-08-20', verified: true },
     { name: 'Carmela D. Ocampo', precinct: 'PRECINCT-0043A', address: '39 N. Domingo St.', civil: 'Married', registered: '2026-07-18', verified: true },
     { name: 'Rodrigo P. Manansala', precinct: 'PRECINCT-0041A', address: '83 A. Luna St.', civil: 'Widowed', registered: '2026-06-12', verified: true },
@@ -184,35 +206,17 @@ export default function AdminDashboardPage() {
     { name: 'Maria Clara Santos', precinct: 'PRECINCT-0042B', address: '88 J.V. Panganiban St.', civil: 'Married', registered: '2023-03-22', verified: true },
   ];
 
-  const blotterCases = [
-    { caseNo: 'BLOT-2026-025', parties: 'Complainant: E. Salome vs. F. Deniega', nature: 'Property Right of Way Obstruction', date: '2026-08-28 15:00', luponStatus: 'Summons Issued' },
-    { caseNo: 'BLOT-2026-024', parties: 'Complainant: T. Cruz vs. M. Gomez', nature: 'Boundary Wall Drainage Dispute', date: '2026-08-27 16:30', luponStatus: 'Hearing Set (Aug 31)' },
-    { caseNo: 'BLOT-2026-023', parties: 'Complainant: G. Reyes vs. R. Santos', nature: 'Neighborhood Videoke Noise Disturbance', date: '2026-08-26 21:15', luponStatus: 'Amicably Settled (Lupon)' },
-    { caseNo: 'BLOT-2026-022', parties: 'Complainant: B. Alcantara vs. D. Soriano', nature: 'Pet Dog Unleashed Animal Trespass', date: '2026-08-25 14:00', luponStatus: 'Amicably Settled (Lupon)' },
-    { caseNo: 'BLOT-2026-021', parties: 'Complainant: L. Ramos vs. C. Natividad', nature: 'Commercial Signage Encroachment', date: '2026-08-24 10:20', luponStatus: 'Hearing Set (Sept 02)' },
-    { caseNo: 'BLOT-2026-020', parties: 'Complainant: J. Padilla vs. V. Cruz', nature: 'Tree Branches Hanging Over Roof', date: '2026-08-23 16:45', luponStatus: 'Amicably Settled (Lupon)' },
-    { caseNo: 'BLOT-2026-019', parties: 'Complainant: M. Roxas vs. T. Magbanua', nature: 'Alleyway Garbage Dumping Complaint', date: '2026-08-22 09:15', luponStatus: 'Referred to Tanod Roster' },
-    { caseNo: 'BLOT-2026-018', parties: 'Complainant: S. Tiago vs. K. Tales', nature: 'Unsettled Small Borrowed Sum (₱2,500)', date: '2026-08-21 14:30', luponStatus: 'Amicably Settled (Lupon)' },
-    { caseNo: 'BLOT-2026-017', parties: 'Complainant: A. Mabini vs. M. Aquino', nature: 'Late Night Motorcycle Revving Noise', date: '2026-08-20 22:00', luponStatus: 'Reprimand Issued' },
-    { caseNo: 'BLOT-2026-016', parties: 'Complainant: P. Penitente vs. J. De Dios', nature: 'Disputed Water Submeter Reading', date: '2026-08-19 11:30', luponStatus: 'Amicably Settled (Lupon)' },
-    { caseNo: 'BLOT-2026-015', parties: 'Complainant: M. Del Pilar vs. G. Jaena', nature: 'Illegal Parking Blocking Garage Gate', date: '2026-08-18 17:10', luponStatus: 'Settled via Barangay Tanod' },
-    { caseNo: 'BLOT-2026-014', parties: 'Complainant: D. Florano vs. C. Ibarra', nature: 'Street Vendor Sidewalk Clearance', date: '2026-08-17 15:40', luponStatus: 'Amicably Settled (Lupon)' },
-    { caseNo: 'BLOT-2026-013', parties: 'Complainant: R. Mendoza vs. M. Santos', nature: 'Shared Wall Renovation Water Leakage', date: '2026-08-16 10:00', luponStatus: 'Hearing Set (Aug 25)' },
-    { caseNo: 'BLOT-2026-012', parties: 'Complainant: E. Salome vs. S. Tiago', nature: 'Stray Cat Nuisance Concern', date: '2026-08-15 13:20', luponStatus: 'Amicably Settled (Lupon)' },
-    { caseNo: 'BLOT-2026-011', parties: 'Complainant: B. Evangelista vs. P. Gomez', nature: 'Unreturned Tools Equipment Dispute', date: '2026-08-14 16:50', luponStatus: 'Amicably Settled (Lupon)' },
-    // --- Page 2 items ---
-    { caseNo: 'BLOT-2026-010', parties: 'Complainant: I. Villanueva vs. D. Delos Reyes', nature: 'Commercial Billboard Glare at Night', date: '2026-08-13 19:30', luponStatus: 'Amicably Settled (Lupon)' },
-    { caseNo: 'BLOT-2026-009', parties: 'Complainant: T. De Espadaña vs. P. Santos', nature: 'Boundary Wall Plaster Repair Cost', date: '2026-08-12 11:00', luponStatus: 'Amicably Settled (Lupon)' },
-    { caseNo: 'BLOT-2026-008', parties: 'Complainant: S. Ibarra vs. K. Tales', nature: 'Barangay Basketball Court Scheduling Conflict', date: '2026-08-11 16:00', luponStatus: 'Settled via SK Chairman' },
-  ];
+  const [citizens, setCitizens] = useState<any[]>(INITIAL_CITIZENS);
 
   // Tab change handler
-  const handleTabChange = (tab: 'requests' | 'citizens' | 'blotter') => {
+  const handleTabChange = (tab: 'requests' | 'citizens' | 'audit') => {
     setActiveTableTab(tab);
     setCurrentPage(1);
     setSearchFilter('');
     if (tab === 'citizens') {
       setSortField('registered');
+    } else if (tab === 'audit') {
+      setSortField('timestamp');
     } else {
       setSortField('date');
     }
@@ -262,11 +266,11 @@ export default function AdminDashboardPage() {
   // Processed citizens
   const processedCitizens = useMemo(() => {
     const q = searchFilter.toLowerCase();
-    return citizenList
+    return citizens
       .filter((item) =>
         item.name.toLowerCase().includes(q) ||
-        item.precinct.toLowerCase().includes(q) ||
-        item.address.toLowerCase().includes(q)
+        (item.precinct && item.precinct.toLowerCase().includes(q)) ||
+        (item.address && item.address.toLowerCase().includes(q))
       )
       .sort((a: any, b: any) => {
         let valA = a[sortField];
@@ -277,17 +281,18 @@ export default function AdminDashboardPage() {
         if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
         return 0;
       });
-  }, [citizenList, searchFilter, sortField, sortDirection]);
+  }, [citizens, searchFilter, sortField, sortDirection]);
 
-  // Processed blotter
-  const processedBlotter = useMemo(() => {
+  // Processed live audit logs
+  const processedAuditLogs = useMemo(() => {
     const q = searchFilter.toLowerCase();
-    return blotterCases
+    return dashboardLogs
       .filter((item) =>
-        item.caseNo.toLowerCase().includes(q) ||
-        item.parties.toLowerCase().includes(q) ||
-        item.nature.toLowerCase().includes(q) ||
-        item.luponStatus.toLowerCase().includes(q)
+        (item.id && item.id.toLowerCase().includes(q)) ||
+        (item.action && item.action.toLowerCase().includes(q)) ||
+        (item.details && item.details.toLowerCase().includes(q)) ||
+        (item.actor && item.actor.toLowerCase().includes(q)) ||
+        (item.timestamp && item.timestamp.toLowerCase().includes(q))
       )
       .sort((a: any, b: any) => {
         let valA = a[sortField];
@@ -298,7 +303,7 @@ export default function AdminDashboardPage() {
         if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
         return 0;
       });
-  }, [blotterCases, searchFilter, sortField, sortDirection]);
+  }, [dashboardLogs, searchFilter, sortField, sortDirection]);
 
   // Active items calculation based on current tab
   const activeDataLength =
@@ -306,7 +311,7 @@ export default function AdminDashboardPage() {
       ? processedRequests.length
       : activeTableTab === 'citizens'
       ? processedCitizens.length
-      : processedBlotter.length;
+      : processedAuditLogs.length;
 
   const paginatedRequests = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
@@ -318,10 +323,10 @@ export default function AdminDashboardPage() {
     return processedCitizens.slice(start, start + pageSize);
   }, [processedCitizens, currentPage, pageSize]);
 
-  const paginatedBlotter = useMemo(() => {
+  const paginatedAuditLogs = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return processedBlotter.slice(start, start + pageSize);
-  }, [processedBlotter, currentPage, pageSize]);
+    return processedAuditLogs.slice(start, start + pageSize);
+  }, [processedAuditLogs, currentPage, pageSize]);
 
   return (
     <div className="space-y-8 font-sans text-slate-800 dark:text-slate-100">
@@ -470,18 +475,18 @@ export default function AdminDashboardPage() {
                   : 'bg-slate-100 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#152747]'
               }`}
             >
-              Citizen Roster ({citizenList.length})
+              Citizen Roster ({citizens.length})
             </button>
 
             <button
-              onClick={() => handleTabChange('blotter')}
+              onClick={() => handleTabChange('audit')}
               className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer ${
-                activeTableTab === 'blotter'
+                activeTableTab === 'audit'
                   ? 'bg-[#9C2007] text-white shadow-md shadow-red-900/20'
                   : 'bg-slate-100 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#152747]'
               }`}
             >
-              Peace &amp; Order ({blotterCases.length})
+              Live Security &amp; Audit ({dashboardLogs.length})
             </button>
           </div>
 
@@ -747,73 +752,91 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* TAB 3: BLOTTER & PEACE AND ORDER */}
-        {activeTableTab === 'blotter' && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-[#080E1A] text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100 dark:border-blue-900/40">
-                <tr>
-                  <TableSortHeader
-                    field="caseNo"
-                    currentField={sortField}
-                    currentDirection={sortDirection}
-                    onSort={handleSort}
-                    label="Docket No."
-                  />
-                  <TableSortHeader
-                    field="parties"
-                    currentField={sortField}
-                    currentDirection={sortDirection}
-                    onSort={handleSort}
-                    label="Involved Parties"
-                  />
-                  <TableSortHeader
-                    field="nature"
-                    currentField={sortField}
-                    currentDirection={sortDirection}
-                    onSort={handleSort}
-                    label="Nature of Incident"
-                  />
-                  <TableSortHeader
-                    field="date"
-                    currentField={sortField}
-                    currentDirection={sortDirection}
-                    onSort={handleSort}
-                    label="Date Logged"
-                  />
-                  <TableSortHeader
-                    field="luponStatus"
-                    currentField={sortField}
-                    currentDirection={sortDirection}
-                    onSort={handleSort}
-                    label="Lupon Status"
-                  />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-blue-950/40 font-medium text-slate-700 dark:text-slate-300">
-                {paginatedBlotter.length === 0 ? (
+        {/* TAB 3: LIVE SECURITY & AUDIT TRAIL */}
+        {activeTableTab === 'audit' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-[#080E1A] rounded-2xl border border-slate-200/60 dark:border-blue-900/40 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="font-bold text-slate-700 dark:text-slate-300">
+                  Live System Audit Stream ({dashboardLogs.length} events logged)
+                </span>
+              </div>
+              <Link
+                href="/admin/audit-logs"
+                className="font-bold text-[#9C2007] dark:text-rose-400 hover:underline flex items-center gap-1"
+              >
+                <span>Full Audit Page &amp; CSV Export</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-[#080E1A] text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100 dark:border-blue-900/40">
                   <tr>
-                    <td colSpan={5} className="py-10 text-center text-slate-400">
-                      No blotter cases found matching your search.
-                    </td>
+                    <TableSortHeader
+                      field="id"
+                      currentField={sortField}
+                      currentDirection={sortDirection}
+                      onSort={handleSort}
+                      label="Event ID"
+                    />
+                    <TableSortHeader
+                      field="action"
+                      currentField={sortField}
+                      currentDirection={sortDirection}
+                      onSort={handleSort}
+                      label="Action"
+                    />
+                    <TableSortHeader
+                      field="details"
+                      currentField={sortField}
+                      currentDirection={sortDirection}
+                      onSort={handleSort}
+                      label="Description"
+                    />
+                    <TableSortHeader
+                      field="actor"
+                      currentField={sortField}
+                      currentDirection={sortDirection}
+                      onSort={handleSort}
+                      label="Actor"
+                    />
+                    <TableSortHeader
+                      field="timestamp"
+                      currentField={sortField}
+                      currentDirection={sortDirection}
+                      onSort={handleSort}
+                      label="Timestamp"
+                    />
                   </tr>
-                ) : (
-                  paginatedBlotter.map((row) => (
-                    <tr key={row.caseNo} className="hover:bg-slate-50/80 dark:hover:bg-[#0E1B33]/60 transition">
-                      <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">{row.caseNo}</td>
-                      <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">{row.parties}</td>
-                      <td className="py-3.5 px-4">{row.nature}</td>
-                      <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px] whitespace-nowrap">{row.date}</td>
-                      <td className="py-3.5 px-4">
-                        <span className="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/70 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800/40 text-[10px] font-bold">
-                          {row.luponStatus}
-                        </span>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-blue-950/40 font-medium text-slate-700 dark:text-slate-300">
+                  {paginatedAuditLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-10 text-center text-slate-400">
+                        No audit events found matching your search.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    paginatedAuditLogs.map((row) => (
+                      <tr key={row.id} className="hover:bg-slate-50/80 dark:hover:bg-[#0E1B33]/60 transition">
+                        <td className="py-3.5 px-4 font-mono font-bold text-slate-500 dark:text-slate-400">{row.id}</td>
+                        <td className="py-3.5 px-4">
+                          <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-lg border bg-rose-50 text-[#9C2007] border-rose-200 dark:bg-rose-950/60 dark:text-rose-400 dark:border-rose-900/50">
+                            {row.action}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 max-w-sm text-slate-800 dark:text-slate-200">{row.details}</td>
+                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white whitespace-nowrap">{row.actor}</td>
+                        <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px] whitespace-nowrap">{row.timestamp}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

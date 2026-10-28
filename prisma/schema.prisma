@@ -23,6 +23,10 @@ model User {
   requests      DocumentRequest[]
   appointments  Appointment[]
   inhabitant    BarangayInhabitant?
+  consentRecords ConsentRecord[]
+  skPosts        SkPost[]
+  skLikes        SkPostLike[]
+  skComments     SkComment[]
 }
 
 model BarangayInhabitant {
@@ -172,6 +176,7 @@ model SkProgram {
   status         String   @default("Ongoing")
   schedule       String
   createdAt      DateTime @default(now())
+  posts          SkPost[]
 }
 
 model TransparencyDocument {
@@ -210,5 +215,71 @@ model AuditLog {
   actor     String
   ip        String?
   timestamp DateTime @default(now())
+}
+
+model ConsentRecord {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  name        String?
+  email       String?
+  consentType String   // "REGISTRATION", "COOKIE", "DATA_PROCESSING"
+  granted     Boolean  @default(true)
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+}
+
+model SkPost {
+  id           String        @id @default(cuid())
+  authorId     String
+  author       User          @relation(fields: [authorId], references: [id])
+  authorName   String
+  authorRole   String        // "SK Chairperson", "SK Kagawad", etc.
+  authorAvatar String?
+  programId    String?
+  program      SkProgram?    @relation(fields: [programId], references: [id])
+  caption      String
+  category     String        @default("Youth Development")
+  isPinned     Boolean       @default(false)
+  media        SkPostMedia[]
+  likes        SkPostLike[]
+  comments     SkComment[]
+  likesCount   Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model SkPostMedia {
+  id        String   @id @default(cuid())
+  postId    String
+  post      SkPost   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  url       String
+  type      String   @default("IMAGE") // "IMAGE" | "VIDEO"
+  caption   String?
+  order     Int      @default(0)
+}
+
+model SkPostLike {
+  id        String   @id @default(cuid())
+  postId    String
+  post      SkPost   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+}
+
+model SkComment {
+  id           String   @id @default(cuid())
+  postId       String
+  post         SkPost   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User     @relation(fields: [authorId], references: [id])
+  authorName   String
+  authorAvatar String?
+  content      String
+  createdAt    DateTime @default(now())
 }
 

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import RealCaptcha from '@/components/ui/RealCaptcha';
 import { 
   Lock, 
   Mail, 
@@ -32,8 +33,7 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [captchaAnswer, setCaptchaAnswer] = useState('');
-  const [captchaQuestion] = useState('4 + 7');
+  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeRole, setActiveRole] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -86,7 +86,7 @@ export default function LoginPage() {
     setActiveRole(role.id);
     setEmail(role.email);
     setPassword('password123');
-    setCaptchaAnswer('11');
+    setIsCaptchaVerified(true);
     setLoading(true);
 
     try {
@@ -116,8 +116,8 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
 
-    if (captchaAnswer.trim() !== '11') {
-      setError('Incorrect security math answer.');
+    if (!isCaptchaVerified) {
+      setError('Please enter the 6-character security code shown in the image.');
       return;
     }
 
@@ -275,19 +275,8 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs">
-              Security Verification: <span className="text-[#9C2007] dark:text-rose-400 font-black">{captchaQuestion}</span> = ?
-            </label>
-            <input
-              type="text"
-              required
-              value={captchaAnswer}
-              onChange={(e) => setCaptchaAnswer(e.target.value)}
-              placeholder="Enter answer (11)"
-              className="w-full px-4 py-3.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-2xl focus:ring-2 focus:ring-[#9C2007]/50 text-sm font-black text-center outline-none transition"
-            />
-          </div>
+          {/* Real System Visual Distorted Alphanumeric Security CAPTCHA */}
+          <RealCaptcha onVerify={setIsCaptchaVerified} />
 
           <button
             type="submit"

@@ -10,7 +10,9 @@ import {
   User, 
   FileText,
   Filter,
-  X
+  X,
+  RotateCcw,
+  Loader2
 } from 'lucide-react';
 import TablePagination from '@/components/ui/TablePagination';
 import TableSortHeader from '@/components/ui/TableSortHeader';
@@ -60,17 +62,78 @@ export default function AdminAuditLogsPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // default new to old
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetch('/api/admin/audit-logs')
-      .then((res) => res.json())
-      .then((data) => {
+  const fetchLogs = async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch('/api/admin/audit-logs');
+      if (res.ok) {
+        const data = await res.json();
         if (data.success && Array.isArray(data.logs) && data.logs.length > 0) {
           setLogs(data.logs);
         }
-      })
-      .catch(() => {});
+      }
+    } catch (err) {
+      console.error('Failed to refresh audit logs:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
   }, []);
+
+  const handleExportCsv = () => {
+    if (!logs || logs.length === 0) {
+      alert('No audit logs available to export.');
+      return;
+    }
+    const headers = ['Event ID', 'Action', 'Details', 'Actor', 'IP Address', 'Timestamp'];
+    const rows = logs.map((l) => [
+      `"${l.id}"`,
+      `"${l.action}"`,
+      `"${(l.details || '').replace(/"/g, '""')}"`,
+      `"${(l.actor || '').replace(/"/g, '""')}"`,
+      `"${l.ip}"`,
+      `"${l.timestamp}"`,
+    ]);
+    const csvContent =
+      'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `smartonse-audit-trail-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const availableActions = useMemo(() => {
+    const set = new Set<string>();
+    logs.forEach((l) => {
+      if (l.action) set.add(l.action);
+    });
+    return Array.from(set).sort();
+  }, [logs]);
+
+  const getActionBadgeClass = (action: string) => {
+    const act = action.toUpperCase();
+    if (act.includes('APPROVED') || act.includes('VERIFIED') || act.includes('LOGIN') && !act.includes('FAILED')) {
+      return 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800/60';
+    }
+    if (act.includes('REJECTED') || act.includes('FAILED') || act.includes('DELETE') || act.includes('VOID')) {
+      return 'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800/60';
+    }
+    if (act.includes('UPDATE') || act.includes('PASSWORD') || act.includes('DISBURSEMENT')) {
+      return 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800/60';
+    }
+    if (act.includes('RBAC') || act.includes('SECURITY') || act.includes('SYSTEM')) {
+      return 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-800/60';
+    }
+    return 'text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700';
+  };
 
   const handleSort = (field: string) => {
     if (sortField === field) {
@@ -134,11 +197,20 @@ export default function AdminAuditLogsPage() {
 
         <div className="flex items-center gap-2.5">
           <button
-            onClick={() => alert('Exporting signed audit logs...')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-[#0E1B33] hover:bg-slate-200 dark:hover:bg-[#152747] text-slate-700 dark:text-slate-200 rounded-2xl font-bold text-xs uppercase tracking-wider transition cursor-pointer border border-transparent dark:border-blue-900/40"
+            onClick={fetchLogs}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-3.5 py-2.5 bg-slate-100 dark:bg-[#0E1B33] hover:bg-slate-200 dark:hover:bg-[#152747] text-slate-700 dark:text-slate-200 rounded-2xl font-bold text-xs uppercase tracking-wider transition cursor-pointer border border-transparent dark:border-blue-900/40 disabled:opacity-50"
+            title="Refresh Live Audit Logs"
+          >
+            <RotateCcw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-[#9C2007]' : ''}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+          <button
+            onClick={handleExportCsv}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#9C2007] hover:bg-[#b02508] text-white rounded-2xl font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-sm hover:shadow"
           >
             <Download className="w-4 h-4" />
-            <span>Export Audit Trail</span>
+            <span>Export CSV</span>
           </button>
         </div>
       </div>
@@ -185,15 +257,12 @@ export default function AdminAuditLogsPage() {
                 }}
                 className="px-3 py-2 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-xs font-bold text-slate-900 dark:text-white cursor-pointer outline-none focus:ring-1 focus:ring-[#9C2007]"
               >
-                <option value="ALL">All Actions</option>
-                <option value="CLEARANCE_APPROVED">Clearance Approved</option>
-                <option value="CLEARANCE_STATUS_UPDATE">Clearance Status Update</option>
-                <option value="CLEARANCE_REJECTED">Clearance Rejected</option>
-                <option value="RESIDENT_VERIFIED">Resident Verified</option>
-                <option value="CITIZEN_REGISTERED">Citizen Registered</option>
-                <option value="LEDGER_DISBURSEMENT">Ledger Disbursement</option>
-                <option value="DISCLOSURE_UPLOADED">Disclosure Uploaded</option>
-                <option value="RBAC_ROLE_SWITCH">RBAC Role Switch</option>
+                <option value="ALL">All Actions ({logs.length})</option>
+                {availableActions.map((act) => (
+                  <option key={act} value={act}>
+                    {act.replace(/_/g, ' ')}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -260,7 +329,7 @@ export default function AdminAuditLogsPage() {
                   <tr key={l.id} className="hover:bg-slate-50/80 dark:hover:bg-[#0E1B33]/60 transition">
                     <td className="py-3.5 px-4 font-mono font-bold text-slate-500 dark:text-slate-400">{l.id}</td>
                     <td className="py-3.5 px-4">
-                      <span className="font-mono text-[10px] font-bold text-[#9C2007] dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded-lg border border-rose-200 dark:border-rose-900/50">
+                      <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded-lg border ${getActionBadgeClass(l.action)}`}>
                         {l.action}
                       </span>
                     </td>

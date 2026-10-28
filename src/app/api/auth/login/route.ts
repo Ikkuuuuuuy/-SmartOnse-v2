@@ -54,6 +54,16 @@ export async function POST(req: Request) {
 
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+      await prisma.auditLog.create({
+        data: {
+          action: 'LOGIN_FAILED',
+          actor: cleanEmail,
+          details: 'Failed login attempt: incorrect password.',
+          ip,
+        },
+      });
+
       return NextResponse.json(
         { error: 'Invalid email or password.' },
         { status: 401 }
@@ -112,6 +122,17 @@ export async function POST(req: Request) {
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    // Write real Audit Log for successful authentication
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+    await prisma.auditLog.create({
+      data: {
+        action: 'USER_LOGIN',
+        actor: `${user.name} (${user.email})`,
+        details: `Citizen signed in successfully with role "${roleTitle}".`,
+        ip,
+      },
     });
 
     return response;

@@ -113,6 +113,17 @@ export async function PATCH(req: Request) {
       });
     }
 
+    // Write real Audit Log entry for the action
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+    await prisma.auditLog.create({
+      data: {
+        action: `REQUEST_STATUS_${updated.status}`,
+        actor: `${sessionUser.name} (${sessionUser.role})`,
+        details: `Updated request ${updated.trackingNumber} (${updated.documentType.name}) for ${updated.fullName} to status "${updated.status}". Remarks: ${updated.remarks || 'None'}`,
+        ip,
+      },
+    });
+
     return NextResponse.json({
       success: true,
       request: {
@@ -150,7 +161,18 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Request id is required.' }, { status: 400 });
     }
 
-    await prisma.documentRequest.delete({ where: { id } });
+    const deleted = await prisma.documentRequest.delete({ where: { id } });
+
+    // Write real Audit Log entry for the deletion
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+    await prisma.auditLog.create({
+      data: {
+        action: 'REQUEST_DELETED',
+        actor: `${sessionUser.name} (${sessionUser.role})`,
+        details: `Deleted clearance request ${deleted.trackingNumber} (${deleted.fullName})`,
+        ip,
+      },
+    });
 
     return NextResponse.json({ success: true, message: 'Clearance request removed successfully!' });
   } catch (err: unknown) {

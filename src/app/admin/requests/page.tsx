@@ -874,7 +874,7 @@ export default function AdminRequestsPage() {
                 </div>
 
                 <div className="order-3">
-                  <p className="font-black text-sm uppercase text-[#9C2007]">HON. ALEJANDRO SANTOS</p>
+                  <p className="font-black text-sm uppercase text-[#9C2007]">HON. ROBERTO B. ALBA</p>
                   <p className="text-[11px] font-bold text-slate-600 uppercase">Punong Barangay</p>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ShieldCheck, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, CheckCircle2, Clock } from 'lucide-react';
 import prisma from '@/lib/prisma';
 
 export default async function VerifyCertificatePage({
@@ -45,13 +45,31 @@ export default async function VerifyCertificatePage({
         <div className="p-6 space-y-6 text-xs">
           {isAuthentic ? (
             <>
-              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60">
-                <ShieldCheck className="w-8 h-8 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <div>
-                  <h3 className="font-bold text-emerald-900 dark:text-emerald-300">Authentic Official Record</h3>
-                  <p className="text-emerald-700 dark:text-emerald-400">Cryptographically registered with Barangay Onse</p>
+              {request.status === 'COMPLETED' || request.status === 'READY_FOR_PICKUP' ? (
+                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60">
+                  <ShieldCheck className="w-8 h-8 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <div>
+                    <h3 className="font-bold text-emerald-900 dark:text-emerald-300">Authentic Official Record</h3>
+                    <p className="text-emerald-700 dark:text-emerald-400">Cryptographically registered &amp; officially approved by Barangay Onse</p>
+                  </div>
                 </div>
-              </div>
+              ) : request.status === 'REJECTED' ? (
+                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60">
+                  <ShieldAlert className="w-8 h-8 text-rose-600 dark:text-rose-400 shrink-0" />
+                  <div>
+                    <h3 className="font-bold text-rose-900 dark:text-rose-300">Document Disapproved / Void</h3>
+                    <p className="text-rose-700 dark:text-rose-400">This request was officially rejected by barangay authorities and is not a valid certificate</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60">
+                  <Clock className="w-8 h-8 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <div>
+                    <h3 className="font-bold text-amber-900 dark:text-amber-300">Application Under Verification</h3>
+                    <p className="text-amber-700 dark:text-amber-400">This document request is in processing queue and has not yet been sealed or released</p>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-3 divide-y divide-slate-100 dark:divide-blue-900/40">
                 <div className="flex justify-between py-1.5">

@@ -96,7 +96,7 @@ export async function GET(req: Request) {
         precinct: inh.precinct || 'PRECINCT-0042A',
         address: `${inh.houseNumber ? inh.houseNumber + ' ' : ''}${inh.street}`,
         civil: (inh.civilStatus as any) || 'Single',
-        contact: '0917-888-' + String(Math.floor(1000 + Math.random() * 9000)),
+        contact: 'N/A',
         email: mockEmail,
         registered: inh.createdAt.toISOString().slice(0, 10),
         verified: true,
@@ -104,7 +104,15 @@ export async function GET(req: Request) {
       });
     }
 
-    return NextResponse.json({ success: true, residents: formattedList });
+    const totalCount = formattedList.length;
+    const verifiedCount = formattedList.filter((r) => r.verified).length;
+
+    return NextResponse.json({ 
+      success: true, 
+      totalResidents: totalCount,
+      verifiedCount,
+      residents: formattedList 
+    });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
     return NextResponse.json({ error: message }, { status: 500 });

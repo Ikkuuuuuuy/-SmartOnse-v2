@@ -27,10 +27,12 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { scanIdentityDocument, SUPPORTED_ID_TYPES, ScanResult } from '@/lib/idScanner';
+import RealCaptcha from '@/components/ui/RealCaptcha';
 
 export default function RegisterPage() {
   // Step State: 1 = Personal Info, 2 = Phone OTP, 3 = ID Upload & Live Scanner, 4 = Account & Submit
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
 
   // Form Fields
   const [name, setName] = useState('');
@@ -398,12 +400,16 @@ export default function RegisterPage() {
       setError('Passwords do not match. Please re-enter.');
       return;
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
       return;
     }
     if (!agreed) {
       setError('Please agree to the Terms and Data Privacy Act consent.');
+      return;
+    }
+    if (!isCaptchaVerified) {
+      setError('Please enter the security verification code shown in the image.');
       return;
     }
 
@@ -1323,7 +1329,7 @@ export default function RegisterPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min. 6 characters"
+                    placeholder="Min. 8 characters"
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none"
                   />
                 </div>
@@ -1345,6 +1351,9 @@ export default function RegisterPage() {
                 </div>
               </div>
             </div>
+
+            {/* Real Security Alphanumeric Image CAPTCHA */}
+            <RealCaptcha onVerify={setIsCaptchaVerified} />
 
             {/* Data Privacy & Consent */}
             <div className="p-3.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 rounded-2xl space-y-2">

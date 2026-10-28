@@ -17,6 +17,7 @@ import {
   AlertCircle,
   QrCode,
   Smartphone,
+  Download,
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -143,21 +144,42 @@ export default function ProfilePage() {
     }
   };
 
-  const handlePasswordUpdate = (e: React.FormEvent) => {
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
     if (passwords.password !== passwords.password_confirmation) {
       setErrorMsg('New password and confirmation do not match.');
       return;
     }
-    if (passwords.password.length < 6) {
-      setErrorMsg('Password must be at least 6 characters.');
+    if (passwords.password.length < 8) {
+      setErrorMsg('New password must be at least 8 characters long.');
       return;
     }
 
-    setSuccessMsg('Your account password has been updated securely.');
-    setPasswords({ current_password: '', password: '', password_confirmation: '' });
-    setErrorMsg(null);
-    setTimeout(() => setSuccessMsg(null), 4000);
+    try {
+      const res = await fetch('/api/profile/password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: passwords.current_password,
+          newPassword: passwords.password,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setErrorMsg(data.error || 'Failed to update password.');
+        return;
+      }
+
+      setSuccessMsg('Your account password has been updated securely.');
+      setPasswords({ current_password: '', password: '', password_confirmation: '' });
+      setTimeout(() => setSuccessMsg(null), 4000);
+    } catch {
+      setErrorMsg('Network error. Failed to update password.');
+    }
   };
 
   const handleToggle2FA = () => {
@@ -410,7 +432,7 @@ export default function ProfilePage() {
             <div className="rounded-3xl border border-slate-200/80 dark:border-blue-900/50 bg-white dark:bg-[#0E1B33] p-6 sm:p-10 shadow-xs space-y-6 transition-colors">
               <div>
                 <h2 className="text-xl font-black uppercase text-slate-900 dark:text-white">Change Password</h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Ensure your account uses a strong password with at least 6 characters.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Ensure your account uses a strong password with at least 8 characters.</p>
               </div>
 
               <form onSubmit={handlePasswordUpdate} className="space-y-5 text-xs">
@@ -516,6 +538,32 @@ export default function ProfilePage() {
                   </form>
                 </div>
               )}
+            </div>
+
+            {/* RA 10173 Citizen Data Portability & Rights Card */}
+            <div className="rounded-3xl border border-slate-200/80 dark:border-blue-900/50 bg-white dark:bg-[#0E1B33] p-6 sm:p-8 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-black uppercase tracking-wider border border-emerald-200 dark:border-emerald-800/40">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Republic Act No. 10173 Compliance
+                  </div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                    Citizen Data Portability &amp; Privacy Rights
+                  </h3>
+                  <p className="text-xs text-slate-500 max-w-xl leading-relaxed">
+                    Under the Philippine Data Privacy Act of 2012, you hold the legal right to access, inspect, and export a complete digital copy of your personal data held in the Barangay Onse civil registry.
+                  </p>
+                </div>
+                <a
+                  href="/api/profile/export"
+                  download
+                  className="px-5 py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition cursor-pointer shrink-0"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download My Data (JSON)</span>
+                </a>
+              </div>
             </div>
           </div>
         )}

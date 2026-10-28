@@ -185,6 +185,17 @@ export async function POST(req: Request) {
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
+    // Write audit log entry for the session
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+    await prisma.auditLog.create({
+      data: {
+        action: 'DEMO_LOGIN',
+        actor: `${user.name} (${target.roleTitle})`,
+        details: `1-Click Demo login accessed for role "${target.roleTitle}". Destination: ${target.destination}`,
+        ip,
+      },
+    });
+
     return response;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Demo login failed';

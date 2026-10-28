@@ -77,6 +77,17 @@ export async function PATCH(
         console.log(`[Admin Verification] Enrolled new resident ${user.name} into Census with RBI: ${rbiNumber}`);
       }
 
+      // Write Audit Log entry
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+      await prisma.auditLog.create({
+        data: {
+          action: 'USER_VERIFIED',
+          actor: `${sessionUser.name} (${sessionUser.role})`,
+          details: `Approved resident account for ${updatedUser.name} (${updatedUser.email}) and assigned RBI census number ${rbiNumber}.`,
+          ip,
+        },
+      });
+
       return NextResponse.json({
         success: true,
         message: `${updatedUser.name} has been approved and enrolled in the Barangay Onse Registry of Inhabitants (${rbiNumber}).`,
@@ -94,6 +105,18 @@ export async function PATCH(
       }
 
       const deleted = await prisma.user.delete({ where: { id } });
+
+      // Write Audit Log entry
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+      await prisma.auditLog.create({
+        data: {
+          action: 'USER_REJECTED',
+          actor: `${sessionUser.name} (${sessionUser.role})`,
+          details: `Rejected and removed unverified resident registration for ${deleted.name} (${deleted.email}).`,
+          ip,
+        },
+      });
+
       return NextResponse.json({
         success: true,
         message: `${deleted.name}'s registration has been rejected and removed.`,
