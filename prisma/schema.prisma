@@ -18,6 +18,10 @@ model User {
   address       String?
   isVerified    Boolean             @default(false)
   avatarUrl     String?
+  mfaEnabled    Boolean             @default(false)
+  mfaOtp        String?
+  mfaOtpExpiry  DateTime?
+  googleId      String?             @unique
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   requests      DocumentRequest[]

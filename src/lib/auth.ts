@@ -76,6 +76,37 @@ export async function verifySessionToken(token: string): Promise<SessionUser | n
 }
 
 /**
+ * Create a signed temporary MFA token valid for 10 minutes
+ */
+export async function createMfaToken(userId: string, email: string): Promise<string> {
+  return new SignJWT({
+    userId,
+    email,
+    purpose: 'mfa_verification',
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('10m')
+    .sign(SECRET_KEY);
+}
+
+/**
+ * Verify a temporary MFA token
+ */
+export async function verifyMfaToken(token: string): Promise<{ userId: string; email: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, SECRET_KEY);
+    if (payload.purpose !== 'mfa_verification') return null;
+    return {
+      userId: payload.userId as string,
+      email: payload.email as string,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Get the currently authenticated user from incoming cookies in Next.js Server Components / Route Handlers
  */
 export async function getSessionUser(): Promise<SessionUser | null> {

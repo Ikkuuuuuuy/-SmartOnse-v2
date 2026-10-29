@@ -45,6 +45,18 @@ export default function ProfilePage() {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [show2FASetup, setShow2FASetup] = useState(false);
   const [verify2FACode, setVerify2FACode] = useState('');
+  const [loading2FA, setLoading2FA] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/profile/2fa')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setTwoFactorEnabled(Boolean(data.mfaEnabled));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Password State
   const [passwords, setPasswords] = useState({
@@ -182,27 +194,86 @@ export default function ProfilePage() {
     }
   };
 
-  const handleToggle2FA = () => {
+  const handleToggle2FA = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
     if (twoFactorEnabled) {
-      setTwoFactorEnabled(false);
-      setShow2FASetup(false);
-      setSuccessMsg('2FA has been disabled on your account.');
-      setTimeout(() => setSuccessMsg(null), 3000);
+      setLoading2FA(true);
+      try {
+        const res = await fetch('/api/profile/2fa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'DISABLE' }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setTwoFactorEnabled(false);
+          setShow2FASetup(false);
+          setSuccessMsg('Two-Factor Authentication has been disabled.');
+          setTimeout(() => setSuccessMsg(null), 3000);
+        } else {
+          setErrorMsg(data.error || 'Failed to disable 2FA.');
+        }
+      } catch {
+        setErrorMsg('Network error while disabling 2FA.');
+      } finally {
+        setLoading2FA(false);
+      }
     } else {
-      setShow2FASetup(true);
+      setLoading2FA(true);
+      try {
+        const res = await fetch('/api/profile/2fa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'REQUEST_ENABLE' }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setShow2FASetup(true);
+          setSuccessMsg('A 6-digit verification code has been dispatched to your email.');
+          setTimeout(() => setSuccessMsg(null), 4000);
+        } else {
+          setErrorMsg(data.error || 'Failed to initialize 2FA activation.');
+        }
+      } catch {
+        setErrorMsg('Network error while requesting 2FA code.');
+      } finally {
+        setLoading2FA(false);
+      }
     }
   };
 
-  const handleConfirm2FA = (e: React.FormEvent) => {
+  const handleConfirm2FA = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (verify2FACode.length >= 6) {
-      setTwoFactorEnabled(true);
-      setShow2FASetup(false);
-      setVerify2FACode('');
-      setSuccessMsg('Two-Factor Authentication (TOTP) is now active on your account!');
-      setTimeout(() => setSuccessMsg(null), 4000);
-    } else {
-      setErrorMsg('Please enter a valid 6-digit authentication code.');
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    if (verify2FACode.trim().length !== 6) {
+      setErrorMsg('Please enter the full 6-digit verification code.');
+      return;
+    }
+
+    setLoading2FA(true);
+    try {
+      const res = await fetch('/api/profile/2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'CONFIRM_ENABLE', otp: verify2FACode.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setTwoFactorEnabled(true);
+        setShow2FASetup(false);
+        setVerify2FACode('');
+        setSuccessMsg('Two-Factor Authentication (Email OTP) is now successfully activated on your account!');
+        setTimeout(() => setSuccessMsg(null), 4000);
+      } else {
+        setErrorMsg(data.error || 'Invalid verification code.');
+      }
+    } catch {
+      setErrorMsg('Network error while confirming 2FA.');
+    } finally {
+      setLoading2FA(false);
     }
   };
 
@@ -496,44 +567,57 @@ export default function ProfilePage() {
 
             {/* 2FA Toggle Card */}
             <div className="rounded-3xl border border-slate-200/80 dark:border-blue-900/50 bg-white dark:bg-[#0E1B33] p-6 sm:p-10 shadow-xs space-y-6 transition-colors">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-black uppercase text-slate-900 dark:text-white">Two-Factor Authentication (2FA)</h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Require an authenticator code (Google / Microsoft Authenticator) when logging in.</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-xl font-black uppercase text-slate-900 dark:text-white">Two-Factor Authentication (2FA)</h2>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                      twoFactorEnabled 
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' 
+                        : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                    }`}>
+                      {twoFactorEnabled ? 'Active' : 'Disabled'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Require a 6-digit verification code sent to your registered email address every time you sign in.
+                  </p>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleToggle2FA}
-                  className={`px-5 py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider transition cursor-pointer ${
+                  disabled={loading2FA}
+                  className={`px-5 py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider transition cursor-pointer disabled:opacity-50 ${
                     twoFactorEnabled
                       ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 hover:bg-rose-200'
-                      : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-md'
+                      : 'bg-[#9C2007] text-white hover:bg-[#8B1A05] shadow-md'
                   }`}
                 >
-                  {twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+                  {loading2FA ? 'Processing...' : twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
                 </button>
               </div>
 
               {show2FASetup && (
                 <div className="p-6 bg-slate-50 dark:bg-[#152747] rounded-2xl border border-slate-200 dark:border-blue-900/40 space-y-4 text-xs animate-in zoom-in-95">
                   <p className="font-bold text-slate-800 dark:text-slate-200">
-                    Scan the QR code in your Authenticator app and enter the 6-digit code:
+                    Enter the 6-digit confirmation code dispatched to your registered email to activate 2FA:
                   </p>
-                  <form onSubmit={handleConfirm2FA} className="flex gap-2 max-w-sm">
+                  <form onSubmit={handleConfirm2FA} className="flex flex-col sm:flex-row gap-2 max-w-sm">
                     <input
                       type="text"
                       maxLength={6}
                       value={verify2FACode}
-                      onChange={(e) => setVerify2FACode(e.target.value)}
+                      onChange={(e) => setVerify2FACode(e.target.value.replace(/\D/g, ''))}
                       placeholder="123456"
-                      className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-blue-900/60 bg-white dark:bg-[#0E1B33] text-slate-900 dark:text-white font-mono text-center text-sm font-bold"
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-blue-900/60 bg-white dark:bg-[#0E1B33] text-slate-900 dark:text-white font-mono text-center text-sm font-bold tracking-widest outline-none focus:ring-1 focus:ring-[#9C2007]"
                     />
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-xl bg-[#9C2007] text-white font-black uppercase cursor-pointer"
+                      disabled={loading2FA || verify2FACode.length !== 6}
+                      className="px-5 py-2.5 rounded-xl bg-[#9C2007] text-white font-black uppercase cursor-pointer disabled:opacity-50"
                     >
-                      Verify
+                      {loading2FA ? 'Verifying...' : 'Verify & Enable'}
                     </button>
                   </form>
                 </div>

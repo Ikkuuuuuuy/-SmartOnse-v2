@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import prisma from '@/lib/prisma';
 import { normalizeRole } from '@/lib/rbac';
-import { comparePassword, createSessionToken, hashPassword, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { comparePassword, createSessionToken, createMfaToken, hashPassword, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { sendOtpEmail } from '@/lib/email';
 
 const ROLE_DESTINATIONS: Record<string, string> = {
   super_admin: '/admin',
@@ -88,6 +90,44 @@ export async function POST(req: Request) {
         },
         { status: 403 }
       );
+    }
+
+    // Handle Two-Factor Authentication (MFA / 2FA via Email OTP)
+    if (user.mfaEnabled) {
+      const otp = crypto.randomInt(100000, 999999).toString();
+      const mfaOtpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { mfaOtp: otp, mfaOtpExpiry },
+      });
+
+      await sendOtpEmail({
+        to: user.email,
+        name: user.name,
+        otp,
+        purpose: 'Two-Factor Authentication Login',
+      });
+
+      const mfaToken = await createMfaToken(user.id, user.email);
+
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+      await prisma.auditLog.create({
+        data: {
+          action: 'MFA_CHALLENGE_ISSUED',
+          actor: `${user.name} (${user.email})`,
+          details: `2FA verification code dispatched to email address.`,
+          ip,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        mfaRequired: true,
+        mfaToken,
+        email: user.email,
+        message: 'A 6-digit verification code has been sent to your registered email address.',
+      });
     }
 
     const role = normalizeRole(user.role);
