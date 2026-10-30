@@ -119,8 +119,13 @@ export async function GET(req: Request) {
 // POST /api/documents - Submit a new document request
 export async function POST(req: Request) {
   try {
+    const sessionUser = await getSessionUser();
     const data = await req.json();
     const trackingNumber = generateTrackingNumber();
+
+    // Security Hardening (IDOR Prevention):
+    // Users cannot spoof another citizen's userId. If authenticated, force their actual session ID.
+    const resolvedUserId = sessionUser ? sessionUser.id : (isAdminUser(sessionUser?.role) ? data.userId : null);
 
     // Match document type by code or name
     const requestedCode = (data.documentTypeCode || '').trim();
@@ -155,7 +160,7 @@ export async function POST(req: Request) {
         purpose: data.purpose || 'Official Document Request',
         civilStatus: data.civilStatus || 'Single',
         yearsOfResidency: Number(data.yearsOfResidency) || 1,
-        userId: data.userId || null,
+        userId: resolvedUserId,
         status: 'PENDING',
       },
       include: {

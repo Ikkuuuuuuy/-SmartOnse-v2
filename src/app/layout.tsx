@@ -8,7 +8,9 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
+import { AccessibilityProvider } from '@/contexts/AccessibilityContext';
 import PrivacyConsentModal from '@/components/modals/PrivacyConsentModal';
+import AccessibilityWidget from '@/components/ui/AccessibilityWidget';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -60,19 +62,22 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col bg-slate-50 dark:bg-[#070D18] text-slate-900 dark:text-slate-100 transition-colors duration-200`}>
         <ThemeProvider>
-          <AuthProvider>
-            <LanguageProvider>
-              <NotificationProvider>
-                <Navbar />
-                <main className="flex-1">
-                  {children}
-                </main>
-                <Footer />
-                <BarangayAiAssistant />
-                <PrivacyConsentModal />
-              </NotificationProvider>
-            </LanguageProvider>
-          </AuthProvider>
+          <AccessibilityProvider>
+            <AuthProvider>
+              <LanguageProvider>
+                <NotificationProvider>
+                  <Navbar />
+                  <main className="flex-1">
+                    {children}
+                  </main>
+                  <Footer />
+                  <BarangayAiAssistant />
+                  <AccessibilityWidget />
+                  <PrivacyConsentModal />
+                </NotificationProvider>
+              </LanguageProvider>
+            </AuthProvider>
+          </AccessibilityProvider>
         </ThemeProvider>
       </body>
     </html>
