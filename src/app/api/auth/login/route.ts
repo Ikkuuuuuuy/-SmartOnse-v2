@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 import { normalizeRole } from '@/lib/rbac';
 import { comparePassword, createSessionToken, createMfaToken, hashPassword, SESSION_COOKIE_NAME } from '@/lib/auth';
 import { sendOtpEmail } from '@/lib/email';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 const ROLE_DESTINATIONS: Record<string, string> = {
   super_admin: '/admin',
@@ -27,6 +28,33 @@ const ROLE_TITLES: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+
+    // Apply Rate Limiting: Max 5 attempts per 60 seconds per IP
+    const rateLimit = checkRateLimit(`login:${ip}`, { limit: 5, windowMs: 60 * 1000 });
+    if (!rateLimit.success) {
+      await prisma.auditLog.create({
+        data: {
+          action: 'LOGIN_RATE_LIMITED',
+          actor: 'Unknown / Suspicious IP',
+          details: `Excessive login attempts blocked by rate limiter.`,
+          ip,
+        },
+      });
+
+      return NextResponse.json(
+        { error: 'Too many login attempts. Please wait 1 minute before trying again.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': '60',
+            'X-RateLimit-Limit': '5',
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const { email, password } = body;
 
@@ -165,7 +193,6 @@ export async function POST(req: Request) {
     });
 
     // Write real Audit Log for successful authentication
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
     await prisma.auditLog.create({
       data: {
         action: 'USER_LOGIN',

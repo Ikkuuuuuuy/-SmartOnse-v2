@@ -47,6 +47,10 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(self), microphone=(), geolocation=()",
           },
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://images.unsplash.com https://lh3.googleusercontent.com https://ui-avatars.com; connect-src 'self' https://*.supabase.co https://*.supabase.com https://accounts.google.com https://oauth2.googleapis.com; frame-ancestors 'self';",
+          },
         ],
       },
     ];

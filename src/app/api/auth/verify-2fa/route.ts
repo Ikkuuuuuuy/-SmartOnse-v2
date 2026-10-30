@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { normalizeRole } from '@/lib/rbac';
 import { createSessionToken, verifyMfaToken, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 const ROLE_DESTINATIONS: Record<string, string> = {
   super_admin: '/admin',
@@ -25,6 +26,17 @@ const ROLE_TITLES: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+
+    // Limit 2FA verification attempts: Max 5 per minute per IP to prevent OTP brute forcing
+    const rateLimit = checkRateLimit(`verify-2fa:${ip}`, { limit: 5, windowMs: 60 * 1000 });
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: 'Too many verification attempts. Please wait 1 minute before trying again.' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const { mfaToken, otp } = body;
 
@@ -119,7 +131,6 @@ export async function POST(req: Request) {
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
     await prisma.auditLog.create({
       data: {
         action: 'USER_LOGIN_MFA_SUCCESS',
