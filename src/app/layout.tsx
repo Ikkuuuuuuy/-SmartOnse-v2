@@ -10,7 +10,6 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { AccessibilityProvider } from '@/contexts/AccessibilityContext';
 import PrivacyConsentModal from '@/components/modals/PrivacyConsentModal';
-import AccessibilityWidget from '@/components/ui/AccessibilityWidget';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -72,7 +71,6 @@ export default function RootLayout({
                   </main>
                   <Footer />
                   <BarangayAiAssistant />
-                  <AccessibilityWidget />
                   <PrivacyConsentModal />
                 </NotificationProvider>
               </LanguageProvider>
