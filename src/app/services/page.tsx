@@ -2,120 +2,121 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ServicesPage() {
+  const { language, t } = useLanguage();
+  const isFil = language === 'fil';
   const [selectedService, setSelectedService] = useState<any | null>(null);
 
   const INITIAL_SERVICES = [
     {
       id: 1,
       code: 'BRGY_CLEARANCE',
-      title: 'Barangay Clearance',
-      description: 'Official clearance certifying residency and good moral standing for employment, legal needs, or business requirements.',
+      title: isFil ? 'Barangay Clearance' : 'Barangay Clearance',
+      description: isFil
+        ? 'Opisyal na sertipiko na nagpapatunay ng paninirahan at mabuting asal para sa trabaho, legal na layunin, o negosyo.'
+        : 'Official clearance certifying residency and good moral standing for employment, legal needs, or business requirements.',
       icon_svg: '📄',
       fee: '₱50.00',
-      turnaround: '1 Business Day',
-      requirements: [
-        'Valid Government ID or Student ID with photo',
-        'Proof of residency (Utility bill / Barangay certificate)',
-        'Community Tax Certificate (Cedula)',
-      ],
+      turnaround: isFil ? '1 Araw ng Trabaho' : '1 Business Day',
+      requirements: isFil
+        ? [
+            'Balidong Government ID o Student ID na may litrato',
+            'Katunayan ng paninirahan (Billing statement / Sertipiko ng Upa)',
+            'Sedula (Community Tax Certificate)',
+          ]
+        : [
+            'Valid Government ID or Student ID with photo',
+            'Proof of residency (Utility bill / Barangay certificate)',
+            'Community Tax Certificate (Cedula)',
+          ],
     },
     {
       id: 2,
       code: 'CERT_RESIDENCY',
-      title: 'Certificate of Residency',
-      description: 'Official certificate verifying that the applicant is a bonafide resident of Barangay Onse.',
+      title: isFil ? 'Sertipiko ng Paninirahan' : 'Certificate of Residency',
+      description: isFil
+        ? 'Opisyal na katunayan na ang aplikante ay lehitimong residente ng Barangay Onse para sa mga transaksyong pampubliko at pribado.'
+        : 'Official certificate verifying that the applicant is a bonafide resident of Barangay Onse.',
       icon_svg: '🏠',
       fee: '₱30.00',
-      turnaround: '1 Business Day',
-      requirements: [
-        'Valid ID with Barangay Onse residential address',
-        'Minimum 6 months continuous residency verification',
-      ],
+      turnaround: isFil ? '1 Araw ng Trabaho' : '1 Business Day',
+      requirements: isFil
+        ? [
+            'Balidong ID na may tirahan sa Barangay Onse',
+            'Katunayan ng hindi bababa sa 6 na buwang paninirahan',
+          ]
+        : [
+            'Valid ID with Barangay Onse residential address',
+            'Minimum 6 months continuous residency verification',
+          ],
     },
     {
       id: 3,
       code: 'CERT_INDIGENCY',
-      title: 'Certificate of Indigency',
-      description: 'Official certificate issued to low-income residents for medical, educational, legal, or financial assistance.',
+      title: isFil ? 'Sertipiko ng Indigency' : 'Certificate of Indigency',
+      description: isFil
+        ? 'Libreng opisyal na sertipikong ibinibigay sa mga residenteng may mababang kita para sa tulong-medikal, edukasyon, o tulong-pinansyal.'
+        : 'Official certificate issued to low-income residents for medical, educational, legal, or financial assistance.',
       icon_svg: '📝',
-      fee: 'FREE',
-      turnaround: 'Same Day / 24 Hours',
-      requirements: [
-        'Barangay ID or Voter Certificate',
-        'Hospital, School, or DSWD Referral Assessment slip',
-      ],
+      fee: isFil ? 'LIBRE' : 'FREE',
+      turnaround: isFil ? 'Sa Araw Din Nito / 24 Oras' : 'Same Day / 24 Hours',
+      requirements: isFil
+        ? [
+            'Barangay ID o Sertipiko ng Botante',
+            'Referral slip o reseta mula sa Ospital, Paaralan, o DSWD/CSWD',
+          ]
+        : [
+            'Barangay ID or Voter Certificate',
+            'Hospital, School, or DSWD Referral Assessment slip',
+          ],
     },
     {
       id: 4,
       code: 'FIRST_TIME_JOBSEEKER',
-      title: 'First-Time Jobseeker Certificate',
-      description: 'Waives government pre-employment document fees under Republic Act No. 11261 for entry-level applicants.',
+      title: isFil ? 'Sertipiko ng First-Time Jobseeker' : 'First-Time Jobseeker Certificate',
+      description: isFil
+        ? 'Libreng mga dokumentong pampamahalaan para sa mga bagong naghahanap ng trabaho sa ilalim ng Republic Act No. 11261.'
+        : 'Waives government pre-employment document fees under Republic Act No. 11261 for entry-level applicants.',
       icon_svg: '🎓',
-      fee: 'FREE (R.A. 11261)',
-      turnaround: 'Same Day',
-      requirements: [
-        'Barangay Oath of Undertaking (signed on-site)',
-        'Valid School ID or PSA Birth Certificate',
-        'Proof of Barangay Onse residency',
-      ],
+      fee: isFil ? 'LIBRE (R.A. 11261)' : 'FREE (R.A. 11261)',
+      turnaround: isFil ? 'Sa Araw Din Nito' : 'Same Day',
+      requirements: isFil
+        ? [
+            'Nilagdaang Barangay Oath of Undertaking',
+            'Balidong School ID o PSA Birth Certificate',
+            'Katunayan ng paninirahan sa Barangay Onse',
+          ]
+        : [
+            'Barangay Oath of Undertaking (signed on-site)',
+            'Valid School ID or PSA Birth Certificate',
+            'Proof of Barangay Onse residency',
+          ],
     },
     {
       id: 5,
       code: 'BUSINESS_CLEARANCE',
-      title: 'Barangay Business Clearance',
-      description: 'Required commercial clearance for business establishments and micro-enterprises operating within Barangay Onse.',
+      title: isFil ? 'Barangay Business Clearance' : 'Barangay Business Clearance',
+      description: isFil
+        ? 'Kailangang permit para sa pagpapatakbo ng mga tindahan, negosyo, at establisimyento sa loob ng Barangay Onse.'
+        : 'Required commercial clearance for business establishments and micro-enterprises operating within Barangay Onse.',
       icon_svg: '💼',
       fee: '₱250.00',
-      turnaround: '2 Business Days',
-      requirements: [
-        'DTI or SEC Certificate of Registration',
-        'Contract of Lease or Proof of Property Ownership',
-        'Sanitary and Fire Safety Inspection clearance',
-      ],
+      turnaround: isFil ? '2 Araw ng Trabaho' : '2 Business Days',
+      requirements: isFil
+        ? [
+            'DTI o SEC Certificate of Registration',
+            'Kontrata ng Upa o Katunayan ng Pagmamay-ari ng Ari-arian',
+            'Sanitary at Fire Safety Inspection clearance',
+          ]
+        : [
+            'DTI or SEC Certificate of Registration',
+            'Contract of Lease or Proof of Property Ownership',
+            'Sanitary and Fire Safety Inspection clearance',
+          ],
     },
   ];
-
-  const [servicesList, setServicesList] = useState(INITIAL_SERVICES);
-
-  React.useEffect(() => {
-    async function loadServices() {
-      try {
-        const res = await fetch('/api/services');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.services && data.services.length > 0) {
-            setServicesList(
-              data.services.map((s: { id: string; title: string; description: string; fee: string; turnaround: string; requirements: string }, idx: number) => ({
-                id: s.id || idx + 1,
-                code: s.title.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
-                title: s.title,
-                description: s.description,
-                icon_svg: s.title.includes('Clearance')
-                  ? '📄'
-                  : s.title.includes('Residency')
-                  ? '🏠'
-                  : s.title.includes('Indigency')
-                  ? '📝'
-                  : s.title.includes('Jobseeker')
-                  ? '🎓'
-                  : s.title.includes('Business')
-                  ? '💼'
-                  : '📋',
-                fee: s.fee,
-                turnaround: s.turnaround,
-                requirements: s.requirements ? s.requirements.split(',').map((r: string) => r.trim()).filter(Boolean) : [],
-              }))
-            );
-          }
-        }
-      } catch {
-        // Fallback initialized
-      }
-    }
-    loadServices();
-  }, []);
 
   return (
     <div className="min-h-screen bg-[#FDF8F6] dark:bg-[#070D18] text-slate-900 dark:text-slate-100 pt-32 md:pt-40 pb-20 px-6 lg:px-10 font-sans transition-colors duration-200">
@@ -125,10 +126,13 @@ export default function ServicesPage() {
         <header className="mb-16 text-center">
           <div>
             <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter uppercase mb-4">
-              Barangay <span className="text-[#9C2007] dark:text-rose-500">E-Services</span>
+              {isFil ? 'Mga E-Serbisyo ng ' : 'Barangay '}
+              <span className="text-[#9C2007] dark:text-rose-500">
+                {isFil ? 'Barangay' : 'E-Services'}
+              </span>
             </h1>
             <p className="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-[0.4em] mb-2">
-              Digitized &amp; Streamlined Resident Certificate Requests
+              {t('services.subtitle')}
             </p>
             <div className="h-1 w-20 bg-[#9C2007] mx-auto rounded-full"></div>
           </div>
@@ -136,7 +140,7 @@ export default function ServicesPage() {
 
         {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {servicesList.map((service) => (
+          {INITIAL_SERVICES.map((service) => (
             <div
               key={service.id}
               className="bg-white dark:bg-[#0E1B33] p-8 rounded-[3.5rem] shadow-xl border border-slate-100 dark:border-blue-900/50 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group"
@@ -155,11 +159,11 @@ export default function ServicesPage() {
 
               <div className="pt-6 border-t border-slate-100 dark:border-blue-900/40">
                 <div className="flex justify-between items-center text-xs mb-4">
-                  <span className="text-slate-400 dark:text-slate-500 font-bold">Fee:</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-bold">{t('services.fee_label')}</span>
                   <span className="font-black text-[#9C2007] dark:text-rose-400">{service.fee}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs mb-6">
-                  <span className="text-slate-400 dark:text-slate-500 font-bold">Processing:</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-bold">{t('services.turnaround_label')}</span>
                   <span className="font-bold text-slate-700 dark:text-slate-300">{service.turnaround}</span>
                 </div>
 
@@ -168,13 +172,13 @@ export default function ServicesPage() {
                     href={`/portal/request?type=${service.code}`}
                     className="w-full text-center bg-[#9C2007] text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider hover:brightness-110 transition shadow-lg shadow-[#9C2007]/20"
                   >
-                    Request Online &rarr;
+                    {t('services.btn_request')}
                   </Link>
                   <button
                     onClick={() => setSelectedService(service)}
                     className="w-full bg-slate-100 dark:bg-[#152747] hover:bg-slate-200 dark:hover:bg-[#1C335C] text-slate-700 dark:text-slate-200 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider transition cursor-pointer"
                   >
-                    View Requirements
+                    {t('services.btn_requirements')}
                   </button>
                 </div>
               </div>
@@ -197,7 +201,9 @@ export default function ServicesPage() {
               <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">{selectedService.title}</h2>
               <p className="text-slate-500 dark:text-slate-300 text-xs mb-6 font-medium">{selectedService.description}</p>
 
-              <h3 className="text-xs font-black uppercase tracking-wider text-[#9C2007] dark:text-rose-400 mb-3">Required Documents:</h3>
+              <h3 className="text-xs font-black uppercase tracking-wider text-[#9C2007] dark:text-rose-400 mb-3">
+                {t('services.modal_req_title')}
+              </h3>
               <ul className="space-y-2 mb-8">
                 {selectedService.requirements.map((req: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 font-medium">
@@ -212,13 +218,13 @@ export default function ServicesPage() {
                   href={`/portal/request?type=${selectedService.code}`}
                   className="flex-1 text-center bg-[#9C2007] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-wider hover:brightness-110 transition shadow-lg shadow-[#9C2007]/20"
                 >
-                  Proceed to Request
+                  {t('services.modal_proceed')}
                 </Link>
                 <button
                   onClick={() => setSelectedService(null)}
                   className="bg-slate-100 dark:bg-[#152747] hover:bg-slate-200 dark:hover:bg-[#1C335C] text-slate-700 dark:text-slate-200 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer"
                 >
-                  Close
+                  {t('services.modal_close')}
                 </button>
               </div>
             </div>

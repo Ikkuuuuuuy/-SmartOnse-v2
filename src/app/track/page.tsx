@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import TablePagination from '@/components/ui/TablePagination';
 import { 
   Search, 
@@ -44,6 +45,8 @@ interface TrackedDocument {
 function TrackContent() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
+  const { language, t } = useLanguage();
+  const isFil = language === 'fil';
   const [trackingNumber, setTrackingNumber] = useState(searchParams.get('trackingNumber') || '');
   const [docData, setDocData] = useState<TrackedDocument | null>(null);
   const [userRequests, setUserRequests] = useState<TrackedDocument[]>([]);
@@ -171,11 +174,13 @@ function TrackContent() {
 
         <div className="text-center space-y-2">
           <span className="text-xs font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 bg-[#9C2007]/10 dark:bg-rose-950/60 px-3 py-1 rounded-full">
-            Real-Time Tracking &bull; Central Registry
+            {isFil ? 'Real-Time na Pagsubaybay • Sentral na Rehistro' : 'Real-Time Tracking • Central Registry'}
           </span>
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase">Track Certificate Request</h1>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase">
+            {t('track.title')}
+          </h1>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-            Enter your ONSE tracking number to view real-time verification and release status.
+            {t('track.subtitle')}
           </p>
         </div>
 

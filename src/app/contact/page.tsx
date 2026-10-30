@@ -1,7 +1,13 @@
+'use client';
+
 import React from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { barangayMap, nearbyServiceCategories } from '@/data/nearbyServices';
 
 export default function ContactPage() {
+  const { language, t } = useLanguage();
+  const isFil = language === 'fil';
+
   return (
     <div className="min-h-screen bg-[#FDF8F6] dark:bg-[#070D18] text-slate-900 dark:text-slate-100 pt-32 md:pt-40 pb-20 px-6 lg:px-10 font-sans transition-colors duration-200">
       <div className="max-w-7xl mx-auto">
@@ -10,10 +16,13 @@ export default function ContactPage() {
         <header className="mb-16 text-center">
           <div>
             <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter uppercase mb-4">
-              Emergency <span className="text-[#9C2007] dark:text-rose-500">&amp; Contact</span>
+              {isFil ? 'Emergency at ' : 'Emergency '}
+              <span className="text-[#9C2007] dark:text-rose-500">
+                {isFil ? 'Ugnayan' : '& Contact'}
+              </span>
             </h1>
             <p className="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-[0.4em] mb-2">
-              24/7 Hotlines, Office Information &amp; Location Map
+              {t('contact.subtitle')}
             </p>
             <div className="h-1 w-20 bg-[#9C2007] mx-auto rounded-full"></div>
           </div>
@@ -27,8 +36,12 @@ export default function ContactPage() {
                 <span className="text-3xl">🚨</span>
               </div>
               <div>
-                <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Emergency Hotlines</h2>
-                <p className="text-slate-600 dark:text-slate-300 font-bold">Available 24/7 for urgent matters</p>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">
+                  {t('contact.emergency_heading')}
+                </h2>
+                <p className="text-slate-600 dark:text-slate-300 font-bold">
+                  {t('contact.emergency_sub')}
+                </p>
               </div>
             </div>
 
@@ -36,26 +49,38 @@ export default function ContactPage() {
               <div className="bg-red-50 dark:bg-rose-950/40 border-2 border-red-200 dark:border-rose-900/50 rounded-xl p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-2xl">🚑</span>
-                  <h3 className="text-lg font-black text-slate-900 dark:text-white">Medical Emergency</h3>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                    {t('contact.med_emergency')}
+                  </h3>
                 </div>
                 <p className="text-2xl font-bold text-red-600 dark:text-rose-400 mb-1">911</p>
-                <p className="text-sm text-slate-600 dark:text-slate-300">National Emergency</p>
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  {t('contact.med_sub')}
+                </p>
               </div>
               <div className="bg-blue-50 dark:bg-blue-950/40 border-2 border-blue-200 dark:border-blue-900/50 rounded-xl p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-2xl">👮</span>
-                  <h3 className="text-lg font-black text-slate-900 dark:text-white">Barangay Hotline</h3>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                    {t('contact.brgy_hotline')}
+                  </h3>
                 </div>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">(02) 8123-4567</p>
-                <p className="text-sm text-slate-600 dark:text-slate-300">Local Emergency</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">(02) 8723-0011</p>
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  {t('contact.brgy_hotline_sub')}
+                </p>
               </div>
               <div className="bg-orange-50 dark:bg-amber-950/40 border-2 border-orange-200 dark:border-amber-900/50 rounded-xl p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-2xl">🔥</span>
-                  <h3 className="text-lg font-black text-slate-900 dark:text-white">Fire Emergency</h3>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                    {t('contact.fire_emergency')}
+                  </h3>
                 </div>
                 <p className="text-2xl font-bold text-orange-600 dark:text-amber-400 mb-1">160</p>
-                <p className="text-sm text-slate-600 dark:text-slate-300">Fire Department</p>
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  {t('contact.fire_sub')}
+                </p>
               </div>
             </div>
           </div>
@@ -68,24 +93,32 @@ export default function ContactPage() {
               <div className="w-12 h-12 bg-[#9C2007] rounded-full flex items-center justify-center">
                 <span className="text-2xl">🏛️</span>
               </div>
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Barangay Hall</h2>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+                {t('contact.hall_heading')}
+              </h2>
             </div>
 
             <div className="space-y-6">
               <div className="border-l-4 border-[#9C2007] pl-6">
-                <h3 className="text-sm font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 mb-2">📍 Office Address</h3>
+                <h3 className="text-sm font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 mb-2">
+                  📍 {t('contact.address_label')}
+                </h3>
                 <p className="text-slate-700 dark:text-slate-200 font-medium text-lg">{barangayMap.address}</p>
               </div>
               <div className="border-l-4 border-blue-600 pl-6">
-                <h3 className="text-sm font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2">📞 Office Numbers</h3>
+                <h3 className="text-sm font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2">
+                  📞 {t('contact.phone_label')}
+                </h3>
                 <p className="text-slate-700 dark:text-slate-200 font-medium text-lg whitespace-pre-line">
-                  {"Telephone: (02) 8123-4567\nMobile: +63 917 123 4567"}
+                  {"Telephone: (02) 8723-0011\nMobile: +63 917 888 0011"}
                 </p>
               </div>
               <div className="border-l-4 border-green-600 pl-6">
-                <h3 className="text-sm font-black uppercase tracking-widest text-green-600 dark:text-emerald-400 mb-2">✉️ Email</h3>
+                <h3 className="text-sm font-black uppercase tracking-widest text-green-600 dark:text-emerald-400 mb-2">
+                  ✉️ {t('contact.email_label')}
+                </h3>
                 <p className="text-slate-700 dark:text-slate-200 font-medium text-lg whitespace-pre-line">
-                  {"admin@brgyonse.gov.ph\nhotlines@brgyonse.gov.ph"}
+                  {"info@onse.gov.ph\nhotlines@onse.gov.ph"}
                 </p>
               </div>
             </div>
@@ -96,17 +129,28 @@ export default function ContactPage() {
               <div className="w-12 h-12 bg-[#9C2007] rounded-full flex items-center justify-center">
                 <span className="text-2xl">🕐</span>
               </div>
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Office Hours</h2>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+                {t('contact.hours_heading')}
+              </h2>
             </div>
 
             <div className="space-y-4">
               <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-[#152747] rounded-xl">
-                <span className="font-bold text-slate-700 dark:text-slate-200">Monday - Friday</span>
-                <span className="font-black text-[#9C2007] dark:text-rose-400">8:00 AM - 5:00 PM</span>
+                <span className="font-bold text-slate-700 dark:text-slate-200">
+                  {isFil ? 'Lunes – Biyernes' : 'Monday – Friday'}
+                </span>
+                <span className="font-black text-[#9C2007] dark:text-rose-400">8:00 AM – 5:00 PM</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-red-50 dark:bg-rose-950/40 rounded-xl border-2 border-red-200 dark:border-rose-900/50">
-                <span className="font-bold text-red-700 dark:text-rose-300">Saturday, Sunday &amp; Holidays</span>
-                <span className="font-black text-red-600 dark:text-rose-400">CLOSED</span>
+                <span className="font-bold text-red-700 dark:text-rose-300">
+                  {isFil ? 'Sabado, Linggo at mga Piyesta Opisyal' : 'Saturday, Sunday & Holidays'}
+                </span>
+                <span className="font-black text-red-600 dark:text-rose-400">
+                  {isFil ? 'SARADO' : 'CLOSED'}
+                </span>
+              </div>
+              <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800/40 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                {t('contact.hours_emergency')}
               </div>
             </div>
           </div>
@@ -118,7 +162,9 @@ export default function ContactPage() {
             <div className="w-12 h-12 bg-[#9C2007] rounded-full flex items-center justify-center">
               <span className="text-2xl">🗺️</span>
             </div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Find Us Here</h2>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+              {isFil ? 'Matatagpuan Dito' : 'Find Us Here'}
+            </h2>
           </div>
           <div className="w-full h-[520px] lg:h-[580px] rounded-3xl overflow-hidden border-2 border-slate-100 dark:border-blue-900/40 shadow-inner">
             <iframe
@@ -138,7 +184,7 @@ export default function ContactPage() {
               rel="noreferrer"
               className="inline-flex items-center gap-2 bg-[#9C2007] text-white px-6 py-3 rounded-full font-black uppercase tracking-widest text-xs hover:bg-[#800000] transition-colors shadow-lg shadow-[#9C2007]/20"
             >
-              Get Directions
+              {isFil ? 'Direksyon sa Mapa' : 'Get Directions'}
             </a>
           </div>
         </div>
@@ -147,10 +193,16 @@ export default function ContactPage() {
         <div className="mt-16">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-8">
             <div>
-              <span className="text-xs font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400">City Directory</span>
-              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase mt-1">Nearby Services in City of San Juan</h2>
+              <span className="text-xs font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400">
+                {isFil ? 'Direktoryo ng Lungsod' : 'City Directory'}
+              </span>
+              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase mt-1">
+                {isFil ? 'Mga Kalapit na Serbisyo sa Lungsod ng San Juan' : 'Nearby Services in City of San Juan'}
+              </h2>
             </div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Common facilities across the city</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+              {isFil ? 'Mga karaniwang pasilidad sa buong lungsod' : 'Common facilities across the city'}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

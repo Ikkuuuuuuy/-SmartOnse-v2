@@ -260,7 +260,7 @@ import NotificationBellDropdown from '@/components/notifications/NotificationBel
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { language, toggleLanguage, setLanguage, t } = useLanguage();
   const { user, logout } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -277,7 +277,7 @@ export default function Navbar() {
     { name: t('nav.services'), href: '/services' },
     { name: t('nav.transparency'), href: '/transparency' },
     { name: t('nav.events'), href: '/events' },
-    { name: 'SK Programs', href: '/sk-programs' },
+    { name: language === 'fil' ? 'Mga Programa ng SK' : 'SK Programs', href: '/sk-programs' },
     { name: t('nav.contact'), href: '/contact' },
   ];
 
@@ -310,6 +310,19 @@ export default function Navbar() {
         })}
 
         <div className="flex gap-2 items-center shrink-0 ml-2">
+          {/* Quick 1-Click Language Switcher (EN | FIL) */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white rounded-full text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-xs border border-white/20"
+            title={language === 'en' ? 'Lumipat sa Tagalog' : 'Switch to English'}
+            aria-label="Toggle language"
+          >
+            <span className={language === 'en' ? 'text-amber-300 font-black underline decoration-2' : 'text-white/60 font-medium'}>EN</span>
+            <span className="text-white/30">|</span>
+            <span className={language === 'fil' ? 'text-amber-300 font-black underline decoration-2' : 'text-white/60 font-medium'}>FIL</span>
+          </button>
+
           {/* Quick Direct Light/Dark Mode Switcher */}
           <button
             type="button"
@@ -389,6 +402,18 @@ export default function Navbar() {
               {link.name}
             </Link>
           ))}
+
+          {/* Mobile Language Switcher */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="flex items-center justify-center gap-3 w-full max-w-xs py-3 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider border border-white/20 transition cursor-pointer"
+          >
+            <span>Wika / Language:</span>
+            <span className={language === 'en' ? 'text-amber-300 font-black underline' : 'text-white/60'}>English</span>
+            <span className="text-white/30">|</span>
+            <span className={language === 'fil' ? 'text-amber-300 font-black underline' : 'text-white/60'}>Tagalog</span>
+          </button>
 
           {/* Mobile Theme Toggle Button */}
           <button
