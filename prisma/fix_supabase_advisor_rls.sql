@@ -77,3 +77,4 @@ CREATE TRIGGER trg_audit_log_immutable
 BEFORE UPDATE OR DELETE ON "AuditLog"
 FOR EACH ROW
 EXECUTE FUNCTION prevent_audit_log_tampering();
+
