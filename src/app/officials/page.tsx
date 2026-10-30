@@ -201,11 +201,6 @@ export default async function OfficialsPage() {
 
         {/* Header Section */}
         <header className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/70 border border-rose-200 dark:border-rose-900/50 text-[#9C2007] dark:text-rose-300 text-[10px] font-black uppercase tracking-widest shadow-xs">
-            <Shield className="w-3.5 h-3.5" />
-            <span>Official Civic Leadership Directory</span>
-          </div>
-
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">
             Barangay <span className="text-[#9C2007] dark:text-rose-500">Officials</span>
           </h1>
