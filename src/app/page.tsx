@@ -29,10 +29,12 @@ import {
   Download
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function WelcomePage() {
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [trackingCode, setTrackingCode] = useState('');
 
   const handleTrackSubmit = (e: React.FormEvent) => {
@@ -46,8 +48,8 @@ export default function WelcomePage() {
 
   const services = [
     {
-      title: 'Barangay Clearance',
-      desc: 'Official certificate for local employment, postal ID, bank accounts, and legal requirements.',
+      title: t('svc.brgy_clearance.title'),
+      desc: t('svc.brgy_clearance.desc'),
       fee: '₱50.00',
       time: '24 Hours',
       badge: 'Most Requested',
@@ -55,8 +57,8 @@ export default function WelcomePage() {
       icon: <FileCheck2 className="w-6 h-6 text-[#9C2007] dark:text-rose-400" />,
     },
     {
-      title: 'Certificate of Residency',
-      desc: 'Certified proof of official residency in Barangay Onse for government and commercial uses.',
+      title: t('svc.residency.title'),
+      desc: t('svc.residency.desc'),
       fee: '₱30.00',
       time: 'Same Day',
       badge: 'Fast Track',
@@ -64,17 +66,17 @@ export default function WelcomePage() {
       icon: <Building2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />,
     },
     {
-      title: 'Certificate of Indigency',
-      desc: 'Free official documentation for medical assistance, burial aid, and social welfare subsidies.',
-      fee: 'FREE',
+      title: t('svc.indigency.title'),
+      desc: t('svc.indigency.desc'),
+      fee: t('services.fee_free'),
       time: 'Same Day',
       badge: 'Social Welfare',
       code: 'CERT_INDIGENCY',
       icon: <HeartPulse className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />,
     },
     {
-      title: 'First-Time Jobseeker Certificate',
-      desc: 'Waives government pre-employment document fees under Republic Act No. 11261.',
+      title: t('svc.jobseeker.title'),
+      desc: t('svc.jobseeker.desc'),
       fee: 'FREE (R.A. 11261)',
       time: 'Same Day',
       badge: 'Youth & Job Aid',
@@ -82,8 +84,8 @@ export default function WelcomePage() {
       icon: <Sparkles className="w-6 h-6 text-amber-600 dark:text-amber-400" />,
     },
     {
-      title: 'Barangay Business Clearance',
-      desc: 'Mandatory commercial permit for new business registration and annual mayor\'s permit renewal.',
+      title: t('svc.business.title'),
+      desc: t('svc.business.desc'),
       fee: '₱250.00',
       time: '2-3 Days',
       badge: 'Commercial',
@@ -91,8 +93,8 @@ export default function WelcomePage() {
       icon: <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />,
     },
     {
-      title: 'Barangay Incident / Blotter Certification',
-      desc: 'Official certification of recorded blotter, incident extract, or conciliation settlement before the Lupong Tagapamayapa.',
+      title: t('svc.blotter.title'),
+      desc: t('svc.blotter.desc'),
       fee: '₱100.00',
       time: '24 Hours',
       badge: 'Peace & Order',
@@ -181,20 +183,20 @@ export default function WelcomePage() {
 
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 dark:bg-[#0E1B33]/90 border border-slate-200 dark:border-blue-900/60 shadow-sm text-xs font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Republic of the Philippines &bull; City of San Juan
+              {t('hero.badge')}
             </div>
           </div>
 
           {/* Main Title */}
           <div className="space-y-4">
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight uppercase leading-[1.05]">
-              Smart Governance <br className="hidden sm:inline" />
+              {t('hero.title_part1')} <br className="hidden sm:inline" />
               <span className="bg-gradient-to-r from-[#9C2007] via-[#c5321f] to-[#800000] dark:from-rose-500 dark:via-rose-400 dark:to-amber-300 bg-clip-text text-transparent">
-                At Your Fingertips
+                {t('hero.title_part2')}
               </span>
             </h1>
             <p className="max-w-3xl mx-auto text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-              Welcome to the official website of <strong>Barangay Onse</strong>. Request civil clearances online, verify documents with anti-counterfeit QR codes, track public finances, and access 24/7 community services.
+              {t('hero.desc')}
             </p>
           </div>
 
@@ -204,7 +206,7 @@ export default function WelcomePage() {
               href="/portal/request" 
               className="bg-[#9C2007] hover:bg-[#8B1A05] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-wider shadow-xl shadow-[#9C2007]/25 hover:shadow-2xl hover:-translate-y-0.5 transition-all flex items-center gap-2 cursor-pointer"
             >
-              <span>Request Clearance Online</span>
+              <span>{t('hero.cta_request')}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
 
@@ -213,7 +215,7 @@ export default function WelcomePage() {
               className="bg-white dark:bg-[#0E1B33] hover:bg-slate-50 dark:hover:bg-[#152747] border border-slate-200 dark:border-blue-900/60 text-slate-800 dark:text-slate-200 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-wider shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-2 cursor-pointer"
             >
               <Search className="w-4 h-4 text-slate-400" />
-              <span>Track Application</span>
+              <span>{t('hero.cta_track')}</span>
             </Link>
 
             {user ? (
@@ -221,14 +223,14 @@ export default function WelcomePage() {
                 href={user.destination || '/admin'} 
                 className="bg-slate-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-wider shadow-md transition-all flex items-center gap-2 cursor-pointer"
               >
-                <span>{user.role === 'resident' ? 'Resident Services' : 'Admin Portal'} &rarr;</span>
+                <span>{user.role === 'resident' ? t('hero.cta_resident_services') : t('hero.cta_admin')} &rarr;</span>
               </Link>
             ) : (
               <Link 
                 href="/login" 
                 className="bg-slate-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-wider shadow-md transition-all flex items-center gap-2 cursor-pointer"
               >
-                <span>Resident Login</span>
+                <span>{t('hero.cta_login')}</span>
               </Link>
             )}
           </div>
@@ -239,7 +241,7 @@ export default function WelcomePage() {
               <span className="text-lg pl-3">🔍</span>
               <input
                 type="text"
-                placeholder="Paste Tracking Code (e.g. ONSE-2026-8891)..."
+                placeholder={t('hero.search_placeholder')}
                 value={trackingCode}
                 onChange={(e) => setTrackingCode(e.target.value)}
                 className="flex-1 bg-transparent border-none text-slate-900 dark:text-white text-xs sm:text-sm font-bold focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
@@ -248,7 +250,7 @@ export default function WelcomePage() {
                 type="submit"
                 className="bg-[#9C2007] hover:bg-[#8B1A05] text-white px-5 sm:px-6 py-3 rounded-xl sm:rounded-2xl font-black text-xs uppercase tracking-wider transition shadow-md shadow-[#9C2007]/20 cursor-pointer shrink-0"
               >
-                Track
+                <span>{t('hero.search_button')}</span>
               </button>
             </form>
           </div>
@@ -283,13 +285,13 @@ export default function WelcomePage() {
           
           <div className="text-center space-y-2">
             <span className="text-xs font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-3.5 py-1 rounded-full border border-rose-200/60 dark:border-rose-900/40">
-              Citizen E-Services &bull; R.A. 11032
+              {t('services.badge')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-              Online Document Applications
+              {t('services.heading')}
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-              File official certifications from home. Verified applications are processed within 24 hours with cryptographic authenticity.
+              {t('services.desc')}
             </p>
           </div>
 
@@ -334,7 +336,7 @@ export default function WelcomePage() {
                     href={`/portal/request?type=${service.code}`}
                     className="w-full py-3 rounded-xl bg-[#9C2007] hover:bg-[#8B1A05] text-white font-extrabold uppercase tracking-wider text-center text-xs flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer"
                   >
-                    <span>Apply Online</span>
+                    <span>{t('services.request_btn')}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
