@@ -172,25 +172,14 @@ export default function RealCaptcha({ onVerify, onAnswerChange, className = '' }
   };
 
   return (
-    <div className={`p-4 rounded-2xl bg-slate-50 dark:bg-[#152747]/80 border border-slate-200 dark:border-blue-900/40 space-y-3 ${className}`}>
-      {/* Header Label */}
-      <div className="flex items-center justify-between">
-        <label className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs">
-          <ShieldCheck className="w-4 h-4 text-[#9C2007] dark:text-rose-400" />
-          <span>Security Verification</span>
-        </label>
-        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-          Anti-Bot Protection
-        </span>
-      </div>
-
+    <div className={`space-y-1.5 ${className}`}>
       {/* Visual CAPTCHA Canvas & Controls */}
       <div className="flex items-center gap-2">
-        <div className="relative rounded-xl overflow-hidden border-2 border-slate-300 dark:border-blue-900 shadow-inner bg-slate-100 dark:bg-slate-900 shrink-0">
+        <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-blue-900/60 shadow-inner bg-slate-100 dark:bg-slate-900 shrink-0">
           <canvas
             ref={canvasRef}
-            width={200}
-            height={52}
+            width={180}
+            height={50}
             className="block select-none cursor-pointer"
             onClick={refresh}
             title="Click image to reload security code"
@@ -203,7 +192,7 @@ export default function RealCaptcha({ onVerify, onAnswerChange, className = '' }
             type="button"
             onClick={refresh}
             title="Generate new security code"
-            className="p-2 rounded-lg bg-white dark:bg-[#0B1528] border border-slate-200 dark:border-blue-900/60 text-slate-600 dark:text-slate-300 hover:text-[#9C2007] dark:hover:text-rose-400 hover:border-[#9C2007] transition cursor-pointer shadow-xs"
+            className="p-1.5 rounded-xl bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/60 text-slate-600 dark:text-slate-300 hover:text-[#9C2007] dark:hover:text-rose-400 hover:border-[#9C2007] transition cursor-pointer shadow-xs"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
@@ -212,7 +201,7 @@ export default function RealCaptcha({ onVerify, onAnswerChange, className = '' }
             onClick={handleSpeak}
             disabled={isSpeaking}
             title="Audio challenge for accessibility"
-            className="p-2 rounded-lg bg-white dark:bg-[#0B1528] border border-slate-200 dark:border-blue-900/60 text-slate-600 dark:text-slate-300 hover:text-[#9C2007] dark:hover:text-rose-400 hover:border-[#9C2007] transition cursor-pointer shadow-xs disabled:opacity-50"
+            className="p-1.5 rounded-xl bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/60 text-slate-600 dark:text-slate-300 hover:text-[#9C2007] dark:hover:text-rose-400 hover:border-[#9C2007] transition cursor-pointer shadow-xs disabled:opacity-50"
           >
             <Volume2 className="w-3.5 h-3.5" />
           </button>
@@ -229,12 +218,12 @@ export default function RealCaptcha({ onVerify, onAnswerChange, className = '' }
             value={userInput}
             onChange={handleInputChange}
             placeholder="Type code..."
-            className={`w-full px-3.5 py-3 bg-white dark:bg-[#0B1528] border rounded-xl text-sm font-mono font-black uppercase tracking-widest text-center outline-none transition ${
+            className={`w-full px-3.5 py-3.5 bg-slate-50 dark:bg-[#152747] border rounded-2xl text-sm font-mono font-black uppercase tracking-widest text-center outline-none transition ${
               status === 'success'
                 ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 ring-2 ring-emerald-500/20'
                 : status === 'error'
                 ? 'border-rose-500 text-rose-600 dark:text-rose-400 ring-2 ring-rose-500/20'
-                : 'border-slate-200 dark:border-blue-900/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#9C2007]/50'
+                : 'border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#9C2007]/50'
             }`}
           />
           {status === 'success' && (
@@ -247,8 +236,8 @@ export default function RealCaptcha({ onVerify, onAnswerChange, className = '' }
       </div>
 
       {/* Helper text */}
-      <div className="flex items-center justify-between text-[10px] text-slate-500">
-        <span>Enter the 6 characters shown in the image above</span>
+      <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 px-1">
+        <span>Enter the 6 characters shown in the image</span>
         {status === 'success' && (
           <span className="font-bold text-emerald-600 dark:text-emerald-400">✓ Verified</span>
         )}

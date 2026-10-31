@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import RealCaptcha from '@/components/ui/RealCaptcha';
 import { 
   Lock, 
   Mail, 
@@ -37,6 +38,7 @@ function LoginForm() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeRole, setActiveRole] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -120,6 +122,7 @@ function LoginForm() {
     setActiveRole(role.id);
     setEmail(role.email);
     setPassword('password123');
+    setIsCaptchaVerified(true);
     setLoading(true);
 
     try {
@@ -148,6 +151,12 @@ function LoginForm() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!isCaptchaVerified) {
+      setError('Please enter the 6-character security code shown in the image.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -489,6 +498,9 @@ function LoginForm() {
                 />
               </div>
             </div>
+
+            {/* Minimal Clean Alphanumeric Security CAPTCHA */}
+            <RealCaptcha onVerify={setIsCaptchaVerified} />
 
             {/* Trust this device checkbox */}
             <div className="flex items-center gap-2 pt-1 pb-1">
