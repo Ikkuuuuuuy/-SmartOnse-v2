@@ -3,6 +3,7 @@ import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
 export const SESSION_COOKIE_NAME = 'smartonse_session';
+export const DEVICE_COOKIE_NAME = 'smartonse_trusted_device';
 
 const SECRET_KEY = new TextEncoder().encode(
   process.env.SESSION_SECRET || 'smartonse_super_secure_jwt_session_secret_2026_barangay_onse_san_juan'
@@ -103,6 +104,33 @@ export async function verifyMfaToken(token: string): Promise<{ userId: string; e
     };
   } catch {
     return null;
+  }
+}
+
+/**
+ * Create a signed Trusted Device token valid for 60 days
+ */
+export async function createTrustedDeviceToken(userId: string): Promise<string> {
+  return new SignJWT({
+    userId,
+    purpose: 'trusted_device',
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('60d')
+    .sign(SECRET_KEY);
+}
+
+/**
+ * Check if the device token cookie matches the user ID
+ */
+export async function isTrustedDevice(token: string | undefined, userId: string): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const { payload } = await jwtVerify(token, SECRET_KEY);
+    return payload.purpose === 'trusted_device' && payload.userId === userId;
+  } catch {
+    return false;
   }
 }
 

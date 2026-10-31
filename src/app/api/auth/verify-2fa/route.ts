@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { normalizeRole } from '@/lib/rbac';
-import { createSessionToken, verifyMfaToken, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { createSessionToken, verifyMfaToken, createTrustedDeviceToken, SESSION_COOKIE_NAME, DEVICE_COOKIE_NAME } from '@/lib/auth';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 const ROLE_DESTINATIONS: Record<string, string> = {
@@ -129,6 +129,16 @@ export async function POST(req: Request) {
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    // Authorize and trust this device for 60 days
+    const deviceToken = await createTrustedDeviceToken(user.id);
+    response.cookies.set(DEVICE_COOKIE_NAME, deviceToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 60, // 60 days
     });
 
     await prisma.auditLog.create({

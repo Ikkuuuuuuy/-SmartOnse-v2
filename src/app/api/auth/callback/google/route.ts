@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import prisma from '@/lib/prisma';
 import { normalizeRole } from '@/lib/rbac';
-import { createSessionToken, createMfaToken, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { createSessionToken, createMfaToken, createTrustedDeviceToken, SESSION_COOKIE_NAME, DEVICE_COOKIE_NAME } from '@/lib/auth';
 import { sendOtpEmail } from '@/lib/email';
 
 const ROLE_DESTINATIONS: Record<string, string> = {
@@ -157,6 +157,16 @@ export async function GET(req: Request) {
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7,
+    });
+
+    // Authorize and trust this device for 60 days
+    const deviceToken = await createTrustedDeviceToken(user.id);
+    redirectResponse.cookies.set(DEVICE_COOKIE_NAME, deviceToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 60,
     });
 
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';

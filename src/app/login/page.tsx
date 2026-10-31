@@ -45,6 +45,7 @@ function LoginForm() {
 
   // 2FA / MFA States
   const [mfaRequired, setMfaRequired] = useState(false);
+  const [isNewDevice, setIsNewDevice] = useState(false);
   const [mfaToken, setMfaToken] = useState('');
   const [mfaEmail, setMfaEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -178,6 +179,7 @@ function LoginForm() {
       // Check if 2FA is required
       if (data.mfaRequired) {
         setMfaRequired(true);
+        setIsNewDevice(!!data.isNewDevice);
         setMfaToken(data.mfaToken);
         setMfaEmail(data.email || email);
         setLoading(false);
@@ -260,11 +262,15 @@ function LoginForm() {
           <img src="/images/barangay-onse-seal.png" alt="Barangay Onse Seal" className="w-full h-full object-contain" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
-          {mfaRequired ? 'Two-Factor Authentication' : 'SmartOnse Login'}
+          {mfaRequired 
+            ? (isNewDevice ? 'New Device Detected' : 'Two-Factor Authentication') 
+            : 'SmartOnse Login'}
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
           {mfaRequired 
-            ? 'Enhanced Security Verification via Registered Email' 
+            ? (isNewDevice 
+                ? 'Security verification required for sign-in from an unrecognized device'
+                : 'Enhanced Security Verification via Registered Email') 
             : 'Barangay Onse Digital E-Governance Portal'}
         </p>
       </div>
@@ -276,6 +282,11 @@ function LoginForm() {
             <div className="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/40 flex items-center justify-center mx-auto text-[#9C2007] dark:text-rose-400">
               <ShieldCheck className="w-6 h-6" />
             </div>
+            {isNewDevice && (
+              <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                Unrecognized Device / Browser
+              </span>
+            )}
             <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
               We dispatched a 6-digit verification code to:
             </p>
