@@ -4,7 +4,6 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import RealCaptcha from '@/components/ui/RealCaptcha';
 import { 
   Lock, 
   Mail, 
@@ -38,10 +37,10 @@ function LoginForm() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeRole, setActiveRole] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [trustDevice, setTrustDevice] = useState(true);
 
   // 2FA / MFA States
   const [mfaRequired, setMfaRequired] = useState(false);
@@ -121,7 +120,6 @@ function LoginForm() {
     setActiveRole(role.id);
     setEmail(role.email);
     setPassword('password123');
-    setIsCaptchaVerified(true);
     setLoading(true);
 
     try {
@@ -150,18 +148,13 @@ function LoginForm() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (!isCaptchaVerified) {
-      setError('Please enter the 6-character security code shown in the image.');
-      return;
-    }
-
     setLoading(true);
+
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, trustDevice }),
       });
 
       const data = await res.json();
@@ -208,7 +201,7 @@ function LoginForm() {
       const res = await fetch('/api/auth/verify-2fa', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mfaToken, otp: otpCode.trim() }),
+        body: JSON.stringify({ mfaToken, otp: otpCode.trim(), trustDevice }),
       });
 
       const data = await res.json();
@@ -327,6 +320,19 @@ function LoginForm() {
                   className="w-full text-center tracking-[8px] font-mono font-black text-xl py-3.5 pl-10 pr-4 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-2xl focus:ring-2 focus:ring-[#9C2007]/50 outline-none transition"
                 />
               </div>
+            </div>
+
+            {/* Trust this device checkbox */}
+            <div className="flex items-center justify-center gap-2 pt-1 pb-1">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300 select-none">
+                <input
+                  type="checkbox"
+                  checked={trustDevice}
+                  onChange={(e) => setTrustDevice(e.target.checked)}
+                  className="w-4 h-4 rounded text-[#9C2007] border-slate-300 dark:border-blue-900 focus:ring-[#9C2007]/40 cursor-pointer"
+                />
+                <span>Trust this device for 60 days</span>
+              </label>
             </div>
 
             <button
@@ -484,8 +490,18 @@ function LoginForm() {
               </div>
             </div>
 
-            {/* Real System Visual Distorted Alphanumeric Security CAPTCHA */}
-            <RealCaptcha onVerify={setIsCaptchaVerified} />
+            {/* Trust this device checkbox */}
+            <div className="flex items-center gap-2 pt-1 pb-1">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300 select-none">
+                <input
+                  type="checkbox"
+                  checked={trustDevice}
+                  onChange={(e) => setTrustDevice(e.target.checked)}
+                  className="w-4 h-4 rounded text-[#9C2007] border-slate-300 dark:border-blue-900 focus:ring-[#9C2007]/40 cursor-pointer"
+                />
+                <span>Trust this device for 60 days</span>
+              </label>
+            </div>
 
             <button
               type="submit"

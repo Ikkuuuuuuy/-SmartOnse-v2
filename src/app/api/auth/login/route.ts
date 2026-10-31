@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const { email, password } = body;
+    const { email, password, trustDevice = true } = body;
 
     if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
       return NextResponse.json(
@@ -211,15 +211,17 @@ export async function POST(req: Request) {
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
-    // Refresh trusted device token (60 days)
-    const deviceToken = await createTrustedDeviceToken(user.id);
-    response.cookies.set(DEVICE_COOKIE_NAME, deviceToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 60, // 60 days
-    });
+    // Refresh trusted device token (60 days) if enabled
+    if (trustDevice) {
+      const deviceToken = await createTrustedDeviceToken(user.id);
+      response.cookies.set(DEVICE_COOKIE_NAME, deviceToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 60, // 60 days
+      });
+    }
 
     // Write real Audit Log for successful authentication
     await prisma.auditLog.create({
