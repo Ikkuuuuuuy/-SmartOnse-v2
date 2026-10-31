@@ -30,7 +30,9 @@ export async function GET(req: Request) {
   const code = searchParams.get('code');
   const error = searchParams.get('error');
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
+  const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || 'smartonse.vercel.app';
+  const proto = req.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${proto}://${host}`;
 
   if (error || !code) {
     return NextResponse.redirect(new URL('/login?error=Google+authentication+cancelled', appUrl));
