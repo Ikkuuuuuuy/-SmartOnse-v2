@@ -32,33 +32,83 @@ export default function BarangayAiAssistant() {
   }, [messages, isOpen]);
 
   const quickQuestions = [
-    'Who is the SK Chairperson?',
-    'Who is the Barangay Captain?',
-    'What are the events in October?',
-    'Requirements for Barangay Clearance?',
-    'How to request Certificate of Indigency?',
-    'Health Center vaccination schedule?',
-    'Emergency Hotlines in Barangay Onse?',
+    'Where is Barangay Onse located?',
+    'Sino ang Barangay Captain at SK?',
+    'Requirements sa Barangay Clearance?',
+    'Paano mag-track ng request (REQ-)?',
+    'Libre ba ang Certificate of Indigency?',
+    'Saan makikita ang mga opisyal at link?',
+    'Emergency Hotlines sa Onse?',
   ];
 
-  // Formats text with **bold** annotations into strong tags
+  // Helper to parse `inline code` and **bold**
+  const renderTextSegment = (text: string, keyPrefix: string) => {
+    const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
+    return parts.map((part, pIdx) => {
+      if (part.startsWith('`') && part.endsWith('`')) {
+        return (
+          <code
+            key={`${keyPrefix}-c-${pIdx}`}
+            className="px-1.5 py-0.5 rounded bg-slate-100 text-[#9C2007] font-mono text-[11px] font-bold"
+          >
+            {part.slice(1, -1)}
+          </code>
+        );
+      }
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <strong key={`${keyPrefix}-b-${pIdx}`} className="font-bold text-slate-900">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      return <React.Fragment key={`${keyPrefix}-t-${pIdx}`}>{part}</React.Fragment>;
+    });
+  };
+
+  // Formats text with markdown links [Text](url), **bold**, and `code`
   const renderFormattedText = (rawText: string) => {
     const lines = rawText.split('\n');
     return lines.map((line, lineIdx) => {
-      // Split by **bold** syntax
-      const parts = line.split(/(\*\*.*?\*\*)/g);
+      const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+      const elements: React.ReactNode[] = [];
+      let lastIndex = 0;
+      let match;
+
+      while ((match = linkRegex.exec(line)) !== null) {
+        const textBefore = line.slice(lastIndex, match.index);
+        if (textBefore) {
+          elements.push(...renderTextSegment(textBefore, `${lineIdx}-pre-${match.index}`));
+        }
+
+        const linkLabel = match[1];
+        const linkUrl = match[2];
+        const isExternal = linkUrl.startsWith('http');
+
+        elements.push(
+          <a
+            key={`${lineIdx}-link-${match.index}`}
+            href={linkUrl}
+            target={isExternal ? '_blank' : '_self'}
+            rel={isExternal ? 'noopener noreferrer' : undefined}
+            className="inline-flex items-center gap-0.5 font-bold text-[#9C2007] hover:text-[#7A1805] underline underline-offset-2 decoration-1 hover:decoration-2 transition-colors mx-0.5"
+          >
+            <span>{linkLabel}</span>
+            <span className="text-[10px] no-underline">↗</span>
+          </a>
+        );
+
+        lastIndex = match.index + match[0].length;
+      }
+
+      const textAfter = line.slice(lastIndex);
+      if (textAfter) {
+        elements.push(...renderTextSegment(textAfter, `${lineIdx}-post-${lastIndex}`));
+      }
+
       return (
         <span key={lineIdx} className="block min-h-[1.15em]">
-          {parts.map((part, partIdx) => {
-            if (part.startsWith('**') && part.endsWith('**')) {
-              return (
-                <strong key={partIdx} className="font-bold text-slate-900">
-                  {part.slice(2, -2)}
-                </strong>
-              );
-            }
-            return part;
-          })}
+          {elements.length > 0 ? elements : '\u00A0'}
         </span>
       );
     });
