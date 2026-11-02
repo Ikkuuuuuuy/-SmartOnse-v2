@@ -18,7 +18,7 @@ export default function BarangayAiAssistant() {
     {
       id: '1',
       sender: 'assistant',
-      text: 'Mabuhay! I am OnseBot, your SmartOnse AI Assistant. How can I assist you with barangay clearances, health center bookings, or municipal hotlines?',
+      text: 'Mabuhay! Ano ang maitutulong ko tungkol sa mga serbisyo, clearances, o impormasyon sa Barangay Onse?',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -130,17 +130,21 @@ export default function BarangayAiAssistant() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/chatbot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text.trim() }),
-      });
+      const [res] = await Promise.all([
+        fetch('/api/chatbot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text.trim() }),
+        }),
+        // Humanized natural response delay (600ms) to show typing indicator
+        new Promise((resolve) => setTimeout(resolve, 600)),
+      ]);
 
       const data = await res.json();
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'assistant',
-        text: data.reply || "I'm here to help. You can also visit our Barangay Hall from Monday to Friday, 8:00 AM to 5:00 PM.",
+        text: data.reply || "Maaari kayong magsadya sa Barangay Onse Hall mula Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
@@ -151,7 +155,7 @@ export default function BarangayAiAssistant() {
         {
           id: (Date.now() + 1).toString(),
           sender: 'assistant',
-          text: 'Our AI assistant is currently updating. For urgent inquiries, please contact the Barangay Hotline at (02) 8123-4567.',
+          text: 'Kasalukuyang nagre-refresh ang OnseBot. Tumawag sa Barangay Desk sa (02) 8723-0011 / (02) 8123-4567.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -232,8 +236,15 @@ export default function BarangayAiAssistant() {
               </div>
             ))}
             {loading && (
-              <div className="flex gap-1.5 items-center text-slate-500 text-xs pl-2">
-                <span className="text-[11px] text-slate-400 font-medium">OnseBot is typing...</span>
+              <div className="flex gap-2 justify-start items-end animate-in fade-in-50 duration-150">
+                <div className="w-6 h-6 rounded-full bg-[#9C2007] text-white flex items-center justify-center shrink-0">
+                  <Bot className="w-3.5 h-3.5" />
+                </div>
+                <div className="bg-white text-slate-800 border border-slate-200 rounded-2xl rounded-tl-none px-3.5 py-2.5 shadow-2xs flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#9C2007] animate-bounce [animation-delay:-0.3s]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#9C2007] animate-bounce [animation-delay:-0.15s]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#9C2007] animate-bounce" />
+                </div>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -244,7 +255,8 @@ export default function BarangayAiAssistant() {
               <button
                 key={idx}
                 onClick={() => handleSend(q)}
-                className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white hover:bg-rose-50 text-slate-700 hover:text-[#9C2007] border border-slate-200 transition shrink-0 cursor-pointer"
+                disabled={loading}
+                className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white hover:bg-rose-50 text-slate-700 hover:text-[#9C2007] border border-slate-200 transition shrink-0 cursor-pointer disabled:opacity-50"
               >
                 {q}
               </button>
@@ -261,9 +273,10 @@ export default function BarangayAiAssistant() {
             <input
               type="text"
               value={input}
+              disabled={loading}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about clearance, health center, events..."
-              className="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#9C2007]"
+              placeholder={loading ? 'Nagsusulat si OnseBot...' : 'Magtanong tungkol sa serbisyo, lokasyon...'}
+              className="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#9C2007] disabled:opacity-60"
             />
             <button
               type="submit"
