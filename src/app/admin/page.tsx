@@ -44,32 +44,8 @@ export default function AdminDashboardPage() {
   const [registeredCitizensCount, setRegisteredCitizensCount] = useState<number>(3824);
   const [dashboardLogs, setDashboardLogs] = useState<any[]>([]);
 
-  // 2. Sample Data for Interactive Tabs (Expanded for Multi-Page Testing)
-  const clearanceQueue = [
-    { id: 'ONSE-2026-9045', applicant: 'Roberto Mendoza', type: 'Certificate of Residency', purpose: 'Bank Account Opening', fee: '₱30.00', feeStatus: 'PAID (Cash)', date: '2026-08-28 14:30', status: 'PENDING_REVIEW' },
-    { id: 'ONSE-2026-9012', applicant: 'Maria Clara Santos', type: 'Certificate of Indigency', purpose: 'Medical Subsidy (San Juan Hosp.)', fee: 'FREE', feeStatus: 'EXEMPTED', date: '2026-08-28 11:15', status: 'PROCESSING' },
-    { id: 'ONSE-2026-8891', applicant: 'Juan Dela Cruz', type: 'Barangay Clearance', purpose: 'Local Employment Application', fee: '₱50.00', feeStatus: 'PAID (GCash)', date: '2026-08-27 16:40', status: 'READY_FOR_PICKUP' },
-    { id: 'ONSE-2026-8840', applicant: 'Danilo A. Florano', type: 'First Time Jobseeker Certificate', purpose: 'BPO Job Application (RA 11261)', fee: 'FREE', feeStatus: 'WAIVED (RA 11261)', date: '2026-08-27 14:00', status: 'COMPLETED' },
-    { id: 'ONSE-2026-8815', applicant: 'Crisostomo Ibarra', type: 'Barangay Business Clearance', purpose: 'Retail Store Permit Renewal', fee: '₱250.00', feeStatus: 'PAID (Cash)', date: '2026-08-26 15:20', status: 'READY_FOR_PICKUP' },
-    { id: 'ONSE-2026-8790', applicant: 'Elias Salome', type: 'Barangay Clearance', purpose: 'Philippine Passport Renewal', fee: '₱50.00', feeStatus: 'PAID (GCash)', date: '2026-08-26 10:15', status: 'PROCESSING' },
-    { id: 'ONSE-2026-8755', applicant: 'Sisa Tiago', type: 'Certificate of Indigency', purpose: 'DSWD AICS Subsidy Endorsement', fee: 'FREE', feeStatus: 'EXEMPTED', date: '2026-08-25 16:30', status: 'READY_FOR_PICKUP' },
-    { id: 'ONSE-2026-8720', applicant: 'Basilio M. Evangelista', type: 'Certificate of Residency', purpose: 'University Scholarship Filing', fee: '₱30.00', feeStatus: 'PAID (Cash)', date: '2026-08-25 11:00', status: 'COMPLETED' },
-    { id: 'ONSE-2026-8692', applicant: 'Crispin M. Evangelista', type: 'First Time Jobseeker Certificate', purpose: 'Entry Level IT Trainee (RA 11261)', fee: 'FREE', feeStatus: 'WAIVED (RA 11261)', date: '2026-08-24 15:45', status: 'COMPLETED' },
-    { id: 'ONSE-2026-8650', applicant: 'Paulita Gomez', type: 'Barangay Clearance', purpose: 'Postal ID Government Filing', fee: '₱50.00', feeStatus: 'PAID (Cash)', date: '2026-08-24 09:20', status: 'PENDING_REVIEW' },
-    { id: 'ONSE-2026-8622', applicant: 'Isagani R. Villanueva', type: 'Barangay Clearance', purpose: 'TIN ID Registration', fee: '₱50.00', feeStatus: 'PAID (GCash)', date: '2026-08-23 14:10', status: 'PROCESSING' },
-    { id: 'ONSE-2026-8590', applicant: 'Donya Victorina Delos Reyes', type: 'Barangay Business Clearance', purpose: 'Commercial Space Sublease Permit', fee: '₱250.00', feeStatus: 'REFUNDED', date: '2026-08-23 10:00', status: 'COMPLETED' },
-    { id: 'ONSE-2026-8565', applicant: 'Tiburcio De Espadaña', type: 'Certificate of Residency', purpose: 'Senior Citizen OSCA Registration', fee: '₱30.00', feeStatus: 'PAID (Cash)', date: '2026-08-22 16:00', status: 'COMPLETED' },
-    { id: 'ONSE-2026-8530', applicant: 'Padre Florentino Santos', type: 'Barangay Clearance', purpose: 'Legal Affidavit of Guardianship', fee: '₱50.00', feeStatus: 'PAID (Cash)', date: '2026-08-22 11:30', status: 'COMPLETED' },
-    { id: 'ONSE-2026-8501', applicant: 'Simoun Ibarra', type: 'Barangay Business Clearance', purpose: 'Jewelry & Gem Trading Shop', fee: '₱250.00', feeStatus: 'PAID (Bank Transfer)', date: '2026-08-21 15:40', status: 'COMPLETED' },
-    // --- Page 2 items ---
-    { id: 'ONSE-2026-8480', applicant: 'Placido Penitente', type: 'Certificate of Indigency', purpose: 'Medical Hospital Waiver', fee: 'FREE', feeStatus: 'EXEMPTED', date: '2026-08-20 14:20', status: 'COMPLETED' },
-    { id: 'ONSE-2026-8452', applicant: 'Juli De Dios', type: 'First Time Jobseeker Certificate', purpose: 'Hospital Ward Attendant Trainee', fee: 'FREE', feeStatus: 'WAIVED (RA 11261)', date: '2026-08-19 11:15', status: 'COMPLETED' },
-    { id: 'ONSE-2026-8420', applicant: 'Kabesang Tales', type: 'Barangay Blotter Certification', purpose: 'Boundary Dispute Docket Proof', fee: '₱100.00', feeStatus: 'PAID (Cash)', date: '2026-08-18 16:00', status: 'COMPLETED' },
-    { id: 'ONSE-2026-8395', applicant: 'Tandang Selo', type: 'Certificate of Indigency', purpose: 'Dialysis Maintenance Subsidy', fee: 'FREE', feeStatus: 'EXEMPTED', date: '2026-08-17 10:30', status: 'COMPLETED' },
-    { id: 'ONSE-2026-8360', applicant: 'Macaraig San Pedro', type: 'Certificate of Residency', purpose: 'LTO Driver License Application', fee: '₱30.00', feeStatus: 'PAID (Cash)', date: '2026-08-16 13:45', status: 'COMPLETED' },
-  ];
-
-  const [clearances, setClearances] = useState(clearanceQueue);
+  // 2. Clearances from Database
+  const [clearances, setClearances] = useState<any[]>([]);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
 
   // Dynamic KPI calculations from live data
@@ -225,31 +201,7 @@ export default function AdminDashboardPage() {
     fetchLatest();
   }, []);
 
-  const INITIAL_CITIZENS = [
-    { name: 'Alfonso V. Quintero', precinct: 'PRECINCT-0042A', address: '188 Lt. Artiaga St.', civil: 'Single', registered: '2026-08-20', verified: true },
-    { name: 'Carmela D. Ocampo', precinct: 'PRECINCT-0043A', address: '39 N. Domingo St.', civil: 'Married', registered: '2026-07-18', verified: true },
-    { name: 'Rodrigo P. Manansala', precinct: 'PRECINCT-0041A', address: '83 A. Luna St.', civil: 'Widowed', registered: '2026-06-12', verified: true },
-    { name: 'Flordeliza M. Buan', precinct: 'PRECINCT-0044B', address: '15 Onse Compound', civil: 'Single', registered: '2026-05-04', verified: true },
-    { name: 'Danilo P. Soriano', precinct: 'PRECINCT-0042B', address: '102 Blumentritt St.', civil: 'Married', registered: '2026-03-30', verified: true },
-    { name: 'Leticia T. Ramos', precinct: 'PRECINCT-0043A', address: '48 J.V. Panganiban St.', civil: 'Widowed', registered: '2026-02-15', verified: true },
-    { name: 'Gerardo K. Ilustre', precinct: 'PRECINCT-0041A', address: '29 F. Manalo St.', civil: 'Married', registered: '2026-01-22', verified: true },
-    { name: 'Corazon E. Natividad', precinct: 'PRECINCT-0042A', address: '71 Gomez St.', civil: 'Single', registered: '2025-11-19', verified: true },
-    { name: 'Victorino S. Cruz', precinct: 'PRECINCT-0044B', address: '62 Lt. Artiaga St.', civil: 'Married', registered: '2025-10-08', verified: true },
-    { name: 'Josefina R. Padilla', precinct: 'PRECINCT-0043A', address: '11 N. Domingo St.', civil: 'Married', registered: '2025-08-14', verified: true },
-    { name: 'Eduardo G. De Leon', precinct: 'PRECINCT-0042B', address: '95 Blumentritt St.', civil: 'Single', registered: '2025-06-25', verified: true },
-    { name: 'Marilou C. Alcantara', precinct: 'PRECINCT-0041A', address: '14 A. Luna St.', civil: 'Married', registered: '2025-04-10', verified: true },
-    { name: 'Manuel L. Roxas Jr.', precinct: 'PRECINCT-0042A', address: '53 Gomez St.', civil: 'Married', registered: '2025-02-01', verified: true },
-    { name: 'Teresa B. Magbanua', precinct: 'PRECINCT-0044B', address: '110 Onse Compound', civil: 'Single', registered: '2024-12-14', verified: true },
-    { name: 'Apolinario M. Mabini', precinct: 'PRECINCT-0043A', address: '24 N. Domingo St.', civil: 'Single', registered: '2024-10-09', verified: true },
-    // --- Page 2 items ---
-    { name: 'Melchora I. Aquino', precinct: 'PRECINCT-0042B', address: '77 Blumentritt St.', civil: 'Widowed', registered: '2024-08-20', verified: true },
-    { name: 'Marcelo H. Del Pilar', precinct: 'PRECINCT-0041A', address: '66 A. Luna St.', civil: 'Married', registered: '2024-06-15', verified: true },
-    { name: 'Graciano L. Jaena', precinct: 'PRECINCT-0042A', address: '130 Gomez St.', civil: 'Single', registered: '2024-04-18', verified: true },
-    { name: 'Juan Dela Cruz', precinct: 'PRECINCT-0042A', address: '145 Lt. Artiaga St.', civil: 'Single', registered: '2023-01-14', verified: true },
-    { name: 'Maria Clara Santos', precinct: 'PRECINCT-0042B', address: '88 J.V. Panganiban St.', civil: 'Married', registered: '2023-03-22', verified: true },
-  ];
-
-  const [citizens, setCitizens] = useState<any[]>(INITIAL_CITIZENS);
+  const [citizens, setCitizens] = useState<any[]>([]);
 
   // Tab change handler
   const handleTabChange = (tab: 'requests' | 'citizens' | 'audit') => {

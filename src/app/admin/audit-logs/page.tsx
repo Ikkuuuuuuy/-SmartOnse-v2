@@ -26,7 +26,9 @@ export interface AuditLog {
   timestamp: string;
 }
 
-const INITIAL_LOGS: AuditLog[] = [
+const INITIAL_LOGS: AuditLog[] = [];
+/*
+const DEPRECATED_MOCK_LOGS: AuditLog[] = [
   { id: 'LOG-8915', action: 'CLEARANCE_APPROVED', details: 'Approved Barangay Clearance #ONSE-2026-9045 for Roberto Mendoza', actor: 'Hon. Roberto Alba (Captain)', ip: '192.168.1.45', timestamp: '2026-08-28 17:15:02' },
   { id: 'LOG-8914', action: 'RESIDENT_VERIFIED', details: 'KYC Address verification approved for Alfonso V. Quintero', actor: 'Jonathan D. Sorio (Staff)', ip: '192.168.1.12', timestamp: '2026-08-28 16:48:30' },
   { id: 'LOG-8913', action: 'CLEARANCE_APPROVED', details: 'Approved Certificate of Indigency #ONSE-2026-9012 for Maria Clara Santos', actor: 'Hon. Roberto Alba (Captain)', ip: '192.168.1.45', timestamp: '2026-08-28 16:32:10' },
@@ -53,9 +55,10 @@ const INITIAL_LOGS: AuditLog[] = [
   { id: 'LOG-8893', action: 'CLEARANCE_REJECTED', details: 'Rejected Business Clearance #ONSE-2026-8590 (Lacked DTI Registration)', actor: 'Jonathan D. Sorio (Staff)', ip: '192.168.1.12', timestamp: '2026-08-23 11:40:00' },
   { id: 'LOG-8892', action: 'SECURITY_LOGIN', details: 'Successful administrative login from San Juan City Gov Network', actor: 'Hon. Roberto Alba (Captain)', ip: '192.168.1.45', timestamp: '2026-08-23 08:00:15' },
 ];
+*/
 
 export default function AdminAuditLogsPage() {
-  const [logs, setLogs] = useState<AuditLog[]>(INITIAL_LOGS);
+  const [logs, setLogs] = useState<AuditLog[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('ALL');
   const [sortField, setSortField] = useState('timestamp');

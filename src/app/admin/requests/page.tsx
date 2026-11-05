@@ -44,7 +44,9 @@ const PRESET_REJECTION_REASONS = [
   'Duplicate request is already currently active under another tracking code.',
 ];
 
-const INITIAL_REQUESTS: ClearanceRequest[] = [
+const INITIAL_REQUESTS: ClearanceRequest[] = [];
+/*
+const DEPRECATED_MOCK_REQUESTS: ClearanceRequest[] = [
   {
     id: '1',
     trackingNumber: 'ONSE-2026-9045',
@@ -312,11 +314,12 @@ const INITIAL_REQUESTS: ClearanceRequest[] = [
     createdAt: '2026-08-13 14:00',
   },
 ];
+*/
 
 export default function AdminRequestsPage() {
   const { addNotification } = useNotifications();
-  const [requests, setRequests] = useState<ClearanceRequest[]>(INITIAL_REQUESTS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [requests, setRequests] = useState<ClearanceRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [sortField, setSortField] = useState('createdAt');

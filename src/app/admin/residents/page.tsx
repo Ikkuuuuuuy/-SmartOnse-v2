@@ -37,7 +37,9 @@ export interface ResidentRecord {
   householdRole: string;
 }
 
-const INITIAL_FALLBACK_RESIDENTS: ResidentRecord[] = [
+const INITIAL_FALLBACK_RESIDENTS: ResidentRecord[] = [];
+/*
+const DEPRECATED_FALLBACK_RESIDENTS: ResidentRecord[] = [
   { id: 'RES-024', name: 'Alfonso V. Quintero', precinct: 'PRECINCT-0042A', address: '188 Lt. Artiaga St.', civil: 'Single', contact: '0917-888-0024', email: 'alfonso@onse.ph', registered: '2026-08-20', verified: true, householdRole: 'Member' },
   { id: 'RES-023', name: 'Carmela D. Ocampo', precinct: 'PRECINCT-0043A', address: '39 N. Domingo St.', civil: 'Married', contact: '0917-888-0023', email: 'carmela@onse.ph', registered: '2026-07-18', verified: true, householdRole: 'Spouse' },
   { id: 'RES-022', name: 'Rodrigo P. Manansala', precinct: 'PRECINCT-0041A', address: '83 A. Luna St.', civil: 'Widowed', contact: '0917-888-0022', email: 'rodrigo@onse.ph', registered: '2026-06-12', verified: true, householdRole: 'Head of Household' },
@@ -63,10 +65,11 @@ const INITIAL_FALLBACK_RESIDENTS: ResidentRecord[] = [
   { id: 'RES-002', name: 'Maria Clara Santos', precinct: 'PRECINCT-0042B', address: '88 J.V. Panganiban St.', civil: 'Married', contact: '0918-777-2233', email: 'maria@onse.ph', registered: '2023-03-22', verified: true, householdRole: 'Spouse' },
   { id: 'RES-001', name: 'Juan Dela Cruz', precinct: 'PRECINCT-0042A', address: '145 Lt. Artiaga St.', civil: 'Single', contact: '0917-888-0011', email: 'juan@onse.ph', registered: '2023-01-14', verified: true, householdRole: 'Head of Household' },
 ];
+*/
 
 export default function AdminResidentsPage() {
-  const [residents, setResidents] = useState<ResidentRecord[]>(INITIAL_FALLBACK_RESIDENTS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [residents, setResidents] = useState<ResidentRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [civilFilter, setCivilFilter] = useState('ALL');
   const [precinctFilter, setPrecinctFilter] = useState('ALL');

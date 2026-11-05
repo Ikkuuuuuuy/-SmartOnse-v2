@@ -30,7 +30,9 @@ export interface EventItem {
   desc: string;
 }
 
-const FALLBACK_EVENTS: EventItem[] = [
+const FALLBACK_EVENTS: EventItem[] = [];
+/*
+const DEPRECATED_EVENTS: EventItem[] = [
   {
     id: 'EVT-01',
     title: 'Barangay General Assembly & State of the Barangay Address (SOBA)',
@@ -76,11 +78,12 @@ const FALLBACK_EVENTS: EventItem[] = [
     desc: 'Simultaneous clean-up of drainage canals and localized misting to prevent dengue outbreaks.',
   },
 ];
+*/
 
 export default function AdminEventsPage() {
   const { addNotification } = useNotifications();
-  const [events, setEvents] = useState<EventItem[]>(FALLBACK_EVENTS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Modal States

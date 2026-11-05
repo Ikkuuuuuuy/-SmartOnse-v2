@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -8,6 +8,48 @@ export default function ServicesPage() {
   const { language, t } = useLanguage();
   const isFil = language === 'fil';
   const [selectedService, setSelectedService] = useState<any | null>(null);
+  const [servicesList, setServicesList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadServices() {
+      try {
+        const res = await fetch('/api/services');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.certificates && Array.isArray(data.certificates)) {
+            const mapped = data.certificates.map((c: any, index: number) => {
+              let reqs: string[] = [];
+              try {
+                reqs = typeof c.requirements === 'string' ? JSON.parse(c.requirements) : c.requirements;
+              } catch {
+                reqs = [c.requirements || 'Valid Government ID'];
+              }
+
+              const icon = c.code?.includes('CLEARANCE') ? '📄' : c.code?.includes('RESIDENCY') ? '🏠' : c.code?.includes('INDIGENCY') ? '🤝' : c.code?.includes('JOBSEEKER') ? '💼' : c.code?.includes('BUSINESS') ? '🏢' : '📋';
+
+              return {
+                id: c.id || index,
+                code: c.code,
+                title: c.name,
+                description: c.description,
+                icon_svg: icon,
+                fee: c.fee,
+                turnaround: c.time || '1 Business Day',
+                requirements: Array.isArray(reqs) ? reqs : [reqs],
+              };
+            });
+            setServicesList(mapped);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load services from DB:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadServices();
+  }, []);
 
   const INITIAL_SERVICES = [
     {
@@ -140,7 +182,7 @@ export default function ServicesPage() {
 
         {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {INITIAL_SERVICES.map((service) => (
+          {(servicesList.length > 0 ? servicesList : INITIAL_SERVICES).map((service) => (
             <div
               key={service.id}
               className="bg-white dark:bg-[#0E1B33] p-8 rounded-[3.5rem] shadow-xl border border-slate-100 dark:border-blue-900/50 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group"

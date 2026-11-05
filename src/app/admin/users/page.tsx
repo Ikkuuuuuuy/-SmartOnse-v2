@@ -30,32 +30,9 @@ export interface UserAccount {
   createdAt: string;
 }
 
-const INITIAL_USERS: UserAccount[] = [
-  { id: 'USR-20', name: 'Alfonso V. Quintero', email: 'alfonso@onse.ph', role: 'resident', roleBadge: 'bg-emerald-100 text-emerald-900', status: 'ACTIVE', lastLogin: '5 mins ago', createdAt: '2026-08-28 14:00' },
-  { id: 'USR-19', name: 'Carmela D. Ocampo', email: 'carmela@onse.ph', role: 'resident', roleBadge: 'bg-emerald-100 text-emerald-900', status: 'ACTIVE', lastLogin: '18 mins ago', createdAt: '2026-08-28 11:30' },
-  { id: 'USR-18', name: 'Rodrigo P. Manansala', email: 'rodrigo@onse.ph', role: 'resident', roleBadge: 'bg-emerald-100 text-emerald-900', status: 'ACTIVE', lastLogin: '1 hour ago', createdAt: '2026-08-27 16:45' },
-  { id: 'USR-17', name: 'Flordeliza M. Buan', email: 'flordeliza@onse.ph', role: 'resident', roleBadge: 'bg-emerald-100 text-emerald-900', status: 'ACTIVE', lastLogin: '2 hours ago', createdAt: '2026-08-27 10:15' },
-  { id: 'USR-16', name: 'Danilo P. Soriano', email: 'danilo.s@onse.ph', role: 'resident', roleBadge: 'bg-emerald-100 text-emerald-900', status: 'ACTIVE', lastLogin: '4 hours ago', createdAt: '2026-08-26 15:20' },
-  { id: 'USR-15', name: 'Leticia T. Ramos', email: 'leticia@onse.ph', role: 'resident', roleBadge: 'bg-emerald-100 text-emerald-900', status: 'ACTIVE', lastLogin: '6 hours ago', createdAt: '2026-08-26 09:00' },
-  { id: 'USR-14', name: 'Hon. Alexis Adrianne R. Luciano', email: 'sk.luciano@onse.gov.ph', role: 'sk_councilor', roleBadge: 'bg-blue-100 text-blue-900', status: 'ACTIVE', lastLogin: '8 hours ago', createdAt: '2026-08-25 17:30' },
-  { id: 'USR-13', name: 'Hon. Ethan Jetter D.G. Garcia', email: 'sk.garcia@onse.gov.ph', role: 'sk_councilor', roleBadge: 'bg-blue-100 text-blue-900', status: 'ACTIVE', lastLogin: 'Yesterday', createdAt: '2026-08-25 14:10' },
-  { id: 'USR-12', name: 'Hon. Ryan Lopez Lorbes', email: 'kagawad.lorbes@onse.gov.ph', role: 'barangay_councilor', roleBadge: 'bg-blue-100 text-blue-900', status: 'ACTIVE', lastLogin: 'Yesterday', createdAt: '2026-08-24 16:00' },
-  { id: 'USR-11', name: 'Hon. Zenaida C. Casao', email: 'kagawad.casao@onse.gov.ph', role: 'barangay_councilor', roleBadge: 'bg-blue-100 text-blue-900', status: 'ACTIVE', lastLogin: '2 days ago', createdAt: '2026-08-24 11:25' },
-  { id: 'USR-10', name: 'Hon. John Mark C. Daradal', email: 'kagawad.daradal@onse.gov.ph', role: 'barangay_councilor', roleBadge: 'bg-blue-100 text-blue-900', status: 'ACTIVE', lastLogin: '2 days ago', createdAt: '2026-08-23 15:40' },
-  { id: 'USR-09', name: 'Hon. Federico S. Deniega', email: 'kagawad.deniega@onse.gov.ph', role: 'barangay_councilor', roleBadge: 'bg-blue-100 text-blue-900', status: 'ACTIVE', lastLogin: '3 days ago', createdAt: '2026-08-23 09:10' },
-  { id: 'USR-08', name: 'Hon. Miguel A. Zamora Jr.', email: 'kagawad.zamora@onse.gov.ph', role: 'barangay_councilor', roleBadge: 'bg-blue-100 text-blue-900', status: 'ACTIVE', lastLogin: '3 days ago', createdAt: '2026-08-22 14:50' },
-  { id: 'USR-07', name: 'Elena V. Gutierrez', email: 'treasurer@onse.gov.ph', role: 'staff', roleBadge: 'bg-amber-100 text-amber-900', status: 'ACTIVE', lastLogin: '4 days ago', createdAt: '2026-08-22 10:20' },
-  { id: 'USR-06', name: 'Atty. Victorina Delos Reyes', email: 'legal@onse.gov.ph', role: 'staff', roleBadge: 'bg-purple-100 text-purple-900', status: 'ACTIVE', lastLogin: '5 days ago', createdAt: '2026-08-21 16:15' },
-  { id: 'USR-05', name: 'Juan Dela Cruz', email: 'juan@onse.ph', role: 'resident', roleBadge: 'bg-emerald-100 text-emerald-900', status: 'ACTIVE', lastLogin: 'Aug 20, 2026', createdAt: '2026-08-20 12:00' },
-  { id: 'USR-04', name: 'Hon. John Michael Permato', email: 'sk@onse.gov.ph', role: 'sk_chairperson', roleBadge: 'bg-purple-100 text-purple-900', status: 'ACTIVE', lastLogin: 'Aug 19, 2026', createdAt: '2026-08-19 15:30' },
-  { id: 'USR-03', name: 'Hon. Danilo Florano', email: 'kagawad.florano@onse.gov.ph', role: 'barangay_councilor', roleBadge: 'bg-blue-100 text-blue-900', status: 'ACTIVE', lastLogin: 'Aug 18, 2026', createdAt: '2026-08-18 10:45' },
-  { id: 'USR-02', name: 'Jonathan D. Sorio', email: 'records@onse.gov.ph', role: 'staff', roleBadge: 'bg-amber-100 text-amber-900', status: 'ACTIVE', lastLogin: 'Aug 17, 2026', createdAt: '2026-08-17 08:30' },
-  { id: 'USR-01', name: 'Hon. Roberto Alba', email: 'captain@onse.gov.ph', role: 'super_admin', roleBadge: 'bg-purple-100 text-purple-900', status: 'ACTIVE', lastLogin: 'Aug 16, 2026', createdAt: '2026-08-16 08:00' },
-];
-
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<UserAccount[]>(INITIAL_USERS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [users, setUsers] = useState<UserAccount[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
@@ -82,7 +59,7 @@ export default function AdminUsersPage() {
     fetch('/api/admin/users')
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && Array.isArray(data.users) && data.users.length > 0) {
+        if (data.success && Array.isArray(data.users)) {
           setUsers(data.users);
         }
       })

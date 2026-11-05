@@ -41,7 +41,9 @@ export interface OfficialItem {
   avatar: string;
 }
 
-const FALLBACK_OFFICIALS: OfficialItem[] = [
+const FALLBACK_OFFICIALS: OfficialItem[] = [];
+/*
+const DEPRECATED_OFFICIALS: OfficialItem[] = [
   {
     id: 'OFF-01',
     name: 'Hon. Roberto B. Alba',
@@ -187,12 +189,13 @@ const FALLBACK_OFFICIALS: OfficialItem[] = [
     avatar: '/images/Mybaby.webp',
   },
 ];
+*/
 
 export default function AdminOfficialsPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'barangay' | 'sk'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [officials, setOfficials] = useState<OfficialItem[]>(() => sortOfficialsByHierarchy(FALLBACK_OFFICIALS));
-  const [isLoading, setIsLoading] = useState(false);
+  const [officials, setOfficials] = useState<OfficialItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Modals

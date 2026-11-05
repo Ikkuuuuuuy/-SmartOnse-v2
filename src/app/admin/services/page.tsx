@@ -32,7 +32,9 @@ export interface ServiceItem {
   description?: string;
 }
 
-const FALLBACK_SERVICES: ServiceItem[] = [
+const FALLBACK_SERVICES: ServiceItem[] = [];
+/*
+const DEPRECATED_SERVICES: ServiceItem[] = [
   {
     id: '1',
     code: 'SRV-001',
@@ -100,10 +102,11 @@ const FALLBACK_SERVICES: ServiceItem[] = [
     monthlyVolume: '25 issued / mo',
   },
 ];
+*/
 
 export default function AdminServicesPage() {
-  const [services, setServices] = useState<ServiceItem[]>(FALLBACK_SERVICES);
-  const [isLoading, setIsLoading] = useState(false);
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<ServiceItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

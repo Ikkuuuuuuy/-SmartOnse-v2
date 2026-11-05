@@ -35,7 +35,9 @@ export interface TransparencyDoc {
   category?: string;
 }
 
-const INITIAL_DOCUMENTS: TransparencyDoc[] = [
+const INITIAL_DOCUMENTS: TransparencyDoc[] = [];
+/*
+const DEPRECATED_DOCUMENTS: TransparencyDoc[] = [
   { id: 'FDB-2026-20', code: 'FDB-2026-20', title: 'Monthly Barangay Financial Report (Form 83) - July 2026', year: 'FY 2026', quarter: 'July 2026', fileSize: '1.9 MB (PDF)', status: 'VERIFIED_COA', uploadedBy: 'Barangay Treasurer', date: '2026-08-10' },
   { id: 'FDB-2026-19', code: 'FDB-2026-19', title: 'SK Monthly Statement of Receipts & Expenditures - July 2026', year: 'FY 2026', quarter: 'July 2026', fileSize: '1.2 MB (PDF)', status: 'VERIFIED_NYC', uploadedBy: 'SK Treasurer', date: '2026-08-08' },
   { id: 'FDB-2026-18', code: 'FDB-2026-18', title: 'Barangay Disaster Risk Reduction Management Fund (BDRRMF) Utilization Q2', year: 'FY 2026', quarter: 'Q2 2026', fileSize: '2.1 MB (PDF)', status: 'VERIFIED_COA', uploadedBy: 'DRRM Officer', date: '2026-07-28' },
@@ -47,10 +49,11 @@ const INITIAL_DOCUMENTS: TransparencyDoc[] = [
   { id: 'FDB-2026-12', code: 'FDB-2026-12', title: 'GAD (Gender and Development) 5% Mandatory Plan & Budget Audit', year: 'FY 2026', quarter: 'Q2 2026', fileSize: '2.4 MB (PDF)', status: 'VERIFIED_COA', uploadedBy: 'GAD Focal Person', date: '2026-06-15' },
   { id: 'FDB-2026-11', code: 'FDB-2026-11', title: 'SK 10% Comprehensive Barangay Youth Development Plan (CBYDP) Mid-Year Review', year: 'FY 2026', quarter: 'Q2 2026', fileSize: '3.4 MB (PDF)', status: 'VERIFIED_NYC', uploadedBy: 'SK Treasurer', date: '2026-06-01' },
 ];
+*/
 
 export default function AdminTransparencyPage() {
-  const [documents, setDocuments] = useState<TransparencyDoc[]>(INITIAL_DOCUMENTS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [documents, setDocuments] = useState<TransparencyDoc[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
