@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { MessageSquare, X, Send, Bot, Sparkles, HelpCircle } from 'lucide-react';
 
 interface ChatMessage {
@@ -11,6 +12,7 @@ interface ChatMessage {
 }
 
 export default function BarangayAiAssistant() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -163,6 +165,11 @@ export default function BarangayAiAssistant() {
       setLoading(false);
     }
   };
+
+  // Hide the citizen chatbot completely from all admin dashboards and pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-6 right-6 z-50">

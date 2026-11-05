@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import TablePagination from '@/components/ui/TablePagination';
 import TableSortHeader from '@/components/ui/TableSortHeader';
-import DashboardCharts from '@/components/admin/DashboardCharts';
+import DashboardCharts, { AnalyticsData } from '@/components/admin/DashboardCharts';
 
 export default function AdminDashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('FY 2026 (August 2026)');
@@ -70,32 +70,64 @@ export default function AdminDashboardPage() {
   ];
 
   const [clearances, setClearances] = useState(clearanceQueue);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
 
   // Dynamic KPI calculations from live data
+  const totalRequestsCount = analyticsData?.summary.totalRequests ?? clearances.length;
+
   const pendingCount = useMemo(() => {
-    return clearances.filter((r) => r.status === 'PENDING' || r.status === 'PENDING_REVIEW').length;
-  }, [clearances]);
+    if (analyticsData?.summary.pendingCount !== undefined) {
+      return analyticsData.summary.pendingCount + (analyticsData.summary.processingCount || 0);
+    }
+    return clearances.filter((r) => r.status === 'PENDING' || r.status === 'PENDING_REVIEW' || r.status === 'PROCESSING').length;
+  }, [clearances, analyticsData]);
 
   const readyCount = useMemo(() => {
+    if (analyticsData?.summary.readyCount !== undefined) {
+      return analyticsData.summary.readyCount;
+    }
     return clearances.filter((r) => r.status === 'READY_FOR_PICKUP').length;
-  }, [clearances]);
+  }, [clearances, analyticsData]);
+
+  const completedCount = useMemo(() => {
+    if (analyticsData?.summary.completedCount !== undefined) {
+      return analyticsData.summary.completedCount;
+    }
+    return clearances.filter((r) => r.status === 'COMPLETED').length;
+  }, [clearances, analyticsData]);
+
+  const realizedRevenue = useMemo(() => {
+    if (analyticsData?.summary.realizedRevenue !== undefined) {
+      return analyticsData.summary.realizedRevenue;
+    }
+    return clearances
+      .filter((r) => r.status === 'COMPLETED' || r.status === 'READY_FOR_PICKUP')
+      .reduce((sum, r) => {
+        const val = parseFloat(r.fee.replace(/[^0-9.]/g, ''));
+        return sum + (isNaN(val) ? 0 : val);
+      }, 0);
+  }, [clearances, analyticsData]);
+
+  const pipelineRevenue = analyticsData?.summary.pipelineRevenue ?? 0;
+  const waivedRevenue = analyticsData?.summary.waivedRevenue ?? 0;
+  const freeGrantsCount = analyticsData?.summary.freeRequestsCount ?? clearances.filter((r) => r.fee === 'FREE').length;
 
   const kpiCards = useMemo(() => [
     {
-      label: 'IRA Budget (Current Year)',
-      value: '₱14,850,000.00',
-      subtext: '42% Utilized • ₱8.61M Available',
-      badge: 'IRA',
-      badgeColor: 'border-black/15 bg-black/5 text-black dark:border-white/20 dark:bg-white/10 dark:text-white',
+      label: 'Total Requests Gathered',
+      value: `${totalRequestsCount} ${totalRequestsCount === 1 ? 'Request' : 'Requests'}`,
+      subtext: `${completedCount} Released • ${pendingCount} In Queue`,
+      badge: 'Volume',
+      badgeColor: 'border-slate-500/30 bg-slate-500/10 text-slate-800 dark:text-slate-200',
       color: 'text-black dark:text-white',
     },
     {
-      label: 'Projected Local Revenue',
-      value: '₱4,285,600.00',
-      subtext: '64% Realized Collections YTD',
-      badge: 'Revenue',
-      badgeColor: 'border-black/15 bg-black/5 text-black dark:border-white/20 dark:bg-white/10 dark:text-white',
-      color: 'text-black dark:text-white',
+      label: 'Realized Fee Revenue',
+      value: `₱${realizedRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      subtext: `+₱${pipelineRevenue.toLocaleString()} Pipeline • ₱${waivedRevenue.toLocaleString()} Waived`,
+      badge: 'Collections',
+      badgeColor: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+      color: 'text-emerald-600 dark:text-emerald-400',
     },
     {
       label: 'Pending Applications',
@@ -110,27 +142,38 @@ export default function AdminDashboardPage() {
       value: `${readyCount} ${readyCount === 1 ? 'Certificate' : 'Certificates'}`,
       subtext: 'Printed & sealed at Window 2',
       badge: 'Release',
-      badgeColor: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
-      color: 'text-emerald-600 dark:text-emerald-400',
+      badgeColor: 'border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-400',
+      color: 'text-blue-600 dark:text-blue-400',
     },
     {
       label: 'Verified Citizens',
       value: registeredCitizensCount.toLocaleString(),
-      subtext: 'Active Civil Registry & RBI',
-      badge: 'Verified',
-      badgeColor: 'border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-400',
-      color: 'text-blue-600 dark:text-blue-400',
+      subtext: `${freeGrantsCount} Fee Exemptions (RA 11261)`,
+      badge: 'Registry',
+      badgeColor: 'border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-400',
+      color: 'text-purple-600 dark:text-purple-400',
     },
-  ], [pendingCount, readyCount, registeredCitizensCount]);
+  ], [totalRequestsCount, completedCount, pendingCount, readyCount, realizedRevenue, pipelineRevenue, waivedRevenue, registeredCitizensCount, freeGrantsCount]);
 
   useEffect(() => {
     const fetchLatest = async () => {
       try {
-        const [resRequests, resResidents, resLogs] = await Promise.all([
+        const [resRequests, resResidents, resLogs, resAnalytics] = await Promise.all([
           fetch('/api/admin/requests'),
           fetch('/api/admin/residents').catch(() => null),
           fetch('/api/admin/audit-logs').catch(() => null),
+          fetch('/api/admin/analytics').catch(() => null),
         ]);
+
+        if (resAnalytics && resAnalytics.ok) {
+          const analyticsJson = await resAnalytics.json();
+          if (analyticsJson.success && analyticsJson.data) {
+            setAnalyticsData(analyticsJson.data);
+            if (analyticsJson.data.summary?.totalInhabitants) {
+              setRegisteredCitizensCount(analyticsJson.data.summary.totalInhabitants);
+            }
+          }
+        }
         
         if (resRequests.ok) {
           const data = await resRequests.json();
@@ -401,9 +444,9 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* 3. Charts & Analytics Row (Data-driven & Interactive) */}
-      <DashboardCharts selectedPeriod={selectedPeriod} />
+      <DashboardCharts selectedPeriod={selectedPeriod} analytics={analyticsData} />
 
-      {/* 4. Real-time Collections & Budget Allocation */}
+      {/* 4. Real-time Collections & Operational Performance */}
       <div className="bg-white dark:bg-[#0B1528] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-blue-900/40 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -412,19 +455,19 @@ export default function AdminDashboardPage() {
             </div>
             <div>
               <h3 className="font-black text-sm uppercase text-black dark:text-white tracking-wider">
-                Projected Income &amp; Revenue Forecasting (Credit &amp; Collections)
+                Internal Revenue &amp; Operational Audit (On-System Report)
               </h3>
               <p className="text-[11px] text-black/60 dark:text-white/60 font-medium">
-                Auto-calculated from DILG Form 83 subsidiary ledgers, recurring clearance issuances, and community tax fees.
+                Live ledger compiled from verified citizen document requests, official fee payments, and statutory assistance waivers.
               </p>
             </div>
           </div>
 
           <Link
-            href="/admin/transparency"
+            href="/admin/requests"
             className="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-black text-white dark:bg-white dark:text-black hover:bg-black/85 dark:hover:bg-white/85 font-bold text-xs uppercase tracking-wider transition"
           >
-            <span>Manage Ledgers</span>
+            <span>View All Requests</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -432,20 +475,32 @@ export default function AdminDashboardPage() {
         {/* Realization KPI Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-[#080E1A] border border-slate-200/60 dark:border-blue-900/30 text-xs">
           <div>
-            <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider block">Annual Projected Local</span>
-            <span className="text-base sm:text-lg font-black text-black dark:text-white">₱4,285,600.00</span>
+            <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider block">Realized Collections</span>
+            <span className="text-base sm:text-lg font-black text-black dark:text-white">
+              ₱{(analyticsData?.summary.realizedRevenue ?? realizedRevenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </span>
+            <span className="text-[10px] text-black/50 dark:text-white/50 block font-medium">Paid &amp; released issuances</span>
           </div>
           <div>
-            <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider block">Monthly Expected Run-Rate</span>
-            <span className="text-base sm:text-lg font-black text-black dark:text-white">₱357,133.33 <span className="text-[10px] text-black/50 dark:text-white/50 font-normal">/ mo</span></span>
+            <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider block">Pipeline Receivables</span>
+            <span className="text-base sm:text-lg font-black text-black dark:text-white">
+              ₱{(analyticsData?.summary.pipelineRevenue ?? pipelineRevenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </span>
+            <span className="text-[10px] text-black/50 dark:text-white/50 block font-medium">{pendingCount} requests in review</span>
           </div>
           <div>
-            <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider block">Realized Collections YTD</span>
-            <span className="text-base sm:text-lg font-black text-black dark:text-white">₱2,740,500.00</span>
+            <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider block">Social Aid Waived</span>
+            <span className="text-base sm:text-lg font-black text-black dark:text-white">
+              ₱{(analyticsData?.summary.waivedRevenue ?? waivedRevenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </span>
+            <span className="text-[10px] text-black/50 dark:text-white/50 block font-medium">Indigency &amp; RA 11261 aid</span>
           </div>
           <div>
-            <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider block">Realization Efficiency</span>
-            <span className="text-base sm:text-lg font-black text-black dark:text-white">64% Target Met</span>
+            <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider block">Avg. Velocity Turnaround</span>
+            <span className="text-base sm:text-lg font-black text-black dark:text-white">
+              {analyticsData?.summary.avgTurnaroundDays ?? '1.0'} <span className="text-[10px] text-black/50 dark:text-white/50 font-normal">days / doc</span>
+            </span>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-semibold">{analyticsData?.summary.collectionEfficiency ?? 100}% collection rate</span>
           </div>
         </div>
       </div>
@@ -757,7 +812,6 @@ export default function AdminDashboardPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-[#080E1A] rounded-2xl border border-slate-200/60 dark:border-blue-900/40 text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="font-bold text-slate-700 dark:text-slate-300">
                   Live System Audit Stream ({dashboardLogs.length} events logged)
                 </span>

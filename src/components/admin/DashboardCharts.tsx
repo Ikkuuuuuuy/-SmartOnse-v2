@@ -9,11 +9,54 @@ import {
   ArrowUpRight, 
   Sparkles,
   Info,
-  Calendar
+  Calendar,
+  CheckCircle2
 } from 'lucide-react';
+
+export interface AnalyticsData {
+  summary: {
+    totalRequests: number;
+    pendingCount: number;
+    processingCount: number;
+    readyCount: number;
+    completedCount: number;
+    rejectedCount: number;
+    realizedRevenue: number;
+    pipelineRevenue: number;
+    waivedRevenue: number;
+    freeRequestsCount: number;
+    paidRequestsCount: number;
+    exemptionRate: number;
+    collectionEfficiency: number;
+    avgTurnaroundDays: string;
+    avgRating: string;
+    ratingsCount: number;
+    totalUsers: number;
+    verifiedUsers: number;
+    totalInhabitants: number;
+  };
+  documentTypeBreakdown: Array<{
+    name: string;
+    code: string;
+    count: number;
+    revenue: number;
+    percentage: number;
+    color: string;
+  }>;
+  monthlyVelocity: Array<{
+    label: string;
+    monthYear: string;
+    sortKey: string;
+    clearances: number;
+    revenue: number;
+    completed: number;
+  }>;
+  topPurposes: Array<{ purpose: string; count: number }>;
+}
 
 export interface DashboardChartsProps {
   selectedPeriod: string;
+  analytics?: AnalyticsData | null;
 }
 
 interface TrendPoint {
@@ -29,50 +72,45 @@ interface SectorItem {
   shortName: string;
   percentage: number;
   amount: number;
+  count?: number;
   color: string;
   desc: string;
 }
 
-// Period Data Sets
+// Fallback Period Data Sets (if database is brand new / completely empty)
 const PERIOD_DATA: Record<string, TrendPoint[]> = {
   'FY 2026 (August 2026)': [
-    { label: 'Mar', clearances: 95, revenue: 142500, budget: 1850000, growth: '+12%' },
-    { label: 'Apr', clearances: 140, revenue: 210000, budget: 2100000, growth: '+47%' },
-    { label: 'May', clearances: 175, revenue: 262500, budget: 2450000, growth: '+25%' },
-    { label: 'Jun', clearances: 210, revenue: 315000, budget: 2800000, growth: '+20%' },
-    { label: 'Jul', clearances: 235, revenue: 352500, budget: 3100000, growth: '+12%' },
-    { label: 'Aug', clearances: 275, revenue: 412500, budget: 2550000, growth: '+17%' },
+    { label: 'May', clearances: 4, revenue: 330, budget: 0, growth: 'Base' },
+    { label: 'Jun', clearances: 6, revenue: 580, budget: 0, growth: '+50%' },
+    { label: 'Jul', clearances: 7, revenue: 650, budget: 0, growth: '+16%' },
+    { label: 'Aug', clearances: 9, revenue: 850, budget: 0, growth: '+28%' },
   ],
   'FY 2026 (Q3 July-Sept)': [
-    { label: 'Jul (Actual)', clearances: 235, revenue: 352500, budget: 3100000, growth: '+12%' },
-    { label: 'Aug (Current)', clearances: 275, revenue: 412500, budget: 2550000, growth: '+17%' },
-    { label: 'Sep (Forecast)', clearances: 320, revenue: 480000, budget: 2900000, growth: '+16%' },
+    { label: 'Jul', clearances: 7, revenue: 650, budget: 0, growth: 'Base' },
+    { label: 'Aug', clearances: 9, revenue: 850, budget: 0, growth: '+28%' },
+    { label: 'Sep', clearances: 10, revenue: 950, budget: 0, growth: '+11%' },
   ],
   'FY 2026 Annual': [
-    { label: 'Jan', clearances: 80, revenue: 120000, budget: 1400000, growth: 'Base' },
-    { label: 'Feb', clearances: 85, revenue: 127500, budget: 1600000, growth: '+6%' },
-    { label: 'Mar', clearances: 95, revenue: 142500, budget: 1850000, growth: '+12%' },
-    { label: 'Apr', clearances: 140, revenue: 210000, budget: 2100000, growth: '+47%' },
-    { label: 'May', clearances: 175, revenue: 262500, budget: 2450000, growth: '+25%' },
-    { label: 'Jun', clearances: 210, revenue: 315000, budget: 2800000, growth: '+20%' },
-    { label: 'Jul', clearances: 235, revenue: 352500, budget: 3100000, growth: '+12%' },
-    { label: 'Aug', clearances: 275, revenue: 412500, budget: 2550000, growth: '+17%' },
-    { label: 'Sep', clearances: 310, revenue: 465000, budget: 2800000, growth: '+13%' },
-    { label: 'Oct', clearances: 340, revenue: 510000, budget: 3000000, growth: '+10%' },
-    { label: 'Nov', clearances: 380, revenue: 570000, budget: 3200000, growth: '+12%' },
-    { label: 'Dec', clearances: 420, revenue: 630000, budget: 3500000, growth: '+11%' },
+    { label: 'Jan', clearances: 2, revenue: 150, budget: 0, growth: 'Base' },
+    { label: 'Feb', clearances: 3, revenue: 230, budget: 0, growth: '+50%' },
+    { label: 'Mar', clearances: 4, revenue: 310, budget: 0, growth: '+33%' },
+    { label: 'Apr', clearances: 4, revenue: 350, budget: 0, growth: '0%' },
+    { label: 'May', clearances: 5, revenue: 410, budget: 0, growth: '+25%' },
+    { label: 'Jun', clearances: 6, revenue: 580, budget: 0, growth: '+20%' },
+    { label: 'Jul', clearances: 7, revenue: 650, budget: 0, growth: '+12%' },
+    { label: 'Aug', clearances: 9, revenue: 850, budget: 0, growth: '+28%' },
   ],
 };
 
-const SECTORS: SectorItem[] = [
-  { name: 'General Services & Operations', shortName: 'General Ops', percentage: 38, amount: 5643000, color: '#DC2626', desc: 'Barangay Hall operations, staff salaries, utility overhead, maintenance' },
-  { name: 'Health & Medical Assistance', shortName: 'Health & Med', percentage: 24, amount: 3564000, color: '#10B981', desc: 'Health center medicines, maternal care, senior citizen vitamins, dental' },
-  { name: 'Peace & Order / Tanod Security', shortName: 'Peace & Order', percentage: 18, amount: 2673000, color: '#8B5CF6', desc: 'Tanod honorarium, CCTV maintenance, night patrols, lupong tagapamayapa' },
-  { name: 'Youth, Sports & SK Programs', shortName: 'Youth & SK', percentage: 12, amount: 1782000, color: '#F59E0B', desc: '10% mandatory SK budget, student scholarships, youth sports league' },
-  { name: 'DRRM & Climate Sanitation', shortName: 'DRRM & Climate', percentage: 8, amount: 1188000, color: '#3B82F6', desc: 'BDRRMF 5% calamity reserve, anti-dengue misting, canal declogging' },
+const DEFAULT_SECTORS: SectorItem[] = [
+  { name: 'Barangay Clearance', shortName: 'Clearance', percentage: 38, amount: 450, count: 9, color: '#DC2626', desc: 'Standard residency and good standing certificates' },
+  { name: 'Certificate of Residency', shortName: 'Residency', percentage: 25, amount: 210, count: 7, color: '#3B82F6', desc: 'Proof of residency certificates' },
+  { name: 'Certificate of Indigency', shortName: 'Indigency', percentage: 17, amount: 0, count: 5, color: '#10B981', desc: 'Fee-exempted medical and financial assistance' },
+  { name: 'First Time Jobseeker', shortName: 'Jobseeker', percentage: 12, amount: 0, count: 3, color: '#F59E0B', desc: 'R.A. 11261 waived pre-employment certificates' },
+  { name: 'Business Clearance', shortName: 'Business', percentage: 8, amount: 500, count: 2, color: '#8B5CF6', desc: 'Commercial establishment permits' },
 ];
 
-export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps) {
+export default function DashboardCharts({ selectedPeriod, analytics }: DashboardChartsProps) {
   // Metric toggle for Left Chart: 'clearances' or 'revenue'
   const [activeMetric, setActiveMetric] = useState<'clearances' | 'revenue'>('clearances');
   const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
@@ -80,14 +118,54 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
   // Sector hover state for Right Donut Chart
   const [hoveredSectorIndex, setHoveredSectorIndex] = useState<number | null>(null);
 
-  // Active dataset
-  const points = PERIOD_DATA[selectedPeriod] || PERIOD_DATA['FY 2026 (August 2026)'];
+  // Derive points from real database analytics if available
+  const points: TrendPoint[] = useMemo(() => {
+    if (analytics && Array.isArray(analytics.monthlyVelocity) && analytics.monthlyVelocity.length > 0) {
+      return analytics.monthlyVelocity.map((m, i, arr) => {
+        const prev = i > 0 ? arr[i - 1].clearances : m.clearances;
+        const diff = m.clearances - prev;
+        const growth = i === 0 ? 'Base' : diff >= 0 ? `+${diff}` : `${diff}`;
+        return {
+          label: m.label,
+          clearances: m.clearances,
+          revenue: m.revenue,
+          budget: 0,
+          growth,
+        };
+      });
+    }
+    return PERIOD_DATA[selectedPeriod] || PERIOD_DATA['FY 2026 (August 2026)'];
+  }, [analytics, selectedPeriod]);
+
+  // Derive sectors from real documentTypeBreakdown if available
+  const sectors: SectorItem[] = useMemo(() => {
+    if (analytics && Array.isArray(analytics.documentTypeBreakdown) && analytics.documentTypeBreakdown.length > 0) {
+      return analytics.documentTypeBreakdown.map((t) => {
+        const short = t.name
+          .replace('Barangay ', '')
+          .replace('Certificate of ', 'Cert. ')
+          .replace('First Time Jobseeker Certificate', 'Jobseeker (RA 11261)')
+          .replace('Incident / Blotter Certification', 'Blotter Report');
+
+        return {
+          name: t.name,
+          shortName: short.length > 18 ? `${short.slice(0, 16)}…` : short,
+          percentage: t.percentage,
+          amount: t.revenue,
+          count: t.count,
+          color: t.color,
+          desc: `${t.count} requests (${t.percentage}%) • ₱${t.revenue.toLocaleString()} collected`,
+        };
+      });
+    }
+    return DEFAULT_SECTORS;
+  }, [analytics]);
 
   // Calculate totals and statistics
   const stats = useMemo(() => {
     const totalClearances = points.reduce((sum, p) => sum + p.clearances, 0);
     const totalRevenue = points.reduce((sum, p) => sum + p.revenue, 0);
-    const avgClearances = Math.round(totalClearances / points.length);
+    const avgClearances = points.length > 0 ? Math.round(totalClearances / points.length) : 0;
     const peakPoint = [...points].sort((a, b) => b.clearances - a.clearances)[0];
 
     return {
@@ -109,12 +187,22 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
 
   const values = points.map((p) => (activeMetric === 'clearances' ? p.clearances : p.revenue));
   const minValue = 0;
-  const rawMax = Math.max(...values, 10);
+  const rawMax = Math.max(...values, 5);
   // Round max value up to nice number for cleaner grid
-  const maxValue = activeMetric === 'clearances' ? Math.ceil(rawMax / 50) * 50 : Math.ceil(rawMax / 100000) * 100000;
+  const maxValue = activeMetric === 'clearances'
+    ? Math.max(5, Math.ceil(rawMax * 1.2))
+    : Math.max(100, Math.ceil(rawMax / 100) * 100);
 
   // Calculate pixel coordinates for each point
   const coords = useMemo(() => {
+    if (points.length === 0) return [];
+    if (points.length === 1) {
+      const p = points[0];
+      const val = activeMetric === 'clearances' ? p.clearances : p.revenue;
+      const x = padding.left + usableWidth / 2;
+      const y = padding.top + usableHeight - ((val - minValue) / (maxValue - minValue)) * usableHeight;
+      return [{ x, y, point: p, val }];
+    }
     return points.map((p, idx) => {
       const val = activeMetric === 'clearances' ? p.clearances : p.revenue;
       const x = padding.left + (idx / Math.max(1, points.length - 1)) * usableWidth;
@@ -158,9 +246,14 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
   const circumference = 2 * Math.PI * radius; // ~238.76
 
   // Cumulative stroke offsets for donut slices
+  const totalSectorCount = useMemo(() => {
+    return sectors.reduce((sum, s) => sum + (s.count || 1), 0);
+  }, [sectors]);
+
   let cumulativeOffset = 0;
-  const donutSlices = SECTORS.map((sec, idx) => {
-    const strokeDash = (sec.percentage / 100) * circumference;
+  const donutSlices = sectors.map((sec, idx) => {
+    const fraction = totalSectorCount > 0 ? (sec.count || 1) / totalSectorCount : 0.2;
+    const strokeDash = fraction * circumference;
     const offset = cumulativeOffset;
     cumulativeOffset += strokeDash;
     return {
@@ -171,7 +264,7 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
     };
   });
 
-  const activeSector = hoveredSectorIndex !== null ? SECTORS[hoveredSectorIndex] : null;
+  const activeSector = hoveredSectorIndex !== null ? sectors[hoveredSectorIndex] : null;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -184,19 +277,19 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-black uppercase tracking-wider text-[#9C2007] dark:text-rose-400 bg-rose-50 dark:bg-rose-950/70 border border-rose-200 dark:border-rose-900/50 px-2 py-0.5 rounded-full">
-                Interactive Velocity
+                System Activity Stream
               </span>
               <span className="text-[10px] font-bold text-slate-400">&bull;</span>
               <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                {selectedPeriod}
+                Live Database Records
               </span>
             </div>
             <h3 className="font-black text-sm uppercase text-slate-900 dark:text-white tracking-wider flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-[#9C2007] dark:text-rose-400" />
-              <span>Barangay Clearance &amp; Revenue Velocity</span>
+              <span>Barangay Request &amp; Fee Velocity</span>
             </h3>
-            <p className="text-[11px] text-slate-400 dark:text-slate-400 font-medium">
-              Hover over data points to inspect monthly clearance volume and fee collections.
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+              Real request volume and actual fee collections recorded inside SmartOnse.
             </p>
           </div>
 
@@ -227,24 +320,23 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
           </div>
         </div>
 
-        {/* Dynamic SVG Area & Line Chart */}
-        <div className="relative h-60 w-full select-none">
+        {/* SVG Interactive Chart Canvas */}
+        <div className="relative w-full h-[210px] select-none">
           <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-full overflow-visible">
             <defs>
-              <linearGradient id="maroonGradientDynamic" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#9C2007" stopOpacity="0.45" />
+              <linearGradient id="velocityAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#9C2007" stopOpacity="0.32" />
                 <stop offset="100%" stopColor="#9C2007" stopOpacity="0.0" />
               </linearGradient>
             </defs>
 
-            {/* Horizontal Grid Lines & Y-Axis Labels */}
+            {/* Horizontal Grid lines and Y-Axis Labels */}
             {gridLevels.map((lvl, idx) => {
               const y = padding.top + usableHeight - lvl * usableHeight;
-              const labelVal = minValue + lvl * (maxValue - minValue);
-              const formatted =
-                activeMetric === 'clearances'
-                  ? Math.round(labelVal).toString()
-                  : `₱${(labelVal / 1000).toFixed(0)}k`;
+              const labelVal = Math.round(minValue + lvl * (maxValue - minValue));
+              const displayVal = activeMetric === 'revenue'
+                ? `₱${labelVal >= 1000 ? `${(labelVal / 1000).toFixed(0)}k` : labelVal}`
+                : labelVal;
 
               return (
                 <g key={idx}>
@@ -254,44 +346,48 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
                     x2={chartWidth - padding.right}
                     y2={y}
                     stroke="currentColor"
-                    className="text-slate-100 dark:text-blue-950/70"
+                    strokeDasharray="4 4"
+                    className="text-slate-200 dark:text-blue-900/40"
                     strokeWidth="1"
-                    strokeDasharray={idx === 0 ? '0' : '4 4'}
                   />
                   <text
-                    x={padding.left - 10}
-                    y={y + 3.5}
+                    x={padding.left - 8}
+                    y={y + 3}
                     fontSize="9"
-                    fontWeight="bold"
+                    fontWeight="700"
                     fill="currentColor"
-                    className="text-slate-400 dark:text-slate-500 font-mono"
+                    className="text-slate-400 dark:text-slate-400"
                     textAnchor="end"
                   >
-                    {formatted}
+                    {displayVal}
                   </text>
                 </g>
               );
             })}
 
-            {/* Gradient Filled Area */}
-            <path
-              d={areaPath}
-              fill="url(#maroonGradientDynamic)"
-              className="transition-all duration-300 ease-out"
-            />
+            {/* Area Fill */}
+            {areaPath && (
+              <path
+                d={areaPath}
+                fill="url(#velocityAreaGradient)"
+                className="transition-all duration-300 ease-out"
+              />
+            )}
 
-            {/* Curved Trend Line */}
-            <path
-              d={linePath}
-              fill="none"
-              stroke="#DC2626"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="transition-all duration-300 ease-out drop-shadow-xs"
-            />
+            {/* Smooth Bezier Line */}
+            {linePath && (
+              <path
+                d={linePath}
+                fill="none"
+                stroke="#9C2007"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="transition-all duration-300 ease-out drop-shadow-sm"
+              />
+            )}
 
-            {/* Active Vertical Crosshair line when hovered */}
+            {/* Hover Vertical Guide Line */}
             {hoveredPointIndex !== null && coords[hoveredPointIndex] && (
               <line
                 x1={coords[hoveredPointIndex].x}
@@ -382,9 +478,9 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
               </div>
               <div className="space-y-1 font-mono text-[11px]">
                 <div className="flex items-center justify-between gap-3 text-slate-700 dark:text-slate-200">
-                  <span>Clearances Issued:</span>
+                  <span>Applications:</span>
                   <strong className="text-slate-900 dark:text-white font-bold">
-                    {coords[hoveredPointIndex].point.clearances.toLocaleString()} docs
+                    {coords[hoveredPointIndex].point.clearances.toLocaleString()} requests
                   </strong>
                 </div>
                 <div className="flex items-center justify-between gap-3 text-slate-700 dark:text-slate-200">
@@ -402,11 +498,11 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
         <div className="pt-3 border-t border-slate-100 dark:border-blue-900/40 grid grid-cols-3 gap-2 text-xs">
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              Period Total
+              System Total
             </span>
             <span className="font-black text-slate-900 dark:text-white text-sm">
               {activeMetric === 'clearances'
-                ? `${stats.totalClearances.toLocaleString()} Clearances`
+                ? `${stats.totalClearances.toLocaleString()} Requests`
                 : `₱${stats.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
             </span>
           </div>
@@ -420,7 +516,7 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
           </div>
           <div className="text-right">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              Peak Month
+              Peak Period
             </span>
             <span className="font-black text-[#9C2007] dark:text-rose-400 text-sm">
               {stats.peakMonth} ({stats.peakValue} docs)
@@ -429,23 +525,23 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
         </div>
       </div>
 
-      {/* 2. RIGHT CHART: Service & Expenditure Breakdown (Interactive Donut) */}
+      {/* 2. RIGHT CHART: Service & Revenue Share (Interactive Donut) */}
       <div className="lg:col-span-5 bg-white dark:bg-[#0B1528] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-blue-900/40 shadow-xs space-y-4 flex flex-col justify-between transition-all">
         
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-800/50 px-2 py-0.5 rounded-full">
-              Full Disclosure Form 83
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800/50 px-2 py-0.5 rounded-full">
+              System Service Distribution
             </span>
             <span className="text-[10px] font-bold text-slate-400">&bull;</span>
-            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">COA Certified</span>
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Database Audit</span>
           </div>
           <h3 className="font-black text-sm uppercase text-slate-900 dark:text-white tracking-wider flex items-center gap-2">
-            <PieChart className="w-4 h-4 text-amber-500" />
-            <span>Service &amp; Expenditure Breakdown</span>
+            <PieChart className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>Document Request &amp; Revenue Share</span>
           </h3>
-          <p className="text-[11px] text-slate-400 dark:text-slate-400 font-medium">
-            Hover over donut slices or sectors below to inspect allocated fund distribution.
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+            Real distribution of citizen applications and collections across all document services.
           </p>
         </div>
 
@@ -492,19 +588,19 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
                     {activeSector.percentage}%
                   </span>
                   <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block font-mono">
-                    ₱{(activeSector.amount / 1000000).toFixed(2)}M
+                    {activeSector.count} reqs • ₱{activeSector.amount.toLocaleString()}
                   </span>
                 </div>
               ) : (
                 <div className="space-y-0.5">
                   <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest block">
-                    Total IRA Ops
+                    Total System Volume
                   </span>
                   <span className="text-xl font-black text-slate-900 dark:text-white block font-mono">
-                    100%
+                    {analytics?.summary.totalRequests ?? stats.totalClearances} Reqs
                   </span>
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block font-mono">
-                    ₱14.85M Budget
+                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 block font-mono">
+                    ₱{(analytics?.summary.realizedRevenue ?? stats.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2 })} Earned
                   </span>
                 </div>
               )}
@@ -514,7 +610,7 @@ export default function DashboardCharts({ selectedPeriod }: DashboardChartsProps
 
         {/* Interactive Legend Grid */}
         <div className="grid grid-cols-2 gap-2 text-xs pt-3 border-t border-slate-100 dark:border-blue-900/40">
-          {SECTORS.map((sec, idx) => {
+          {sectors.map((sec, idx) => {
             const isHovered = hoveredSectorIndex === idx;
 
             return (

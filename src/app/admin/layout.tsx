@@ -444,15 +444,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
 
             <div className="hidden sm:block">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                <h2 className="text-xs font-black tracking-wider uppercase flex items-center gap-1.5">
-                  <span className="text-slate-400 dark:text-slate-400 font-bold">{currentBreadcrumb.group}</span>
-                  <span className="text-slate-300 dark:text-slate-600 font-bold">&gt;</span>
-                  <span className="text-slate-900 dark:text-white font-black">{currentBreadcrumb.label}</span>
-                </h2>
-              </div>
-              <p className="text-[10px] text-slate-400 dark:text-slate-400 font-semibold tracking-wider uppercase mt-0.5 ml-4">
+              <h2 className="text-xs font-black tracking-wider uppercase flex items-center gap-1.5">
+                <span className="text-slate-400 dark:text-slate-400 font-bold">{currentBreadcrumb.group}</span>
+                <span className="text-slate-300 dark:text-slate-600 font-bold">&gt;</span>
+                <span className="text-slate-900 dark:text-white font-black">{currentBreadcrumb.label}</span>
+              </h2>
+              <p className="text-[10px] text-slate-400 dark:text-slate-400 font-semibold tracking-wider uppercase mt-0.5">
                 Digital E-Governance &bull; Financial &amp; Services System
               </p>
             </div>
