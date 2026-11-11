@@ -137,7 +137,7 @@ export default function AdminDashboardPage() {
     {
       label: 'Verified Citizens',
       value: registeredCitizensCount.toLocaleString(),
-      subtext: `${freeGrantsCount} Fee Exemptions (RA 11261)`,
+      subtext: `${freeGrantsCount} Free Grants (RA 11261)`,
       badge: 'Registry',
       badgeColor: 'border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-400',
       color: 'text-purple-600 dark:text-purple-400',
@@ -203,7 +203,7 @@ export default function AdminDashboardPage() {
               type: r.documentType,
               purpose: r.purpose,
               fee: r.fee === 0 ? 'FREE' : `₱${r.fee.toFixed(2)}`,
-              feeStatus: r.fee === 0 ? 'EXEMPTED' : 'PAID',
+              feeStatus: r.fee === 0 ? 'FREE' : 'PAID',
               date: r.createdAt,
               status: r.status === 'PENDING' ? 'PENDING_REVIEW' : r.status,
             }));
@@ -702,7 +702,7 @@ export default function AdminDashboardPage() {
                   { key: 'PROCESSING', label: 'Processing' },
                   { key: 'READY_FOR_PICKUP', label: 'Ready for Pickup' },
                   { key: 'COMPLETED', label: 'Completed' },
-                  { key: 'REJECTED', label: 'Disapproved' },
+                  { key: 'REJECTED', label: 'Rejected' },
                 ].map((st) => (
                   <button
                     key={st.key}
@@ -851,7 +851,7 @@ export default function AdminDashboardPage() {
                         )}
                         {row.status === 'REJECTED' && (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40 text-[10px] font-black uppercase whitespace-nowrap">
-                            Disapproved
+                            Rejected
                           </span>
                         )}
                       </td>

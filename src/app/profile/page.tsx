@@ -685,7 +685,7 @@ export default function ProfilePage() {
                               : 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300'
                           }`}
                         >
-                          {req.status === 'REJECTED' ? 'DISAPPROVED' : req.status.replace(/_/g, ' ')}
+                          {req.status === 'REJECTED' ? 'REJECTED' : req.status.replace(/_/g, ' ')}
                         </span>
                         {req.status === 'REJECTED' && req.remarks && (
                           <div className="mt-1 text-[10px] text-rose-600 dark:text-rose-400 font-medium max-w-[180px] truncate" title={req.remarks}>

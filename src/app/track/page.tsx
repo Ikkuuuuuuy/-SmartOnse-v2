@@ -162,7 +162,7 @@ function TrackContent() {
       case 'COMPLETED':
         return <span className="px-2.5 py-1 bg-purple-100 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-800/40 text-[10px] font-black rounded-full uppercase whitespace-nowrap inline-block">COMPLETED &amp; RELEASED</span>;
       case 'REJECTED':
-        return <span className="px-2.5 py-1 bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800/40 text-[10px] font-black rounded-full uppercase whitespace-nowrap inline-block">DISAPPROVED</span>;
+        return <span className="px-2.5 py-1 bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800/40 text-[10px] font-black rounded-full uppercase whitespace-nowrap inline-block">REJECTED</span>;
       default:
         return <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-[10px] font-black rounded-full uppercase whitespace-nowrap inline-block">{status}</span>;
     }
@@ -252,7 +252,7 @@ function TrackContent() {
                   <option value="PROCESSING">Processing</option>
                   <option value="READY_FOR_PICKUP">Ready for Pickup</option>
                   <option value="COMPLETED">Completed &amp; Released</option>
-                  <option value="REJECTED">Disapproved</option>
+                  <option value="REJECTED">Rejected</option>
                 </select>
               </div>
             </div>
@@ -417,7 +417,7 @@ function TrackContent() {
                   </div>
                   <div className="space-y-1">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700">
-                      Application Disapproved
+                      Application Rejected
                     </div>
                     <h4 className="text-lg font-black uppercase text-rose-950 dark:text-rose-100">
                       Request for Certificate Rejected
@@ -478,7 +478,7 @@ function TrackContent() {
                       : 'bg-slate-50 dark:bg-[#152747] border-slate-200 dark:border-blue-900/40 text-slate-400'
                   }`}
                 >
-                  {getStepStatus(2) === 'rejected' ? '2. Disapproved' : '2. Processing'}
+                  {getStepStatus(2) === 'rejected' ? '2. Rejected' : '2. Processing'}
                 </div>
                 <div
                   className={`p-3 rounded-xl border font-bold transition ${
@@ -511,7 +511,7 @@ function TrackContent() {
                 <div>
                   <span className="text-slate-400 font-bold uppercase text-[10px]">Official Fee</span>
                   <p className="font-bold text-[#9C2007] dark:text-rose-400">
-                    {docData.fee === 0 ? 'FREE / EXEMPTED' : `₱${docData.fee.toFixed(2)}`}
+                    {docData.fee === 0 ? 'FREE' : `₱${docData.fee.toFixed(2)}`}
                   </p>
                 </div>
                 <div>

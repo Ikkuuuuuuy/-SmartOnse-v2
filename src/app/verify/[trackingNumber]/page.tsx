@@ -57,7 +57,7 @@ export default async function VerifyCertificatePage({
                 <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60">
                   <ShieldAlert className="w-8 h-8 text-rose-600 dark:text-rose-400 shrink-0" />
                   <div>
-                    <h3 className="font-bold text-rose-900 dark:text-rose-300">Document Disapproved / Void</h3>
+                    <h3 className="font-bold text-rose-900 dark:text-rose-300">Document Rejected / Void</h3>
                     <p className="text-rose-700 dark:text-rose-400">This request was officially rejected by barangay authorities and is not a valid certificate</p>
                   </div>
                 </div>
@@ -106,7 +106,7 @@ export default async function VerifyCertificatePage({
                       : request.status === 'READY_FOR_PICKUP'
                       ? 'VERIFIED & READY'
                       : request.status === 'REJECTED'
-                      ? 'DISAPPROVED / REJECTED'
+                      ? 'REJECTED'
                       : 'UNDER VERIFICATION'}
                   </span>
                 </div>

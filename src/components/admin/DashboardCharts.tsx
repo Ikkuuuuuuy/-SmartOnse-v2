@@ -105,7 +105,7 @@ const PERIOD_DATA: Record<string, TrendPoint[]> = {
 const DEFAULT_SECTORS: SectorItem[] = [
   { name: 'Barangay Clearance', shortName: 'Clearance', percentage: 38, amount: 450, count: 9, color: '#DC2626', desc: 'Standard residency and good standing certificates' },
   { name: 'Certificate of Residency', shortName: 'Residency', percentage: 25, amount: 210, count: 7, color: '#3B82F6', desc: 'Proof of residency certificates' },
-  { name: 'Certificate of Indigency', shortName: 'Indigency', percentage: 17, amount: 0, count: 5, color: '#10B981', desc: 'Fee-exempted medical and financial assistance' },
+  { name: 'Certificate of Indigency', shortName: 'Indigency', percentage: 17, amount: 0, count: 5, color: '#10B981', desc: 'Free medical and financial assistance' },
   { name: 'First Time Jobseeker', shortName: 'Jobseeker', percentage: 12, amount: 0, count: 3, color: '#F59E0B', desc: 'R.A. 11261 waived pre-employment certificates' },
   { name: 'Business Clearance', shortName: 'Business', percentage: 8, amount: 500, count: 2, color: '#8B5CF6', desc: 'Commercial establishment permits' },
 ];

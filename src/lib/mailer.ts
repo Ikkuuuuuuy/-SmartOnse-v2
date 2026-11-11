@@ -328,9 +328,9 @@ export async function sendStatusUpdateEmail({
     statusBadgeBg = '#FEE2E2';
     statusBadgeText = '#991B1B';
     statusBadgeBorder = '#FECACA';
-    statusTitle = 'Application Disapproved / Disapproved ⚠️';
+    statusTitle = 'Application Rejected ⚠️';
     statusSubtitle = 'Kinakailangan ng karagdagang dokumento o paglilinaw para sa iyong aplikasyon.';
-    emailSubject = `[SmartOnse] Update: Disapproved ang ${documentType} (#${trackingNumber})`;
+    emailSubject = `[SmartOnse] Update: Rejected ang ${documentType} (#${trackingNumber})`;
   }
 
   const siteUrl = process.env.NEXTAUTH_URL || 'https://smartonse-v2.vercel.app';

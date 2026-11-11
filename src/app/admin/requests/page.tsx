@@ -414,8 +414,8 @@ export default function AdminRequestsPage() {
           description = `Your ${target.documentType} (#${target.trackingNumber}) has been officially completed and released.`;
           notifType = 'system';
         } else if (newStatus === 'REJECTED') {
-          title = 'Certificate Request Disapproved';
-          description = `Application #${target.trackingNumber} (${target.documentType}) was disapproved.${remarks ? ` Reason: ${remarks}` : ''}`;
+          title = 'Certificate Request Rejected';
+          description = `Application #${target.trackingNumber} (${target.documentType}) was rejected.${remarks ? ` Reason: ${remarks}` : ''}`;
           notifType = 'alert';
         }
 
@@ -879,7 +879,7 @@ export default function AdminRequestsPage() {
               <div className="flex items-center gap-2">
                 {selectedRequest.status === 'REJECTED' ? (
                   <div className="px-3.5 py-2 bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 font-bold text-xs rounded-xl flex items-center gap-1.5 border border-rose-300 dark:border-rose-800/60 shadow-xs">
-                    <XCircle className="w-4 h-4" /> Disapproved (Printing Prohibited)
+                    <XCircle className="w-4 h-4" /> Rejected (Printing Prohibited)
                   </div>
                 ) : (
                   <button
@@ -1061,7 +1061,7 @@ export default function AdminRequestsPage() {
                   setRejectionReason(e.target.value);
                   if (rejectionError) setRejectionError(null);
                 }}
-                placeholder="State the clear reason why the certificate request was disapproved..."
+                placeholder="State the clear reason why the certificate request was rejected..."
                 className="w-full p-3.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/50 rounded-2xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-1 focus:ring-rose-500 transition resize-none"
               />
               {rejectionError && (
