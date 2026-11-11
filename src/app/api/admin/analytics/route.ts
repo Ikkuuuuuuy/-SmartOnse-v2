@@ -27,7 +27,14 @@ export async function GET(req: Request) {
     }
 
     const { searchParams } = new URL(req.url);
-    const periodParam = searchParams.get('period') || 'FY 2026 (August 2026)';
+    const timeframeParam = (searchParams.get('timeframe') || searchParams.get('granularity') || '').toLowerCase();
+    const yearParam = searchParams.get('year');
+    const monthParam = searchParams.get('month');
+    const quarterParam = searchParams.get('quarter');
+    const dayParam = searchParams.get('day');
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+    const periodParam = searchParams.get('period') || '';
 
     // 1. Fetch all document requests with their document types
     const [allRequests, totalUsers, verifiedUsers, totalInhabitants] = await Promise.all([
@@ -44,34 +51,244 @@ export async function GET(req: Request) {
       prisma.barangayInhabitant.count(),
     ]);
 
-    // Parse period window
-    let startDate: Date | null = null;
-    let endDate: Date | null = null;
-    let allowedMonths: string[] | null = null;
+    // Determine timeframe mode
+    let mode = timeframeParam;
+    if (!mode) {
+      if (periodParam.includes('August') || periodParam.toLowerCase() === 'month') mode = 'month';
+      else if (periodParam.includes('Q3') || periodParam.includes('Quarter') || periodParam.toLowerCase() === 'quarter') mode = 'quarter';
+      else if (periodParam.includes('Annual') || periodParam.toLowerCase() === 'year') mode = 'year';
+      else if (startDateParam && endDateParam) mode = 'custom';
+      else if (dayParam) mode = 'day';
+      else mode = 'month';
+    }
 
-    if (periodParam.includes('August') || periodParam.includes('Aug') || periodParam.toLowerCase() === 'month') {
-      // Month window: August 2026
-      startDate = new Date('2026-08-01T00:00:00.000Z');
-      endDate = new Date('2026-08-31T23:59:59.999Z');
-      // Velocity shows May to August trajectory
-      allowedMonths = ['2026-05', '2026-06', '2026-07', '2026-08'];
-    } else if (periodParam.includes('Q3') || periodParam.includes('Quarter') || periodParam.toLowerCase() === 'quarter') {
-      // Quarter window: Q3 2026 (July - September)
-      startDate = new Date('2026-07-01T00:00:00.000Z');
-      endDate = new Date('2026-09-30T23:59:59.999Z');
-      allowedMonths = ['2026-07', '2026-08', '2026-09'];
-    } else if (periodParam.includes('Annual') || periodParam.includes('Full Year') || periodParam.toLowerCase() === 'annual') {
-      // Annual window: Full Year 2026
-      startDate = new Date('2026-01-01T00:00:00.000Z');
-      endDate = new Date('2026-12-31T23:59:59.999Z');
-      allowedMonths = null;
+    const selectedYear = yearParam ? parseInt(yearParam, 10) : 2026;
+    const selectedMonth = monthParam ? parseInt(monthParam, 10) : 8; // 1-12 (Aug default for seed)
+    const selectedQuarter = quarterParam ? parseInt(quarterParam, 10) : 3; // 1-4
+
+    const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const MONTH_NAMES_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    interface VelocityBucket {
+      label: string;
+      monthYear: string;
+      sortKey: string;
+      clearances: number;
+      revenue: number;
+      completed: number;
+      start: Date;
+      end: Date;
+    }
+
+    const velocityBuckets: VelocityBucket[] = [];
+    let filterStart: Date | null = null;
+    let filterEnd: Date | null = null;
+    let labelTitle = '';
+
+    if (mode === 'day') {
+      const targetDayStr = dayParam || (startDateParam || '2026-08-28');
+      filterStart = new Date(`${targetDayStr}T00:00:00.000Z`);
+      filterEnd = new Date(`${targetDayStr}T23:59:59.999Z`);
+      labelTitle = `Daily: ${targetDayStr}`;
+
+      // 6 Hourly slots: 8am, 10am, 12pm, 2pm, 4pm, 6pm
+      const hours = [8, 10, 12, 14, 16, 18];
+      hours.forEach((h, idx) => {
+        const slotStart = new Date(`${targetDayStr}T${String(h).padStart(2, '0')}:00:00.000Z`);
+        const nextH = idx < hours.length - 1 ? hours[idx + 1] : 23;
+        const slotEnd = new Date(`${targetDayStr}T${String(nextH).padStart(2, '0')}:59:59.999Z`);
+        const displayTime = h === 12 ? '12:00 PM' : h < 12 ? `${h}:00 AM` : `${h - 12}:00 PM`;
+        velocityBuckets.push({
+          label: displayTime,
+          monthYear: `${targetDayStr} ${displayTime}`,
+          sortKey: `${targetDayStr}-${String(h).padStart(2, '0')}`,
+          clearances: 0,
+          revenue: 0,
+          completed: 0,
+          start: slotStart,
+          end: slotEnd,
+        });
+      });
+    } else if (mode === 'week') {
+      const refDayStr = dayParam || startDateParam || '2026-08-28';
+      const refDate = new Date(`${refDayStr}T12:00:00.000Z`);
+      
+      // 7 consecutive days up to reference date
+      const daysList: Date[] = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(refDate);
+        d.setDate(d.getDate() - i);
+        daysList.push(d);
+      }
+
+      filterStart = new Date(daysList[0].toISOString().slice(0, 10) + 'T00:00:00.000Z');
+      filterEnd = new Date(daysList[daysList.length - 1].toISOString().slice(0, 10) + 'T23:59:59.999Z');
+      labelTitle = `Weekly: ${filterStart.toISOString().slice(0, 10)} to ${filterEnd.toISOString().slice(0, 10)}`;
+
+      const dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      daysList.forEach((d) => {
+        const dStr = d.toISOString().slice(0, 10);
+        const dayLabel = `${dayNamesShort[d.getUTCDay()]} ${d.getUTCDate()}`;
+        velocityBuckets.push({
+          label: dayLabel,
+          monthYear: dStr,
+          sortKey: dStr,
+          clearances: 0,
+          revenue: 0,
+          completed: 0,
+          start: new Date(`${dStr}T00:00:00.000Z`),
+          end: new Date(`${dStr}T23:59:59.999Z`),
+        });
+      });
+    } else if (mode === 'month') {
+      filterStart = new Date(Date.UTC(selectedYear, selectedMonth - 1, 1, 0, 0, 0));
+      filterEnd = new Date(Date.UTC(selectedYear, selectedMonth, 0, 23, 59, 59, 999));
+      const mName = MONTH_NAMES_FULL[selectedMonth - 1];
+      const mShort = MONTH_NAMES_SHORT[selectedMonth - 1];
+      labelTitle = `Monthly: ${mName} ${selectedYear}`;
+
+      const totalDaysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+      const intervals = [
+        { label: `W1 (${mShort} 1-7)`, startDay: 1, endDay: 7 },
+        { label: `W2 (${mShort} 8-14)`, startDay: 8, endDay: 14 },
+        { label: `W3 (${mShort} 15-21)`, startDay: 15, endDay: 21 },
+        { label: `W4 (${mShort} 22-28)`, startDay: 22, endDay: 28 },
+        ...(totalDaysInMonth > 28 ? [{ label: `W5 (${mShort} 29-${totalDaysInMonth})`, startDay: 29, endDay: totalDaysInMonth }] : []),
+      ];
+
+      intervals.forEach((inv, idx) => {
+        velocityBuckets.push({
+          label: inv.label,
+          monthYear: `${inv.label} ${selectedYear}`,
+          sortKey: `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-W${idx + 1}`,
+          clearances: 0,
+          revenue: 0,
+          completed: 0,
+          start: new Date(Date.UTC(selectedYear, selectedMonth - 1, inv.startDay, 0, 0, 0)),
+          end: new Date(Date.UTC(selectedYear, selectedMonth - 1, inv.endDay, 23, 59, 59, 999)),
+        });
+      });
+    } else if (mode === 'quarter') {
+      const startMonthIdx = (selectedQuarter - 1) * 3;
+      const endMonthIdx = startMonthIdx + 2;
+      filterStart = new Date(Date.UTC(selectedYear, startMonthIdx, 1, 0, 0, 0));
+      filterEnd = new Date(Date.UTC(selectedYear, endMonthIdx + 1, 0, 23, 59, 59, 999));
+      labelTitle = `Quarterly: Q${selectedQuarter} ${selectedYear} (${MONTH_NAMES_SHORT[startMonthIdx]} – ${MONTH_NAMES_SHORT[endMonthIdx]})`;
+
+      for (let m = startMonthIdx; m <= endMonthIdx; m++) {
+        const mLabel = MONTH_NAMES_SHORT[m];
+        const mKey = `${selectedYear}-${String(m + 1).padStart(2, '0')}`;
+        velocityBuckets.push({
+          label: `${mLabel} ${selectedYear}`,
+          monthYear: `${mLabel} ${selectedYear}`,
+          sortKey: mKey,
+          clearances: 0,
+          revenue: 0,
+          completed: 0,
+          start: new Date(Date.UTC(selectedYear, m, 1, 0, 0, 0)),
+          end: new Date(Date.UTC(selectedYear, m + 1, 0, 23, 59, 59, 999)),
+        });
+      }
+    } else if (mode === 'year') {
+      filterStart = new Date(Date.UTC(selectedYear, 0, 1, 0, 0, 0));
+      filterEnd = new Date(Date.UTC(selectedYear, 11, 31, 23, 59, 59, 999));
+      labelTitle = `Annual: Full Year ${selectedYear}`;
+
+      for (let m = 0; m < 12; m++) {
+        const mLabel = MONTH_NAMES_SHORT[m];
+        const mKey = `${selectedYear}-${String(m + 1).padStart(2, '0')}`;
+        velocityBuckets.push({
+          label: mLabel,
+          monthYear: `${mLabel} ${selectedYear}`,
+          sortKey: mKey,
+          clearances: 0,
+          revenue: 0,
+          completed: 0,
+          start: new Date(Date.UTC(selectedYear, m, 1, 0, 0, 0)),
+          end: new Date(Date.UTC(selectedYear, m + 1, 0, 23, 59, 59, 999)),
+        });
+      }
+    } else if (mode === 'custom' && startDateParam && endDateParam) {
+      filterStart = new Date(`${startDateParam}T00:00:00.000Z`);
+      filterEnd = new Date(`${endDateParam}T23:59:59.999Z`);
+      labelTitle = `Custom: ${startDateParam} to ${endDateParam}`;
+
+      // Calculate days difference
+      const diffDays = Math.max(1, Math.round((filterEnd.getTime() - filterStart.getTime()) / (1000 * 60 * 60 * 24)));
+      if (diffDays <= 14) {
+        // Daily breakdown
+        for (let i = 0; i < diffDays; i++) {
+          const d = new Date(filterStart);
+          d.setDate(d.getDate() + i);
+          const dStr = d.toISOString().slice(0, 10);
+          velocityBuckets.push({
+            label: `${MONTH_NAMES_SHORT[d.getUTCMonth()]} ${d.getUTCDate()}`,
+            monthYear: dStr,
+            sortKey: dStr,
+            clearances: 0,
+            revenue: 0,
+            completed: 0,
+            start: new Date(`${dStr}T00:00:00.000Z`),
+            end: new Date(`${dStr}T23:59:59.999Z`),
+          });
+        }
+      } else {
+        // Monthly breakdown
+        const curr = new Date(filterStart);
+        while (curr <= filterEnd) {
+          const y = curr.getUTCFullYear();
+          const m = curr.getUTCMonth();
+          const mLabel = MONTH_NAMES_SHORT[m];
+          const mKey = `${y}-${String(m + 1).padStart(2, '0')}`;
+          const bStart = new Date(Date.UTC(y, m, 1, 0, 0, 0));
+          const bEnd = new Date(Date.UTC(y, m + 1, 0, 23, 59, 59, 999));
+          velocityBuckets.push({
+            label: `${mLabel} ${y}`,
+            monthYear: `${mLabel} ${y}`,
+            sortKey: mKey,
+            clearances: 0,
+            revenue: 0,
+            completed: 0,
+            start: bStart,
+            end: bEnd,
+          });
+          curr.setUTCMonth(curr.getUTCMonth() + 1);
+        }
+      }
+    } else {
+      // 'all' (All-time)
+      filterStart = null;
+      filterEnd = null;
+      labelTitle = 'All-Time Analytics';
+
+      // Group all months from data
+      const monthKeySet = new Set<string>();
+      allRequests.forEach((r) => {
+        const d = new Date(r.createdAt);
+        monthKeySet.add(`${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`);
+      });
+      const sortedKeys = Array.from(monthKeySet).sort();
+      sortedKeys.forEach((key) => {
+        const [y, m] = key.split('-').map(Number);
+        const mLabel = MONTH_NAMES_SHORT[m - 1];
+        velocityBuckets.push({
+          label: `${mLabel} ${y}`,
+          monthYear: `${mLabel} ${y}`,
+          sortKey: key,
+          clearances: 0,
+          revenue: 0,
+          completed: 0,
+          start: new Date(Date.UTC(y, m - 1, 1, 0, 0, 0)),
+          end: new Date(Date.UTC(y, m, 0, 23, 59, 59, 999)),
+        });
+      });
     }
 
     // Filter requests for KPI Summary calculations
     const requests = allRequests.filter((r) => {
-      if (!startDate || !endDate) return true;
+      if (!filterStart || !filterEnd) return true;
       const d = new Date(r.createdAt);
-      return d >= startDate && d <= endDate;
+      return d >= filterStart && d <= filterEnd;
     });
 
     const totalRequests = requests.length;
@@ -84,9 +301,9 @@ export async function GET(req: Request) {
     let rejectedCount = 0;
 
     // 3. Financial metrics
-    let realizedRevenue = 0; // Completed or Ready for pickup
-    let pipelineRevenue = 0; // Pending or Processing
-    let waivedRevenue = 0;   // Free grants (Indigency / RA 11261)
+    let realizedRevenue = 0;
+    let pipelineRevenue = 0;
+    let waivedRevenue = 0;
     let freeRequestsCount = 0;
     let paidRequestsCount = 0;
 
@@ -99,17 +316,7 @@ export async function GET(req: Request) {
       color: string;
     }>();
 
-    // 5. Group by month for velocity
-    const monthMap = new Map<string, {
-      label: string;
-      monthYear: string;
-      sortKey: string;
-      clearances: number;
-      revenue: number;
-      completed: number;
-    }>();
-
-    // 6. Turnaround and feedback ratings
+    // 5. Turnaround and feedback ratings
     const turnaroundTimesDays: number[] = [];
     const ratings: number[] = [];
     const purposeFreq: Record<string, number> = {};
@@ -172,55 +379,21 @@ export async function GET(req: Request) {
       typeMap.set(typeCode, existingType);
     }
 
-    // Monthly velocity calculation (from all requests or period-allowed months)
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    // Populate velocity buckets
     for (const r of allRequests) {
-      const fee = r.documentType?.fee ?? 0;
       const createdDate = new Date(r.createdAt);
-      const year = createdDate.getFullYear();
-      const monthIdx = createdDate.getMonth();
-      const monthLabel = monthNames[monthIdx];
-      const monthYearKey = `${year}-${String(monthIdx + 1).padStart(2, '0')}`;
-      const displayLabel = `${monthLabel} ${year}`;
+      const fee = r.documentType?.fee ?? 0;
 
-      if (allowedMonths && !allowedMonths.includes(monthYearKey)) {
-        continue;
-      }
-
-      const existingMonth = monthMap.get(monthYearKey) || {
-        label: monthLabel,
-        monthYear: displayLabel,
-        sortKey: monthYearKey,
-        clearances: 0,
-        revenue: 0,
-        completed: 0,
-      };
-
-      existingMonth.clearances += 1;
-      if (r.status === 'COMPLETED' || r.status === 'READY_FOR_PICKUP') {
-        existingMonth.revenue += fee;
-      }
-      if (r.status === 'COMPLETED') {
-        existingMonth.completed += 1;
-      }
-      monthMap.set(monthYearKey, existingMonth);
-    }
-
-    // If allowedMonths includes future/target months that have 0 records, ensure they are represented
-    if (allowedMonths) {
-      for (const mKey of allowedMonths) {
-        if (!monthMap.has(mKey)) {
-          const [yStr, mStr] = mKey.split('-');
-          const mIdx = parseInt(mStr, 10) - 1;
-          const mLabel = monthNames[mIdx];
-          monthMap.set(mKey, {
-            label: mLabel,
-            monthYear: `${mLabel} ${yStr}`,
-            sortKey: mKey,
-            clearances: 0,
-            revenue: 0,
-            completed: 0,
-          });
+      for (const bucket of velocityBuckets) {
+        if (createdDate >= bucket.start && createdDate <= bucket.end) {
+          bucket.clearances += 1;
+          if (r.status === 'COMPLETED' || r.status === 'READY_FOR_PICKUP') {
+            bucket.revenue += fee;
+          }
+          if (r.status === 'COMPLETED') {
+            bucket.completed += 1;
+          }
+          break;
         }
       }
     }
@@ -231,10 +404,15 @@ export async function GET(req: Request) {
       percentage: totalRequests > 0 ? Math.round((t.count / totalRequests) * 100) : 0,
     })).sort((a, b) => b.count - a.count);
 
-    // Convert month map to sorted array
-    const monthlyVelocity = Array.from(monthMap.values()).sort((a, b) => 
-      a.sortKey.localeCompare(b.sortKey)
-    );
+    // Format velocity output (without start/end date properties)
+    const monthlyVelocity = velocityBuckets.map((b) => ({
+      label: b.label,
+      monthYear: b.monthYear,
+      sortKey: b.sortKey,
+      clearances: b.clearances,
+      revenue: b.revenue,
+      completed: b.completed,
+    }));
 
     // Average turnaround time (days)
     const avgTurnaroundDays = turnaroundTimesDays.length > 0
@@ -254,7 +432,8 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       success: true,
-      period: periodParam,
+      period: labelTitle,
+      timeframe: mode,
       data: {
         summary: {
           totalRequests,
