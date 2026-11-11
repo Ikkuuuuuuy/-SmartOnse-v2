@@ -102,7 +102,7 @@ function RequestContent() {
     if (user) {
       setFullName(user.name || '');
       setEmail(user.email || '');
-      setContactNumber(user.phone || '0917-888-0011');
+      setContactNumber(user.phone || '');
       setAddress(user.address || 'Lt. Artiaga St., Barangay Onse, San Juan City');
     }
   }, [user]);
@@ -132,7 +132,7 @@ function RequestContent() {
         body: JSON.stringify({
           documentTypeCode: docType,
           fullName: user?.name || fullName || 'Citizen Applicant',
-          contactNumber: user?.phone || contactNumber || '0917-888-0011',
+          contactNumber: contactNumber || user?.phone || '',
           email: user?.email || email || '',
           address: user?.address || address || 'Barangay Onse, San Juan City',
           purpose: purpose || 'Official Document Application',

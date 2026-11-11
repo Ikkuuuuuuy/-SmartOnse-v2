@@ -361,6 +361,9 @@ export default function AdminRequestsPage() {
   }, []);
 
   const updateStatus = async (id: string, newStatus: any, remarks?: string) => {
+    // Find target request before optimistic update
+    const target = requests.find((r) => r.id === id) || (selectedRequest?.id === id ? selectedRequest : null);
+
     // Optimistic UI update
     setRequests((prev) =>
       prev.map((r) =>
@@ -375,6 +378,43 @@ export default function AdminRequestsPage() {
           ? { ...prev, status: newStatus, ...(remarks !== undefined ? { remarks } : {}) }
           : null
       );
+    }
+
+    // Trigger in-app notification for ALL status transitions
+    if (target) {
+      try {
+        let title = `Status Updated: ${newStatus}`;
+        let description = `Request #${target.trackingNumber} (${target.documentType}) is now ${newStatus}.`;
+        let notifType: 'request' | 'alert' | 'system' = 'request';
+
+        if (newStatus === 'PROCESSING') {
+          title = 'Certificate Under Review';
+          description = `Application #${target.trackingNumber} (${target.documentType}) is now being processed by Barangay Onse staff.`;
+          notifType = 'request';
+        } else if (newStatus === 'READY_FOR_PICKUP') {
+          title = 'Document Ready for Pickup! 📄';
+          description = `Great news! Your ${target.documentType} (#${target.trackingNumber}) is ready for pickup at Barangay Onse Hall.`;
+          notifType = 'request';
+        } else if (newStatus === 'COMPLETED') {
+          title = 'Document Completed & Released ✅';
+          description = `Your ${target.documentType} (#${target.trackingNumber}) has been officially completed and released.`;
+          notifType = 'system';
+        } else if (newStatus === 'REJECTED') {
+          title = 'Certificate Request Disapproved';
+          description = `Application #${target.trackingNumber} (${target.documentType}) was disapproved.${remarks ? ` Reason: ${remarks}` : ''}`;
+          notifType = 'alert';
+        }
+
+        addNotification({
+          title,
+          description,
+          type: notifType,
+          targetRole: 'resident',
+          href: `/track?trackingNumber=${target.trackingNumber}`,
+        });
+      } catch (e) {
+        console.error('Failed to trigger in-app notification:', e);
+      }
     }
 
     try {
@@ -411,20 +451,6 @@ export default function AdminRequestsPage() {
     setIsSubmittingRejection(true);
     try {
       await updateStatus(rejectModalRequest.id, 'REJECTED', trimmed);
-
-      // Send real-time notification to resident
-      try {
-        addNotification({
-          title: 'Certificate Request Disapproved',
-          description: `Application #${rejectModalRequest.trackingNumber} (${rejectModalRequest.documentType}) was rejected. Reason: ${trimmed}`,
-          type: 'alert',
-          targetRole: 'resident',
-          href: `/track?trackingNumber=${rejectModalRequest.trackingNumber}`,
-        });
-      } catch (e) {
-        console.error('Failed to push resident notification:', e);
-      }
-
       setRejectModalRequest(null);
       setRejectionReason('');
       setRejectionError(null);
@@ -691,7 +717,11 @@ export default function AdminRequestsPage() {
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-slate-900 dark:text-white">{r.fullName}</div>
-                      <div className="text-[10px] text-slate-400">{r.contactNumber}</div>
+                      <div className="text-[10px] text-slate-400">
+                        {r.contactNumber && r.contactNumber !== 'Unprovided' && r.contactNumber.trim() !== ''
+                          ? r.contactNumber
+                          : '—'}
+                      </div>
                     </td>
                     <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200">{r.documentType}</td>
                     <td className="py-3.5 px-4 max-w-xs truncate text-slate-500 dark:text-slate-400" title={r.purpose}>

@@ -94,10 +94,10 @@ export default function ProfilePage() {
         name: user.name || '',
         email: user.email || '',
         birthdate: '1995-06-15',
-        phone_number: user.phone || '0917-888-0011',
+        phone_number: user.phone || '',
         house_number: '145',
         street: user.address || 'Lt. Artiaga St., Barangay Onse',
-        emergency_contact: user.emergencyContact || '0917-888-9999 (Family Contact)',
+        emergency_contact: user.emergencyContact || '',
         precinct_number: user.precinctNumber || 'PRECINCT-0042A',
         is_verified: true,
       });

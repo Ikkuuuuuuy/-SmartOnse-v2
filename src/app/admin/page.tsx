@@ -396,23 +396,30 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Timeframe Mode Pill Bar & Contextual Calendar Controls */}
-        <div className="pt-3 border-t border-slate-100 dark:border-blue-950/50 flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
-          {/* Granularity Tabs (Day / Week / Month / Quarter / Year / All / Custom) */}
-          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100/90 dark:bg-[#0E1B33] rounded-2xl border border-slate-200/50 dark:border-blue-900/30">
-            {(['day', 'week', 'month', 'quarter', 'year', 'all', 'custom'] as const).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setTimeframeMode(mode)}
-                className={`px-3 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider transition cursor-pointer ${
-                  timeframeMode === mode
-                    ? 'bg-[#9C2007] text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                }`}
+        {/* Timeframe Mode Dropdown & Contextual Calendar Controls */}
+        <div className="pt-3 border-t border-slate-100 dark:border-blue-950/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Timeframe Filter Dropdown */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <CalendarRange className="w-3.5 h-3.5 text-[#9C2007] dark:text-rose-400" />
+              <span>Timeframe:</span>
+            </span>
+            <div className="relative">
+              <select
+                value={timeframeMode}
+                onChange={(e) => setTimeframeMode(e.target.value as TimeframeMode)}
+                className="appearance-none bg-slate-100/90 dark:bg-[#0E1B33] hover:bg-slate-200/70 dark:hover:bg-[#132342] border border-slate-200 dark:border-blue-900/60 text-slate-900 dark:text-slate-100 text-xs font-black uppercase tracking-wider py-2 pl-3.5 pr-8 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#9C2007] cursor-pointer transition shadow-xs"
               >
-                {mode === 'custom' ? 'Custom Range' : mode === 'all' ? 'All Time' : mode}
-              </button>
-            ))}
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+                <option value="quarter">Quarter</option>
+                <option value="year">Year</option>
+                <option value="all">All Time</option>
+                <option value="custom">Custom Range</option>
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
           </div>
 
           {/* Contextual Date/Month/Quarter Pickers */}

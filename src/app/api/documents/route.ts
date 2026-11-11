@@ -13,12 +13,12 @@ function maskName(name: string): string {
 }
 
 function maskPhone(phone: string | null): string {
-  if (!phone) return '0917-***-****';
+  if (!phone || phone === 'Unprovided' || phone.trim() === '') return '—';
   const clean = phone.replace(/\s+/g, '');
   if (clean.length >= 7) {
     return `${clean.slice(0, 4)}-***-${clean.slice(-2)}`;
   }
-  return '0917-***-****';
+  return clean || '—';
 }
 
 function maskEmail(email: string | null): string | null {
@@ -154,7 +154,7 @@ export async function POST(req: Request) {
         trackingNumber,
         documentTypeId: docType.id,
         fullName: data.fullName || 'Citizen Applicant',
-        contactNumber: data.contactNumber || '0917-000-0000',
+        contactNumber: data.contactNumber && String(data.contactNumber).trim() ? String(data.contactNumber).trim() : 'Unprovided',
         email: data.email || null,
         address: data.address || 'Barangay Onse, San Juan City',
         purpose: data.purpose || 'Official Document Request',

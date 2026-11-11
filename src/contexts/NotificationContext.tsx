@@ -179,21 +179,51 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       return;
     }
 
-    const userKey = `smartonse_notifs_${user.id || user.role || user.email}`;
-    try {
-      const stored = localStorage.getItem(userKey);
-      if (stored) {
-        setNotifications(JSON.parse(stored));
-      } else {
+    const loadUserNotifs = () => {
+      const userKey = `smartonse_notifs_${user.id || user.role || user.email}`;
+      try {
+        const stored = localStorage.getItem(userKey);
+        let currentNotifs: NotificationItem[] = stored
+          ? JSON.parse(stored)
+          : (ROLE_NOTIFICATIONS[user.role] || ROLE_NOTIFICATIONS.resident);
+
+        // Check cross-role broadcast queue (e.g. status changes pushed by admin)
+        const broadcastKey = 'smartonse_system_broadcasts';
+        const rawBroadcasts = localStorage.getItem(broadcastKey);
+        if (rawBroadcasts) {
+          const broadcasts: NotificationItem[] = JSON.parse(rawBroadcasts);
+          const relevant = broadcasts.filter(
+            (b) =>
+              (!b.targetRole || b.targetRole === 'all' || b.targetRole === user.role) &&
+              !currentNotifs.some((n) => n.id === b.id)
+          );
+          if (relevant.length > 0) {
+            currentNotifs = [...relevant, ...currentNotifs].slice(0, 40);
+          }
+        }
+
+        setNotifications(currentNotifs);
+        localStorage.setItem(userKey, JSON.stringify(currentNotifs));
+      } catch (e) {
+        console.error('Failed to load user notifications:', e);
         const defaultRoleNotifs = ROLE_NOTIFICATIONS[user.role] || ROLE_NOTIFICATIONS.resident;
         setNotifications(defaultRoleNotifs);
-        localStorage.setItem(userKey, JSON.stringify(defaultRoleNotifs));
       }
-    } catch (e) {
-      console.error('Failed to load user notifications:', e);
-      const defaultRoleNotifs = ROLE_NOTIFICATIONS[user.role] || ROLE_NOTIFICATIONS.resident;
-      setNotifications(defaultRoleNotifs);
-    }
+    };
+
+    loadUserNotifs();
+
+    // Listen for storage events across browser tabs/windows
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'smartonse_system_broadcasts' || e.key?.startsWith('smartonse_notifs_')) {
+        loadUserNotifs();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [user]);
 
   // Save to current user's localStorage
@@ -245,7 +275,20 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       href: item.href,
       read: false,
     };
+
     saveNotifications([newNotif, ...notifications]);
+
+    // Also persist to system broadcast so other roles (especially residents) receive it
+    if (typeof window !== 'undefined') {
+      try {
+        const broadcastKey = 'smartonse_system_broadcasts';
+        const existing: NotificationItem[] = JSON.parse(localStorage.getItem(broadcastKey) || '[]');
+        const updated = [newNotif, ...existing.filter((x) => x.id !== newNotif.id)].slice(0, 50);
+        localStorage.setItem(broadcastKey, JSON.stringify(updated));
+      } catch (e) {
+        console.error('Failed to broadcast notification:', e);
+      }
+    }
   };
 
   const unreadCount = user ? notifications.filter((n) => !n.read).length : 0;

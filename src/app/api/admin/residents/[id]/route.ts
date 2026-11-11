@@ -100,7 +100,7 @@ export async function PATCH(
           id: updatedInh.id,
           name: `${updatedInh.firstName} ${updatedInh.lastName}`,
           email: email || 'resident@onse.ph',
-          contact: contact || '0917-888-0000',
+          contact: contact ? contact.trim() : '—',
           address: updatedInh.street,
           precinct: updatedInh.precinct,
           civil: updatedInh.civilStatus,

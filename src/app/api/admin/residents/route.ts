@@ -74,7 +74,7 @@ export async function GET(req: Request) {
         precinct: linkedInh?.precinct || 'PRECINCT-0042A',
         address: u.address || linkedInh?.street || 'Barangay Onse, San Juan City',
         civil: (linkedInh?.civilStatus as any) || 'Single',
-        contact: u.phone || '0917-888-0000',
+        contact: u.phone || '—',
         email: u.email,
         registered: u.createdAt.toISOString().slice(0, 10),
         verified: u.isVerified,
@@ -141,7 +141,7 @@ export async function POST(req: Request) {
     }
 
     const cleanEmail = email ? email.trim().toLowerCase() : `${name.toLowerCase().replace(/\s+/g, '')}@onse.ph`;
-    const cleanContact = contact ? contact.trim() : '0917-888-0000';
+    const cleanContact = contact && contact.trim() ? contact.trim() : null;
     const cleanPrecinct = precinct ? precinct.trim() : 'PRECINCT-0042A';
     const cleanCivil = civil || 'Single';
     const cleanRole = householdRole || 'Head of Household';

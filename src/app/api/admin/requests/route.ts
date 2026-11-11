@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
+import { sendStatusUpdateEmail } from '@/lib/mailer';
 
 // GET /api/admin/requests - Fetch all clearance requests from database
 export async function GET(req: Request) {
@@ -103,13 +104,13 @@ export async function PATCH(req: Request) {
       updated = await prisma.documentRequest.update({
         where: { id },
         data: updateData,
-        include: { documentType: true },
+        include: { documentType: true, user: true },
       });
     } else {
       updated = await prisma.documentRequest.update({
         where: { trackingNumber },
         data: updateData,
-        include: { documentType: true },
+        include: { documentType: true, user: true },
       });
     }
 
@@ -123,6 +124,22 @@ export async function PATCH(req: Request) {
         ip,
       },
     });
+
+    // Send SMTP status update email to applicant if recipient email is available
+    const recipientEmail = updated.email || updated.user?.email;
+    if (recipientEmail && status) {
+      sendStatusUpdateEmail({
+        to: recipientEmail,
+        recipientName: updated.fullName,
+        trackingNumber: updated.trackingNumber,
+        documentType: updated.documentType.name,
+        status: updated.status,
+        remarks: updated.remarks || undefined,
+        pickupDate: updated.pickupDate || undefined,
+      }).catch((emailErr) => {
+        console.error('[SMTP Status Update Email Error]:', emailErr);
+      });
+    }
 
     return NextResponse.json({
       success: true,

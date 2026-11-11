@@ -263,3 +263,269 @@ export async function sendPasswordResetEmail({
   }
 }
 
+export async function sendStatusUpdateEmail({
+  to,
+  recipientName,
+  trackingNumber,
+  documentType,
+  status,
+  remarks,
+  pickupDate,
+}: {
+  to: string;
+  recipientName: string;
+  trackingNumber: string;
+  documentType: string;
+  status: string;
+  remarks?: string;
+  pickupDate?: string | Date | null;
+}) {
+  const hasSmtpCredentials = Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
+
+  const formattedDate = new Intl.DateTimeFormat('en-PH', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'Asia/Manila',
+  }).format(new Date());
+
+  const formattedPickup = pickupDate
+    ? new Intl.DateTimeFormat('en-PH', {
+        dateStyle: 'full',
+        timeZone: 'Asia/Manila',
+      }).format(new Date(pickupDate))
+    : null;
+
+  // Status-specific badges and copy
+  let statusBadgeBg = '#FEF3C7';
+  let statusBadgeText = '#92400E';
+  let statusBadgeBorder = '#FCD34D';
+  let statusTitle = 'Application Under Review';
+  let statusSubtitle = 'Ang iyong aplikasyon ay kasalukuyang sinusuri ng Barangay Onse desk staff.';
+  let emailSubject = `[SmartOnse] Update sa iyong ${documentType} (#${trackingNumber})`;
+
+  if (status === 'PROCESSING') {
+    statusBadgeBg = '#E0F2FE';
+    statusBadgeText = '#075985';
+    statusBadgeBorder = '#BAE6FD';
+    statusTitle = 'Under Processing & Review';
+    statusSubtitle = 'Kasalukuyang inihahanda at pino-proseso ang iyong opisyal na dokumento.';
+    emailSubject = `[SmartOnse] Processing na ang iyong ${documentType} (#${trackingNumber})`;
+  } else if (status === 'READY_FOR_PICKUP') {
+    statusBadgeBg = '#D1FAE5';
+    statusBadgeText = '#065F46';
+    statusBadgeBorder = '#A7F3D0';
+    statusTitle = 'Ready for Pickup / Pwede Nang Kunin 📄';
+    statusSubtitle = 'Handa na ang iyong dokumento para sa pag-claim sa Barangay Onse Hall.';
+    emailSubject = `[SmartOnse] Ready for Pickup: ${documentType} (#${trackingNumber})`;
+  } else if (status === 'COMPLETED') {
+    statusBadgeBg = '#F3E8FF';
+    statusBadgeText = '#6B21A8';
+    statusBadgeBorder = '#E9D5FF';
+    statusTitle = 'Completed & Officially Released ✅';
+    statusSubtitle = 'Matagumpay nang naipagkaloob at nai-release ang iyong dokumento.';
+    emailSubject = `[SmartOnse] Officially Completed & Released: ${documentType} (#${trackingNumber})`;
+  } else if (status === 'REJECTED') {
+    statusBadgeBg = '#FEE2E2';
+    statusBadgeText = '#991B1B';
+    statusBadgeBorder = '#FECACA';
+    statusTitle = 'Application Disapproved / Disapproved ⚠️';
+    statusSubtitle = 'Kinakailangan ng karagdagang dokumento o paglilinaw para sa iyong aplikasyon.';
+    emailSubject = `[SmartOnse] Update: Disapproved ang ${documentType} (#${trackingNumber})`;
+  }
+
+  const siteUrl = process.env.NEXTAUTH_URL || 'https://smartonse-v2.vercel.app';
+  const trackingUrl = `${siteUrl}/track?trackingNumber=${encodeURIComponent(trackingNumber)}`;
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${emailSubject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <!-- Preheader text -->
+  <div style="display: none; max-height: 0px; overflow: hidden; opacity: 0; font-size: 1px; line-height: 1px; color: #fff;">
+    Update sa iyong dokumento ${documentType} (${trackingNumber}): Kasalukuyang ${status}.
+  </div>
+
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 36px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.1), 0 4px 12px -2px rgba(15, 23, 42, 0.05); border: 1px solid #e2e8f0;">
+          
+          <!-- Government Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #7A1201 0%, #9C2007 60%, #B91C1C 100%); padding: 32px 28px 26px 28px; text-align: center; color: #ffffff;">
+              <div style="display: inline-block; padding: 4px 14px; background: rgba(255, 255, 255, 0.16); border-radius: 9999px; font-size: 10px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase; color: #FEE2E2; margin-bottom: 10px; border: 1px solid rgba(255, 255, 255, 0.22);">
+                Republika ng Pilipinas • Lungsod ng San Juan
+              </div>
+              <h1 style="margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.25);">
+                BARANGAY ONSE
+              </h1>
+              <p style="margin: 4px 0 0 0; font-size: 13px; font-weight: 600; color: #FECACA; letter-spacing: 0.4px;">
+                Official Document & Clearance Management System
+              </p>
+            </td>
+          </tr>
+
+          <!-- Golden Accent Strip -->
+          <tr>
+            <td style="height: 4px; background: linear-gradient(90deg, #F59E0B 0%, #FDE68A 50%, #F59E0B 100%); font-size: 0; line-height: 0;">&nbsp;</td>
+          </tr>
+
+          <!-- Main Body -->
+          <tr>
+            <td style="padding: 34px 30px 28px 30px; color: #1e293b;">
+              
+              <!-- Greeting -->
+              <h2 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 800; color: #0f172a;">
+                Magandang araw, ${recipientName || 'Citizen'}! 👋
+              </h2>
+              <p style="margin: 0 0 22px 0; font-size: 14px; line-height: 1.6; color: #475569;">
+                May mahalagang update ukol sa iyong hiniling na sertipikasyon / dokumento sa <strong>Barangay Onse Online Portal</strong>:
+              </p>
+
+              <!-- Status Announcement Card -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td style="background-color: ${statusBadgeBg}; border: 1px solid ${statusBadgeBorder}; border-radius: 16px; padding: 18px 20px; text-align: center;">
+                    <div style="font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: ${statusBadgeText}; margin-bottom: 6px;">
+                      CURRENT APPLICATION STATUS
+                    </div>
+                    <div style="font-size: 18px; font-weight: 900; color: ${statusBadgeText}; letter-spacing: 0.4px;">
+                      ${statusTitle}
+                    </div>
+                    <p style="margin: 6px 0 0 0; font-size: 12px; color: ${statusBadgeText}; opacity: 0.9; line-height: 1.4;">
+                      ${statusSubtitle}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Document Details Table -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 24px; font-size: 13px;">
+                <tr>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #64748b; font-weight: 600; width: 40%;">
+                    Tracking Number:
+                  </td>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #9C2007; font-weight: 800; font-family: monospace; font-size: 14px;">
+                    ${trackingNumber}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #64748b; font-weight: 600;">
+                    Uri ng Dokumento:
+                  </td>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: 700;">
+                    ${documentType}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #64748b; font-weight: 600;">
+                    Aplikante:
+                  </td>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: 600;">
+                    ${recipientName}
+                  </td>
+                </tr>
+                ${formattedPickup ? `
+                <tr>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #065F46; font-weight: 700;">
+                    Pickup Schedule:
+                  </td>
+                  <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #065F46; font-weight: 800;">
+                    ${formattedPickup}
+                  </td>
+                </tr>
+                ` : ''}
+                ${remarks ? `
+                <tr>
+                  <td style="padding: 12px 16px; color: #64748b; font-weight: 600; vertical-align: top;">
+                    Admin Remarks:
+                  </td>
+                  <td style="padding: 12px 16px; color: #1e293b; font-weight: 600; line-height: 1.5;">
+                    ${remarks}
+                  </td>
+                </tr>
+                ` : ''}
+              </table>
+
+              <!-- Pickup Guidelines if Ready for Pickup -->
+              ${status === 'READY_FOR_PICKUP' ? `
+              <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 14px 16px; border-radius: 8px; margin-bottom: 24px;">
+                <div style="font-weight: 800; font-size: 13px; color: #065f46; margin-bottom: 6px;">
+                  📋 Mga Dapat Dalhin sa Pag-claim:
+                </div>
+                <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #047857; line-height: 1.6;">
+                  <li>Isang (1) Valid Government-issued Photo ID (PhilSys ID, Driver's License, Passport, Postal ID, etc.)</li>
+                  <li>Kopyahin o i-save ang Tracking Number: <strong>${trackingNumber}</strong></li>
+                  <li>Kung may authorized representative, magdala ng pirmadong Authorization Letter at Valid ID ng kinatawan</li>
+                </ul>
+              </div>
+              ` : ''}
+
+              <!-- Tracking CTA Button -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 26px;">
+                <tr>
+                  <td align="center">
+                    <a href="${trackingUrl}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #7A1201 0%, #9C2007 100%); color: #ffffff; text-decoration: none; padding: 14px 34px; border-radius: 12px; font-size: 14px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(156, 32, 7, 0.35);">
+                      Suriin ang Status sa Portal &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Office Hours / Hall Location -->
+              <div style="border-top: 1px dashed #cbd5e1; padding-top: 20px; font-size: 12px; color: #64748b; line-height: 1.6;">
+                <p style="margin: 0 0 4px 0;"><strong>Barangay Onse Hall:</strong> Lt. Artiaga St., Barangay Onse, San Juan City, Metro Manila</p>
+                <p style="margin: 0 0 4px 0;"><strong>Oras ng Tanggapan:</strong> Lunes hanggang Biyernes, 8:00 AM – 5:00 PM</p>
+                <p style="margin: 0;"><strong>Hotline:</strong> (02) 8723-0011 / 0917-888-0011</p>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 24px; text-align: center; color: #94a3b8; font-size: 11px;">
+              <p style="margin: 0 0 4px 0;">
+                Ito ay opisyal at automated notification mula sa SmartOnse Governance Portal.
+              </p>
+              <p style="margin: 0;">
+                Timestamp: ${formattedDate} (PHT) • &copy; ${new Date().getFullYear()} Barangay Onse, San Juan City. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  if (hasSmtpCredentials) {
+    try {
+      const info = await transporter.sendMail({
+        from: process.env.SMTP_FROM || `"Barangay Onse" <${process.env.SMTP_USER}>`,
+        to,
+        subject: emailSubject,
+        text: `Magandang araw, ${recipientName}! Update sa iyong ${documentType} (#${trackingNumber}): Ang kasalukuyang status ay "${statusTitle}". ${remarks ? `Remarks: ${remarks}. ` : ''}Suriin ang detalye sa: ${trackingUrl}`,
+        html: htmlContent,
+      });
+      console.log(`[SMTP Mailer] Status update email sent to ${to} (#${trackingNumber}): ${info.messageId}`);
+      return { success: true, realSent: true, messageId: info.messageId };
+    } catch (err: any) {
+      console.error('[SMTP Status Update Email Error]', err);
+      return { success: false, realSent: false, error: err.message };
+    }
+  } else {
+    console.log(`[SMTP Mailer (Sandbox Mode)] Status update email for ${to} (#${trackingNumber}): ${statusTitle}`);
+    return { success: true, realSent: false, sandbox: true };
+  }
+}
+
+
