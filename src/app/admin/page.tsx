@@ -220,7 +220,6 @@ export default function AdminDashboardPage() {
             if (Array.isArray(resData.residents) && resData.residents.length > 0) {
               const mappedCitizens = resData.residents.map((r: any) => ({
                 name: r.name,
-                precinct: r.precinct || 'PRECINCT-0042A',
                 address: r.address || 'Barangay Onse',
                 civil: r.civil || 'Single',
                 registered: r.registered || '2026-01-01',
@@ -307,7 +306,6 @@ export default function AdminDashboardPage() {
     return citizens
       .filter((item) =>
         item.name.toLowerCase().includes(q) ||
-        (item.precinct && item.precinct.toLowerCase().includes(q)) ||
         (item.address && item.address.toLowerCase().includes(q))
       )
       .sort((a: any, b: any) => {
@@ -897,13 +895,6 @@ export default function AdminDashboardPage() {
                     label="Full Legal Name"
                   />
                   <TableSortHeader
-                    field="precinct"
-                    currentField={sortField}
-                    currentDirection={sortDirection}
-                    onSort={handleSort}
-                    label="Precinct Number"
-                  />
-                  <TableSortHeader
                     field="address"
                     currentField={sortField}
                     currentDirection={sortDirection}
@@ -930,7 +921,7 @@ export default function AdminDashboardPage() {
               <tbody className="divide-y divide-slate-100 dark:divide-blue-950/40 font-medium text-slate-700 dark:text-slate-300">
                 {paginatedCitizens.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-10 text-center text-slate-400">
+                    <td colSpan={5} className="py-10 text-center text-slate-400">
                       No citizen records found matching your search.
                     </td>
                   </tr>
@@ -938,7 +929,6 @@ export default function AdminDashboardPage() {
                   paginatedCitizens.map((row) => (
                     <tr key={row.name} className="hover:bg-slate-50/80 dark:hover:bg-[#0E1B33]/60 transition">
                       <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">{row.name}</td>
-                      <td className="py-3.5 px-4 font-mono font-bold text-[#9C2007] dark:text-rose-400">{row.precinct}</td>
                       <td className="py-3.5 px-4">{row.address}</td>
                       <td className="py-3.5 px-4">{row.civil}</td>
                       <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">{row.registered}</td>

@@ -37,7 +37,6 @@ export default function ProfilePage() {
     house_number: '145',
     street: '',
     emergency_contact: '',
-    precinct_number: '',
     is_verified: true,
   });
 
@@ -98,7 +97,6 @@ export default function ProfilePage() {
         house_number: '145',
         street: user.address || 'Lt. Artiaga St., Barangay Onse',
         emergency_contact: user.emergencyContact || '',
-        precinct_number: user.precinctNumber || 'PRECINCT-0042A',
         is_verified: true,
       });
     }
@@ -146,7 +144,6 @@ export default function ProfilePage() {
         phone: formData.phone_number,
         address: formData.street,
         emergencyContact: formData.emergency_contact,
-        precinctNumber: formData.precinct_number,
       });
       setSuccessMsg('Profile information updated and saved in the database successfully.');
       setTimeout(() => setSuccessMsg(null), 4000);
@@ -410,17 +407,6 @@ export default function ProfilePage() {
                     className="w-full rounded-2xl border border-slate-200 dark:border-blue-900/40 bg-slate-50 dark:bg-[#152747] p-3.5 text-xs text-slate-900 dark:text-white outline-none focus:border-[#9C2007] focus:ring-1 focus:ring-[#9C2007] font-mono"
                   />
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 text-[11px]">COMELEC Precinct Code</label>
-                  <input
-                    type="text"
-                    value={formData.precinct_number}
-                    onChange={(e) => setFormData({ ...formData, precinct_number: e.target.value })}
-                    placeholder="PRECINCT-0042A"
-                    className="w-full rounded-2xl border border-slate-200 dark:border-blue-900/40 bg-slate-50 dark:bg-[#152747] p-3.5 text-xs text-slate-900 dark:text-white outline-none focus:border-[#9C2007] focus:ring-1 focus:ring-[#9C2007] font-mono font-bold"
-                  />
-                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -476,7 +462,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300">
-                  Your identity has been validated against COMELEC Precinct 0042A records. You are eligible for expedited 1-hour document issuance.
+                  Your identity has been validated against official Barangay Onse Registry of Inhabitants records. You are eligible for expedited 1-hour document issuance.
                 </p>
               </div>
 

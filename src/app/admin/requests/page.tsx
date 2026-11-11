@@ -14,7 +14,8 @@ import {
   Clock,
   AlertTriangle,
   XCircle,
-  MessageSquare
+  MessageSquare,
+  MoreVertical
 } from 'lucide-react';
 import TablePagination from '@/components/ui/TablePagination';
 import TableSortHeader from '@/components/ui/TableSortHeader';
@@ -333,6 +334,19 @@ export default function AdminRequestsPage() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [rejectionError, setRejectionError] = useState<string | null>(null);
   const [isSubmittingRejection, setIsSubmittingRejection] = useState(false);
+
+  // Row Action Dropdown Menu State
+  const [activeActionMenuId, setActiveActionMenuId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest('.action-menu-container')) {
+        setActiveActionMenuId(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const fetchRequests = async () => {
     setIsLoading(true);
@@ -780,23 +794,63 @@ export default function AdminRequestsPage() {
                       </div>
                     </td>
                     <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="relative inline-block text-left action-menu-container">
                         <button
-                          onClick={() => setSelectedRequest(r)}
-                          className="px-3 py-1.5 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-lg font-bold text-[11px] uppercase tracking-wider inline-flex items-center gap-1 cursor-pointer shadow-xs transition"
-                          title="Print official certificate"
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveActionMenuId(activeActionMenuId === r.id ? null : r.id);
+                          }}
+                          className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#132342] transition cursor-pointer"
+                          title="Actions menu"
                         >
-                          <Printer className="w-3.5 h-3.5" />
-                          <span>Print</span>
+                          <MoreVertical className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => handleDeleteRequest(r.id, r.trackingNumber)}
-                          className="px-2.5 py-1.5 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-600 text-rose-700 dark:text-rose-300 hover:text-white rounded-lg font-bold text-[11px] transition inline-flex items-center gap-1 cursor-pointer border border-rose-200/60 dark:border-rose-900/40"
-                          title="Cancel or delete request"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span>Delete</span>
-                        </button>
+
+                        {activeActionMenuId === r.id && (
+                          <div 
+                            className="absolute right-0 mt-1 w-48 rounded-xl bg-white dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 shadow-xl py-1 z-30 animate-in fade-in zoom-in-95 duration-100"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {/* Print Option - STRICTLY DISABLED IF REJECTED */}
+                            {r.status !== 'REJECTED' ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveActionMenuId(null);
+                                  setSelectedRequest(r);
+                                }}
+                                className="w-full text-left px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#162746] hover:text-[#9C2007] dark:hover:text-rose-400 flex items-center gap-2.5 transition cursor-pointer"
+                              >
+                                <Printer className="w-4 h-4 text-[#9C2007] dark:text-rose-400" />
+                                <span>Print Certificate</span>
+                              </button>
+                            ) : (
+                              <div
+                                className="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-400 dark:text-slate-600 flex items-center gap-2.5 cursor-not-allowed opacity-60"
+                                title="Printing is disabled because this certificate request has been rejected."
+                              >
+                                <Printer className="w-4 h-4" />
+                                <span>Cannot Print (Rejected)</span>
+                              </div>
+                            )}
+
+                            <div className="h-px bg-slate-100 dark:bg-blue-900/40 my-1" />
+
+                            {/* Delete Option */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveActionMenuId(null);
+                                handleDeleteRequest(r.id, r.trackingNumber);
+                              }}
+                              className="w-full text-left px-3.5 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center gap-2.5 transition cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              <span>Delete Request</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -823,12 +877,18 @@ export default function AdminRequestsPage() {
             <div className="flex justify-between items-center no-print">
               <h3 className="font-black text-slate-900 dark:text-white uppercase">Printable Official Certificate</h3>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={handlePrint}
-                  className="px-4 py-2 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-xl font-bold text-xs uppercase flex items-center gap-1.5 cursor-pointer shadow-md"
-                >
-                  <Printer className="w-4 h-4" /> Print / Save PDF
-                </button>
+                {selectedRequest.status === 'REJECTED' ? (
+                  <div className="px-3.5 py-2 bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 font-bold text-xs rounded-xl flex items-center gap-1.5 border border-rose-300 dark:border-rose-800/60 shadow-xs">
+                    <XCircle className="w-4 h-4" /> Disapproved (Printing Prohibited)
+                  </div>
+                ) : (
+                  <button
+                    onClick={handlePrint}
+                    className="px-4 py-2 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-xl font-bold text-xs uppercase flex items-center gap-1.5 cursor-pointer shadow-md"
+                  >
+                    <Printer className="w-4 h-4" /> Print / Save PDF
+                  </button>
+                )}
                 <button
                   onClick={() => setSelectedRequest(null)}
                   className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer"

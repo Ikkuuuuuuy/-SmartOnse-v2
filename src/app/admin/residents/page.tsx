@@ -27,7 +27,7 @@ export interface ResidentRecord {
   inhabitantId?: string | null;
   rbiNumber?: string;
   name: string;
-  precinct: string;
+  precinct?: string;
   address: string;
   civil: 'Single' | 'Married' | 'Widowed' | 'Separated';
   contact: string;
@@ -72,7 +72,6 @@ export default function AdminResidentsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [civilFilter, setCivilFilter] = useState('ALL');
-  const [precinctFilter, setPrecinctFilter] = useState('ALL');
   const [sortField, setSortField] = useState('registered');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,7 +87,6 @@ export default function AdminResidentsPage() {
     name: '',
     email: '',
     contact: '',
-    precinct: 'PRECINCT-0042A',
     civil: 'Single' as const,
     householdRole: 'Head of Household',
     address: '',
@@ -132,7 +130,6 @@ export default function AdminResidentsPage() {
           name: '',
           email: '',
           contact: '',
-          precinct: 'PRECINCT-0042A',
           civil: 'Single',
           householdRole: 'Head of Household',
           address: '',
@@ -162,7 +159,6 @@ export default function AdminResidentsPage() {
           email: editingResident.email,
           contact: editingResident.contact,
           address: editingResident.address,
-          precinct: editingResident.precinct,
           civil: editingResident.civil,
           householdRole: editingResident.householdRole,
         }),
@@ -221,16 +217,14 @@ export default function AdminResidentsPage() {
     return residents
       .filter((r) => {
         const matchesCivil = civilFilter === 'ALL' || r.civil === civilFilter;
-        const matchesPrecinct = precinctFilter === 'ALL' || r.precinct === precinctFilter;
         const q = searchTerm.toLowerCase();
         const matchesSearch =
           (r.name && r.name.toLowerCase().includes(q)) ||
-          (r.precinct && r.precinct.toLowerCase().includes(q)) ||
           (r.address && r.address.toLowerCase().includes(q)) ||
           (r.id && r.id.toLowerCase().includes(q)) ||
           (r.contact && r.contact.toLowerCase().includes(q)) ||
           (r.email && r.email.toLowerCase().includes(q));
-        return matchesCivil && matchesPrecinct && matchesSearch;
+        return matchesCivil && matchesSearch;
       })
       .sort((a: any, b: any) => {
         let valA = a[sortField];
@@ -243,7 +237,7 @@ export default function AdminResidentsPage() {
         if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
         return 0;
       });
-  }, [residents, searchTerm, civilFilter, precinctFilter, sortField, sortDirection]);
+  }, [residents, searchTerm, civilFilter, sortField, sortDirection]);
 
   // Paginated items
   const paginatedResidents = useMemo(() => {
@@ -290,7 +284,7 @@ export default function AdminResidentsPage() {
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-[#0B1528] p-5 rounded-3xl border border-slate-200/80 dark:border-blue-900/40 shadow-xs space-y-1">
           <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider">Total Residents</span>
           <div className="text-2xl font-black text-black dark:text-white">{residents.length}</div>
@@ -303,12 +297,6 @@ export default function AdminResidentsPage() {
             {residents.filter((r) => r.householdRole === 'Head of Household').length || Math.ceil(residents.length / 3)}
           </div>
           <p className="text-[11px] text-black/60 dark:text-white/60">Household heads</p>
-        </div>
-
-        <div className="bg-white dark:bg-[#0B1528] p-5 rounded-3xl border border-slate-200/80 dark:border-blue-900/40 shadow-xs space-y-1">
-          <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider">Active Precincts</span>
-          <div className="text-2xl font-black text-black dark:text-white">5</div>
-          <p className="text-[11px] text-black/60 dark:text-white/60">Active COMELEC clusters</p>
         </div>
 
         <div className="bg-white dark:bg-[#0B1528] p-5 rounded-3xl border border-slate-200/80 dark:border-blue-900/40 shadow-xs space-y-1">
@@ -334,7 +322,7 @@ export default function AdminResidentsPage() {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Search by resident name, precinct, address, ID, contact..."
+              placeholder="Search by resident name, address, ID, contact, email..."
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-2xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-[#9C2007] outline-none"
             />
             {searchTerm && (
@@ -369,26 +357,6 @@ export default function AdminResidentsPage() {
                 <option value="Separated">Separated</option>
               </select>
             </div>
-
-            {/* Precinct Filter */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Precinct:</span>
-              <select
-                value={precinctFilter}
-                onChange={(e) => {
-                  setPrecinctFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="px-3 py-2 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-xs font-bold text-slate-900 dark:text-white cursor-pointer outline-none focus:ring-1 focus:ring-[#9C2007]"
-              >
-                <option value="ALL">All Precincts</option>
-                <option value="PRECINCT-0041A">0041A</option>
-                <option value="PRECINCT-0042A">0042A</option>
-                <option value="PRECINCT-0042B">0042B</option>
-                <option value="PRECINCT-0043A">0043A</option>
-                <option value="PRECINCT-0044B">0044B</option>
-              </select>
-            </div>
           </div>
         </div>
 
@@ -410,13 +378,6 @@ export default function AdminResidentsPage() {
                   currentDirection={sortDirection}
                   onSort={handleSort}
                   label="Full Legal Name"
-                />
-                <TableSortHeader
-                  field="precinct"
-                  currentField={sortField}
-                  currentDirection={sortDirection}
-                  onSort={handleSort}
-                  label="Precinct Code"
                 />
                 <TableSortHeader
                   field="address"
@@ -452,7 +413,7 @@ export default function AdminResidentsPage() {
             <tbody className="divide-y divide-slate-100 dark:divide-blue-950/40 font-medium text-slate-700 dark:text-slate-300">
               {paginatedResidents.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                  <td colSpan={7} className="py-12 text-center text-slate-400">
                     No resident records found matching your query.
                   </td>
                 </tr>
@@ -473,7 +434,6 @@ export default function AdminResidentsPage() {
                       </div>
                       <div className="text-[10px] text-slate-400 dark:text-slate-500">{r.householdRole} &bull; {r.email}</div>
                     </td>
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#9C2007] dark:text-rose-400">{r.precinct}</td>
                     <td className="py-3.5 px-4">{r.address}</td>
                     <td className="py-3.5 px-4">{r.civil}</td>
                     <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300">{r.contact}</td>
@@ -566,34 +526,18 @@ export default function AdminResidentsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Precinct</label>
-                  <select
-                    value={addForm.precinct}
-                    onChange={(e) => setAddForm({ ...addForm, precinct: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007]"
-                  >
-                    <option value="PRECINCT-0041A">PRECINCT-0041A</option>
-                    <option value="PRECINCT-0042A">PRECINCT-0042A</option>
-                    <option value="PRECINCT-0042B">PRECINCT-0042B</option>
-                    <option value="PRECINCT-0043A">PRECINCT-0043A</option>
-                    <option value="PRECINCT-0044B">PRECINCT-0044B</option>
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Civil Status</label>
-                  <select
-                    value={addForm.civil}
-                    onChange={(e) => setAddForm({ ...addForm, civil: e.target.value as any })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007]"
-                  >
-                    <option value="Single">Single</option>
-                    <option value="Married">Married</option>
-                    <option value="Widowed">Widowed</option>
-                    <option value="Separated">Separated</option>
-                  </select>
-                </div>
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Civil Status</label>
+                <select
+                  value={addForm.civil}
+                  onChange={(e) => setAddForm({ ...addForm, civil: e.target.value as any })}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007]"
+                >
+                  <option value="Single">Single</option>
+                  <option value="Married">Married</option>
+                  <option value="Widowed">Widowed</option>
+                  <option value="Separated">Separated</option>
+                </select>
               </div>
 
               <div className="space-y-1">
@@ -689,34 +633,18 @@ export default function AdminResidentsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Precinct</label>
-                  <select
-                    value={editingResident.precinct}
-                    onChange={(e) => setEditingResident({ ...editingResident, precinct: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007]"
-                  >
-                    <option value="PRECINCT-0041A">PRECINCT-0041A</option>
-                    <option value="PRECINCT-0042A">PRECINCT-0042A</option>
-                    <option value="PRECINCT-0042B">PRECINCT-0042B</option>
-                    <option value="PRECINCT-0043A">PRECINCT-0043A</option>
-                    <option value="PRECINCT-0044B">PRECINCT-0044B</option>
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Civil Status</label>
-                  <select
-                    value={editingResident.civil}
-                    onChange={(e) => setEditingResident({ ...editingResident, civil: e.target.value as any })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007]"
-                  >
-                    <option value="Single">Single</option>
-                    <option value="Married">Married</option>
-                    <option value="Widowed">Widowed</option>
-                    <option value="Separated">Separated</option>
-                  </select>
-                </div>
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Civil Status</label>
+                <select
+                  value={editingResident.civil}
+                  onChange={(e) => setEditingResident({ ...editingResident, civil: e.target.value as any })}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-[#9C2007]"
+                >
+                  <option value="Single">Single</option>
+                  <option value="Married">Married</option>
+                  <option value="Widowed">Widowed</option>
+                  <option value="Separated">Separated</option>
+                </select>
               </div>
 
               <div className="space-y-1">
