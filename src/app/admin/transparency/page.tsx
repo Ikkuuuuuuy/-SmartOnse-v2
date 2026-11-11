@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   DollarSign, 
   FileText, 
@@ -17,7 +17,10 @@ import {
   Search, 
   Filter,
   RefreshCw,
-  Loader2
+  Loader2,
+  UploadCloud,
+  FileSpreadsheet,
+  AlertCircle
 } from 'lucide-react';
 import TablePagination from '@/components/ui/TablePagination';
 import TableSortHeader from '@/components/ui/TableSortHeader';
@@ -29,6 +32,7 @@ export interface TransparencyDoc {
   year: string;
   quarter: string;
   fileSize: string;
+  fileUrl?: string;
   status: string;
   uploadedBy: string;
   date: string;
@@ -67,6 +71,15 @@ export default function AdminTransparencyPage() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<TransparencyDoc | null>(null);
 
+  // File Upload State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreviewName, setFilePreviewName] = useState('');
+  const [calculatedFileSize, setCalculatedFileSize] = useState('');
+  const [fileBase64, setFileBase64] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
+
   // Upload Form
   const [uploadForm, setUploadForm] = useState({
     title: '',
@@ -74,6 +87,55 @@ export default function AdminTransparencyPage() {
     quarter: 'Q3 2026',
     category: 'Financial Statement',
   });
+
+  const handleFileSelect = (file: File) => {
+    const validExts = ['.pdf', '.doc', '.docx', '.xlsx'];
+    const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+    if (!validExts.includes(ext)) {
+      setFileError('Invalid file type. Please upload a PDF, DOC, DOCX, or XLSX file.');
+      return;
+    }
+    // 8MB limit
+    if (file.size > 8 * 1024 * 1024) {
+      setFileError('File size exceeds 8MB limit. Please upload a smaller document.');
+      return;
+    }
+
+    setFileError(null);
+    setSelectedFile(file);
+    setFilePreviewName(file.name);
+
+    // Auto-calculate formatted file size
+    const extClean = ext.replace('.', '').toUpperCase();
+    const formattedSize = file.size >= 1024 * 1024
+      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB (${extClean})`
+      : `${Math.round(file.size / 1024)} KB (${extClean})`;
+    setCalculatedFileSize(formattedSize);
+
+    // Autofill title if blank
+    if (!uploadForm.title) {
+      const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+      setUploadForm((prev) => ({ ...prev, title: cleanName }));
+    }
+
+    // Convert file to Base64 data URL
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFileBase64(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearFile = () => {
+    setSelectedFile(null);
+    setFilePreviewName('');
+    setCalculatedFileSize('');
+    setFileBase64('');
+    setFileError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const fetchDocs = async () => {
     setIsLoading(true);
@@ -101,7 +163,11 @@ export default function AdminTransparencyPage() {
       const res = await fetch('/api/admin/transparency', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(uploadForm),
+        body: JSON.stringify({
+          ...uploadForm,
+          fileSize: calculatedFileSize || '1.8 MB (PDF)',
+          fileUrl: fileBase64 || '#',
+        }),
       });
       const data = await res.json();
       if (res.ok && data.success && data.document) {
@@ -113,6 +179,7 @@ export default function AdminTransparencyPage() {
           quarter: 'Q3 2026',
           category: 'Financial Statement',
         });
+        handleClearFile();
       } else {
         alert(data.error || 'Failed to upload disclosure.');
       }
@@ -371,6 +438,19 @@ export default function AdminTransparencyPage() {
                     <td className="py-3.5 px-4 font-mono text-[11px] text-slate-500 dark:text-slate-400">{d.date}</td>
                     <td className="py-3.5 px-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
+                        {d.fileUrl && d.fileUrl !== '#' && (
+                          <a
+                            href={d.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download={d.title}
+                            className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-600 text-emerald-700 dark:text-emerald-300 hover:text-white rounded-lg font-bold text-[11px] transition inline-flex items-center gap-1 cursor-pointer border border-emerald-200/60 dark:border-emerald-900/40"
+                            title="Download/view uploaded file"
+                          >
+                            <Download className="w-3 h-3" />
+                            <span>View</span>
+                          </a>
+                        )}
                         <button
                           onClick={() => setEditingDoc({ ...d })}
                           className="px-2.5 py-1 bg-slate-100 dark:bg-[#0E1B33] hover:bg-[#9C2007] dark:hover:bg-[#9C2007] text-slate-700 dark:text-slate-300 hover:text-white rounded-lg font-bold text-[11px] transition inline-flex items-center gap-1 cursor-pointer border border-transparent dark:border-blue-900/40"
@@ -421,6 +501,98 @@ export default function AdminTransparencyPage() {
             <p className="text-xs text-slate-500 dark:text-slate-400">Post certified public finance ledgers or DILG Form 83 reports.</p>
 
             <form onSubmit={handleUploadSubmit} className="space-y-4 text-xs">
+              {/* Interactive File Upload Dropzone */}
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px] flex items-center justify-between">
+                  <span>Document File Attachment</span>
+                  {calculatedFileSize && (
+                    <span className="text-emerald-600 dark:text-emerald-400 font-mono text-[10px] normal-case font-bold">
+                      {calculatedFileSize}
+                    </span>
+                  )}
+                </label>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.xlsx"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileSelect(file);
+                  }}
+                />
+
+                {selectedFile ? (
+                  <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-[#0E1B33] border border-emerald-500/40 dark:border-emerald-500/30 rounded-2xl">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        {filePreviewName.endsWith('.xlsx') ? (
+                          <FileSpreadsheet className="w-5 h-5" />
+                        ) : (
+                          <FileText className="w-5 h-5" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 dark:text-white truncate text-xs">
+                          {filePreviewName}
+                        </p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                          Ready to attach • {calculatedFileSize}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleClearFile}
+                      className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition cursor-pointer"
+                      title="Remove file"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragging(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) handleFileSelect(file);
+                    }}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition flex flex-col items-center justify-center gap-2 ${
+                      isDragging
+                        ? 'border-[#9C2007] bg-red-500/10'
+                        : 'border-slate-300 dark:border-blue-900/60 hover:border-[#9C2007] dark:hover:border-[#9C2007] bg-slate-50/50 dark:bg-[#0E1B33]/40'
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-[#152747] text-slate-600 dark:text-slate-300 flex items-center justify-center">
+                      <UploadCloud className="w-5 h-5 text-[#9C2007]" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                        Click to browse or drag and drop document here
+                      </p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+                        Accepts PDF, DOC, DOCX, XLSX (Max 8MB)
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {fileError && (
+                  <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 text-[11px] pt-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fileError}</span>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-1">
                 <label className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Document Title</label>
                 <input

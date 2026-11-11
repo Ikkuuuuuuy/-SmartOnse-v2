@@ -74,8 +74,6 @@ export const translations: Record<Language, Record<string, string>> = {
     'svc.jobseeker.desc': 'Waives government pre-employment document fees under Republic Act No. 11261 for entry-level applicants.',
     'svc.business.title': 'Barangay Business Clearance',
     'svc.business.desc': 'Mandatory commercial permit for new business registration and annual mayor\'s permit renewal.',
-    'svc.blotter.title': 'Barangay Incident / Blotter Certification',
-    'svc.blotter.desc': 'Official certification of recorded blotter, incident extract, or conciliation settlement before the Lupong Tagapamayapa.',
 
     // Features Section
     'features.badge': 'Modern Public Administration',
@@ -127,7 +125,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'about.hall_desc': 'Located in the heart of San Juan City, Metro Manila. Our barangay hall houses the Punong Barangay executive office, Session Hall, Lupong Tagapamayapa conciliation room, Barangay Health Station, Day Care Center, and 24/7 BDRRM Emergency Operations Center.',
     'about.hall_hours_title': 'Operating Hours',
     'about.hall_hours_val': 'Monday to Friday: 8:00 AM – 5:00 PM',
-    'about.hall_hours_sub': 'Emergency & Blotter: 24/7 Active',
+    'about.hall_hours_sub': 'Emergency & Quick Response: 24/7 Active',
     'about.hall_contact_title': 'Frontline Contact',
     'about.hall_contact_val': 'Hotline: (02) 8723-0011 / 0917-888-0011',
     'about.hall_contact_sub': 'Email: info@onse.gov.ph',
@@ -167,7 +165,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'contact.email_label': 'Official Email Addresses',
     'contact.hours_heading': 'Office Hours',
     'contact.hours_general': 'Regular Operations: Monday – Friday: 8:00 AM – 5:00 PM',
-    'contact.hours_emergency': 'Emergency Dispatch, Police & Tanod Blotter: 24/7 Active Non-Stop',
+    'contact.hours_emergency': 'Emergency Dispatch & Tanod Security: 24/7 Active Non-Stop',
 
     // Track Page
     'track.title': 'Track Application Status',
@@ -277,8 +275,6 @@ export const translations: Record<Language, Record<string, string>> = {
     'svc.jobseeker.desc': 'Libreng pre-employment documents alinsunod sa itinatadhana ng Republic Act No. 11261 para sa mga bagong naghahanap ng trabaho.',
     'svc.business.title': 'Barangay Business Clearance',
     'svc.business.desc': 'Kailangang permit para sa pagpaparehistro ng bagong negosyo at taunang Mayor\'s Permit renewal.',
-    'svc.blotter.title': 'Sertipikasyon ng Barangay Blotter / Rekord',
-    'svc.blotter.desc': 'Opisyal na katunayan ng naitalang blotter, ulat ng insidente, o kasunduan sa Lupong Tagapamayapa.',
 
     // Features Section
     'features.badge': 'Makabagong Serbisyong Publiko',
@@ -330,7 +326,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'about.hall_desc': 'Matatagpuan sa gitna ng Lungsod ng San Juan, Kalakhang Maynila. Narito ang opisina ng Punong Barangay, Session Hall, Lupong Tagapamayapa, Barangay Health Station, Day Care Center, at 24/7 BDRRM Operations Center.',
     'about.hall_hours_title': 'Oras ng Tanggapan',
     'about.hall_hours_val': 'Lunes hanggang Biyernes: 8:00 AM – 5:00 PM',
-    'about.hall_hours_sub': 'Emergency at Blotter: Bukas 24/7 Araw-araw',
+    'about.hall_hours_sub': 'Emergency at Quick Response: Bukas 24/7 Araw-araw',
     'about.hall_contact_title': 'Ugnayan sa Frontline',
     'about.hall_contact_val': 'Hotline: (02) 8723-0011 / 0917-888-0011',
     'about.hall_contact_sub': 'Email: info@onse.gov.ph',
@@ -370,7 +366,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'contact.email_label': 'Opisyal na mga Email Address',
     'contact.hours_heading': 'Oras ng Serbisyo',
     'contact.hours_general': 'Karaniwang Transaksyon: Lunes – Biyernes: 8:00 AM – 5:00 PM',
-    'contact.hours_emergency': 'Emergency Dispatch, Pulisya at Blotter ng Tanod: Bukas 24/7 Walang Patid',
+    'contact.hours_emergency': 'Emergency Dispatch at Seguridad ng Tanod: Bukas 24/7 Walang Patid',
 
     // Track Page
     'track.title': 'Alamin ang Katayuan ng Aplikasyon',

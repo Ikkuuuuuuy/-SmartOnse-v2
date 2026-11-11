@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { processChatbotMessage } from '@/lib/chatbot/chatbotEngine';
+import { processChatbotMessage, type ChatHistoryItem } from '@/lib/chatbot/chatbotEngine';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
@@ -20,6 +20,18 @@ export async function POST(req: Request) {
 
     const body = await req.json().catch(() => ({}));
     const message = typeof body?.message === 'string' ? body.message.trim() : '';
+    const rawHistory = Array.isArray(body?.history) ? body.history : [];
+    const history: ChatHistoryItem[] = rawHistory
+      .filter((item: unknown): item is ChatHistoryItem =>
+        Boolean(
+          item &&
+          typeof item === 'object' &&
+          ('sender' in item) &&
+          ('text' in item) &&
+          typeof (item as ChatHistoryItem).text === 'string'
+        )
+      )
+      .slice(-6);
 
     if (!message) {
       return NextResponse.json({
@@ -36,11 +48,12 @@ export async function POST(req: Request) {
       });
     }
 
-    const result = await processChatbotMessage(message);
+    const result = await processChatbotMessage(message, history);
 
     return NextResponse.json({
       reply: result.reply,
       category: result.category,
+      suggestions: result.suggestions,
     });
   } catch (err: unknown) {
     console.error('[Chatbot Error]', err);

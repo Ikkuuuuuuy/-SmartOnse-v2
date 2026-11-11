@@ -33,15 +33,17 @@ export default function BarangayAiAssistant() {
     }
   }, [messages, isOpen]);
 
-  const quickQuestions = [
-    'Where is Barangay Onse located?',
-    'Sino ang Barangay Captain at SK?',
+  const defaultQuickQuestions = [
     'Requirements sa Barangay Clearance?',
-    'Paano mag-track ng request (REQ-)?',
     'Libre ba ang Certificate of Indigency?',
+    'Sino ang Barangay Captain at SK?',
+    'Where is Barangay Onse located?',
+    'Paano mag-track ng request?',
     'Saan makikita ang mga opisyal at link?',
     'Emergency Hotlines sa Onse?',
   ];
+
+  const [quickQuestions, setQuickQuestions] = useState<string[]>(defaultQuickQuestions);
 
   // Helper to parse `inline code` and **bold**
   const renderTextSegment = (text: string, keyPrefix: string) => {
@@ -132,11 +134,16 @@ export default function BarangayAiAssistant() {
     setLoading(true);
 
     try {
+      const historyPayload = messages.slice(-6).map((m) => ({
+        sender: m.sender,
+        text: m.text,
+      }));
+
       const [res] = await Promise.all([
         fetch('/api/chatbot', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text.trim() }),
+          body: JSON.stringify({ message: text.trim(), history: historyPayload }),
         }),
         // Humanized natural response delay (600ms) to show typing indicator
         new Promise((resolve) => setTimeout(resolve, 600)),
@@ -149,6 +156,14 @@ export default function BarangayAiAssistant() {
         text: data.reply || "Maaari kayong magsadya sa Barangay Onse Hall mula Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
+
+      if (Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+        const merged = [
+          ...data.suggestions,
+          ...defaultQuickQuestions.filter((q) => !data.suggestions.includes(q)),
+        ];
+        setQuickQuestions(merged.slice(0, 7));
+      }
 
       setMessages((prev) => [...prev, botMsg]);
     } catch {

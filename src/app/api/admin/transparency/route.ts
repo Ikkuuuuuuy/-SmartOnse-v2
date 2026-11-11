@@ -26,7 +26,8 @@ export async function GET() {
         title: doc.title,
         year: `FY ${doc.year}`,
         quarter: doc.quarter || `Q${Math.floor(index / 3) + 1} ${doc.year}`,
-        fileSize: `${doc.fileSize} (PDF)`,
+        fileSize: doc.fileSize.includes('(') ? doc.fileSize : `${doc.fileSize} (PDF)`,
+        fileUrl: doc.fileUrl || '#',
         status: doc.category.includes('SK') ? 'VERIFIED_NYC' : 'VERIFIED_COA',
         uploadedBy: doc.category.includes('SK') ? 'SK Treasurer' : 'Barangay Treasurer',
         date: doc.publishedDate.toISOString().slice(0, 10),
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { title, year, quarter, category, fileSize } = body;
+    const { title, year, quarter, category, fileSize, fileUrl } = body;
 
     if (!title) {
       return NextResponse.json(
@@ -72,8 +73,8 @@ export async function POST(req: Request) {
         category: cleanCategory,
         year: parsedYear,
         quarter: cleanQuarter,
-        fileUrl: '#',
-        fileSize: fileSize || '1.8 MB',
+        fileUrl: fileUrl || '#',
+        fileSize: fileSize || '1.8 MB (PDF)',
         publishedDate: new Date(),
       },
     });
@@ -88,7 +89,8 @@ export async function POST(req: Request) {
         title: newDoc.title,
         year: `FY ${newDoc.year}`,
         quarter: newDoc.quarter,
-        fileSize: `${newDoc.fileSize} (PDF)`,
+        fileSize: newDoc.fileSize,
+        fileUrl: newDoc.fileUrl,
         status: 'VERIFIED_COA',
         uploadedBy: sessionUser.name || 'Barangay Treasurer',
         date: newDoc.publishedDate.toISOString().slice(0, 10),

@@ -116,15 +116,13 @@ async function main() {
       processingDays: 2,
       requirements: JSON.stringify(['DTI or SEC Registration', 'Contract of Lease / Ownership Proof', 'Sanitary & Fire Permit']),
     },
-    {
-      code: 'BLOTTER_REPORT',
-      name: 'Barangay Incident / Blotter Certification',
-      description: 'Official certification of recorded blotter, incident entry, or settlement before the Lupong Tagapamayapa.',
-      fee: 100.0,
-      processingDays: 1,
-      requirements: JSON.stringify(['Valid Government ID', 'Blotter Case / Docket reference number', 'Personal appearance or Desk Officer interview']),
-    },
   ];
+
+  const oldBlotter = await prisma.documentType.findUnique({ where: { code: 'BLOTTER_REPORT' } });
+  if (oldBlotter) {
+    await prisma.documentRequest.deleteMany({ where: { documentTypeId: oldBlotter.id } });
+    await prisma.documentType.delete({ where: { id: oldBlotter.id } });
+  }
 
   for (const dt of docTypes) {
     await prisma.documentType.upsert({
@@ -182,15 +180,6 @@ async function main() {
       requirements: 'DTI or SEC Certificate of Registration, Contract of Lease or Proof of Property Ownership, Sanitary and Fire Safety Inspection clearance',
       processingTime: '2 Business Days',
       order: 5,
-    },
-    {
-      title: 'Barangay Incident / Blotter Certification',
-      category: 'Peace & Order',
-      description: 'Official certification of recorded blotter, incident entry, or settlement before the Lupong Tagapamayapa.',
-      fee: '₱100.00',
-      requirements: 'Valid Government ID of complainant or authorized party, Blotter Case / Docket reference number, Personal appearance or verification with Desk Officer',
-      processingTime: '24 Hours',
-      order: 6,
     },
   ];
 
@@ -853,7 +842,6 @@ async function main() {
   const dtIndigency = await prisma.documentType.findUniqueOrThrow({ where: { code: 'CERT_INDIGENCY' } });
   const dtJobseeker = await prisma.documentType.findUniqueOrThrow({ where: { code: 'FIRST_TIME_JOBSEEKER' } });
   const dtBusiness = await prisma.documentType.findUniqueOrThrow({ where: { code: 'BUSINESS_CLEARANCE' } });
-  const dtBlotter = await prisma.documentType.findUniqueOrThrow({ where: { code: 'BLOTTER_REPORT' } });
 
   const requestsToSeed = [
     // ------------------------------------------
@@ -985,17 +973,17 @@ async function main() {
     },
     {
       trackingNumber: 'ONSE-2026-0619',
-      documentTypeId: dtBlotter.id,
+      documentTypeId: dtClearance.id,
       userId: userMap.get('rodrigo.macaraeg@gmail.com'),
       fullName: 'Rodrigo Macaraeg',
       contactNumber: '0917-555-0107',
       email: 'rodrigo.macaraeg@gmail.com',
       address: '9 Pinaglabanan St., Barangay Onse, San Juan City',
-      purpose: 'Traffic Incident Blotter Copy for Insurance Claim',
+      purpose: 'Postal ID & SSS Verification Requirement',
       civilStatus: 'Married',
       yearsOfResidency: 35,
       status: 'COMPLETED',
-      remarks: 'Certified true copy of Lupon Blotter docket entry released.',
+      remarks: 'Barangay clearance verified and issued.',
       createdAt: new Date('2026-06-19T10:00:00Z'),
       updatedAt: new Date('2026-06-19T14:30:00Z'),
       rating: 4,

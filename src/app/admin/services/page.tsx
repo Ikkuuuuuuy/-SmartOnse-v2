@@ -90,17 +90,6 @@ const DEPRECATED_SERVICES: ServiceItem[] = [
     status: 'ACTIVE',
     monthlyVolume: '85 issued / mo',
   },
-  {
-    id: '6',
-    code: 'SRV-006',
-    name: 'Barangay Incident / Blotter Certification',
-    category: 'Peace & Order',
-    fee: '₱100.00',
-    turnaround: '24 Hours',
-    requirements: 'Personal Appearance before Desk Officer / Tanod Roster',
-    status: 'ACTIVE',
-    monthlyVolume: '25 issued / mo',
-  },
 ];
 */
 

@@ -12,12 +12,11 @@ const TYPE_COLORS: Record<string, string> = {
   FIRST_TIME_JOBSEEKER: '#F59E0B', // Amber
   BUSINESS_CLEARANCE: '#8B5CF6', // Purple
   BUSINESS_PERMIT: '#6366F1', // Indigo
-  BLOTTER_REPORT: '#EC4899', // Pink
 };
 
 const DEFAULT_COLOR = '#64748B';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const sessionUser = await getSessionUser();
     if (!sessionUser || !isAdminUser(sessionUser.role)) {
@@ -27,8 +26,11 @@ export async function GET() {
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const periodParam = searchParams.get('period') || 'FY 2026 (August 2026)';
+
     // 1. Fetch all document requests with their document types
-    const [requests, totalUsers, verifiedUsers, totalInhabitants] = await Promise.all([
+    const [allRequests, totalUsers, verifiedUsers, totalInhabitants] = await Promise.all([
       prisma.documentRequest.findMany({
         include: {
           documentType: true,
@@ -41,6 +43,36 @@ export async function GET() {
       prisma.user.count({ where: { isVerified: true } }),
       prisma.barangayInhabitant.count(),
     ]);
+
+    // Parse period window
+    let startDate: Date | null = null;
+    let endDate: Date | null = null;
+    let allowedMonths: string[] | null = null;
+
+    if (periodParam.includes('August') || periodParam.includes('Aug') || periodParam.toLowerCase() === 'month') {
+      // Month window: August 2026
+      startDate = new Date('2026-08-01T00:00:00.000Z');
+      endDate = new Date('2026-08-31T23:59:59.999Z');
+      // Velocity shows May to August trajectory
+      allowedMonths = ['2026-05', '2026-06', '2026-07', '2026-08'];
+    } else if (periodParam.includes('Q3') || periodParam.includes('Quarter') || periodParam.toLowerCase() === 'quarter') {
+      // Quarter window: Q3 2026 (July - September)
+      startDate = new Date('2026-07-01T00:00:00.000Z');
+      endDate = new Date('2026-09-30T23:59:59.999Z');
+      allowedMonths = ['2026-07', '2026-08', '2026-09'];
+    } else if (periodParam.includes('Annual') || periodParam.includes('Full Year') || periodParam.toLowerCase() === 'annual') {
+      // Annual window: Full Year 2026
+      startDate = new Date('2026-01-01T00:00:00.000Z');
+      endDate = new Date('2026-12-31T23:59:59.999Z');
+      allowedMonths = null;
+    }
+
+    // Filter requests for KPI Summary calculations
+    const requests = allRequests.filter((r) => {
+      if (!startDate || !endDate) return true;
+      const d = new Date(r.createdAt);
+      return d >= startDate && d <= endDate;
+    });
 
     const totalRequests = requests.length;
 
@@ -97,7 +129,6 @@ export async function GET() {
       // Revenue
       if (fee === 0) {
         freeRequestsCount++;
-        // Standard reference value for free grants if it were billed normally is ₱50
         waivedRevenue += 50;
       } else {
         paidRequestsCount++;
@@ -139,15 +170,22 @@ export async function GET() {
         existingType.revenue += fee;
       }
       typeMap.set(typeCode, existingType);
+    }
 
-      // Monthly aggregation
+    // Monthly velocity calculation (from all requests or period-allowed months)
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    for (const r of allRequests) {
+      const fee = r.documentType?.fee ?? 0;
       const createdDate = new Date(r.createdAt);
       const year = createdDate.getFullYear();
       const monthIdx = createdDate.getMonth();
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const monthLabel = monthNames[monthIdx];
       const monthYearKey = `${year}-${String(monthIdx + 1).padStart(2, '0')}`;
       const displayLabel = `${monthLabel} ${year}`;
+
+      if (allowedMonths && !allowedMonths.includes(monthYearKey)) {
+        continue;
+      }
 
       const existingMonth = monthMap.get(monthYearKey) || {
         label: monthLabel,
@@ -166,6 +204,25 @@ export async function GET() {
         existingMonth.completed += 1;
       }
       monthMap.set(monthYearKey, existingMonth);
+    }
+
+    // If allowedMonths includes future/target months that have 0 records, ensure they are represented
+    if (allowedMonths) {
+      for (const mKey of allowedMonths) {
+        if (!monthMap.has(mKey)) {
+          const [yStr, mStr] = mKey.split('-');
+          const mIdx = parseInt(mStr, 10) - 1;
+          const mLabel = monthNames[mIdx];
+          monthMap.set(mKey, {
+            label: mLabel,
+            monthYear: `${mLabel} ${yStr}`,
+            sortKey: mKey,
+            clearances: 0,
+            revenue: 0,
+            completed: 0,
+          });
+        }
+      }
     }
 
     // Convert document type map to array with percentages
@@ -197,6 +254,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
+      period: periodParam,
       data: {
         summary: {
           totalRequests,

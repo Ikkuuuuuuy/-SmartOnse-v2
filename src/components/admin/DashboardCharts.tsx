@@ -144,8 +144,7 @@ export default function DashboardCharts({ selectedPeriod, analytics }: Dashboard
         const short = t.name
           .replace('Barangay ', '')
           .replace('Certificate of ', 'Cert. ')
-          .replace('First Time Jobseeker Certificate', 'Jobseeker (RA 11261)')
-          .replace('Incident / Blotter Certification', 'Blotter Report');
+          .replace('First Time Jobseeker Certificate', 'Jobseeker (RA 11261)');
 
         return {
           name: t.name,

@@ -47,8 +47,9 @@ export default function AdminDashboardPage() {
   // 2. Clearances from Database
   const [clearances, setClearances] = useState<any[]>([]);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(false);
 
-  // Dynamic KPI calculations from live data
+  // Dynamic KPI calculations from live data (automatically reflects filtered period)
   const totalRequestsCount = analyticsData?.summary.totalRequests ?? clearances.length;
 
   const pendingCount = useMemo(() => {
@@ -131,25 +132,39 @@ export default function AdminDashboardPage() {
     },
   ], [totalRequestsCount, completedCount, pendingCount, readyCount, realizedRevenue, pipelineRevenue, waivedRevenue, registeredCitizensCount, freeGrantsCount]);
 
+  // Sync analytics dynamically whenever selectedPeriod changes
+  const fetchAnalyticsData = async (period: string) => {
+    setIsAnalyticsLoading(true);
+    try {
+      const res = await fetch(`/api/admin/analytics?period=${encodeURIComponent(period)}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setAnalyticsData(json.data);
+          if (json.data.summary?.totalInhabitants) {
+            setRegisteredCitizensCount(json.data.summary.totalInhabitants);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to sync period analytics:', err);
+    } finally {
+      setIsAnalyticsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnalyticsData(selectedPeriod);
+  }, [selectedPeriod]);
+
   useEffect(() => {
     const fetchLatest = async () => {
       try {
-        const [resRequests, resResidents, resLogs, resAnalytics] = await Promise.all([
+        const [resRequests, resResidents, resLogs] = await Promise.all([
           fetch('/api/admin/requests'),
           fetch('/api/admin/residents').catch(() => null),
           fetch('/api/admin/audit-logs').catch(() => null),
-          fetch('/api/admin/analytics').catch(() => null),
         ]);
-
-        if (resAnalytics && resAnalytics.ok) {
-          const analyticsJson = await resAnalytics.json();
-          if (analyticsJson.success && analyticsJson.data) {
-            setAnalyticsData(analyticsJson.data);
-            if (analyticsJson.data.summary?.totalInhabitants) {
-              setRegisteredCitizensCount(analyticsJson.data.summary.totalInhabitants);
-            }
-          }
-        }
         
         if (resRequests.ok) {
           const data = await resRequests.json();

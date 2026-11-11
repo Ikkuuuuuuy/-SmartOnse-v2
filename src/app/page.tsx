@@ -92,15 +92,6 @@ export default function WelcomePage() {
       code: 'BUSINESS_CLEARANCE',
       icon: <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />,
     },
-    {
-      title: t('svc.blotter.title'),
-      desc: t('svc.blotter.desc'),
-      fee: '₱100.00',
-      time: '24 Hours',
-      badge: 'Peace & Order',
-      code: 'BLOTTER_REPORT',
-      icon: <Scale className="w-6 h-6 text-rose-600 dark:text-rose-400" />,
-    },
   ];
 
   const steps = [
