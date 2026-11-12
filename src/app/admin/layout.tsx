@@ -28,7 +28,8 @@ import {
   ChevronUp,
   Sun,
   Moon,
-  Shield
+  Shield,
+  TrendingUp
 } from 'lucide-react';
 import NotificationBellDropdown from '@/components/notifications/NotificationBellDropdown';
 
@@ -48,6 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const currentBreadcrumb = useMemo(() => {
     const routeMap: Record<string, { group: string; label: string }> = {
       '/admin': { group: 'Main & Analytics', label: 'Dashboard' },
+      '/admin/reports': { group: 'Main & Analytics', label: 'Report Analytics' },
       '/admin/requests': { group: 'Main & Analytics', label: 'Certificate Requests' },
       '/admin/residents': { group: 'Main & Analytics', label: 'Resident Directory' },
       '/admin/verifications': { group: 'Main & Analytics', label: 'Pending Verifications' },
@@ -178,6 +180,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       group: 'MAIN & ANALYTICS',
       items: [
         { label: 'Dashboard', href: '/admin', moduleKey: 'dashboard', icon: <BarChart3 className="w-4 h-4" />, badge: null },
+        { label: 'Report Analytics', href: '/admin/reports', moduleKey: 'reports', icon: <TrendingUp className="w-4 h-4" />, badge: null },
         { label: 'Certificate Requests', href: '/admin/requests', moduleKey: 'requests', icon: <Receipt className="w-4 h-4" />, badge: null },
         { label: 'Resident Directory', href: '/admin/residents', moduleKey: 'residents', icon: <Users className="w-4 h-4" />, badge: null },
         { label: 'Pending Verifications', href: '/admin/verifications', moduleKey: 'verifications', icon: <UserCheck className="w-4 h-4" />, badge: pendingCount !== null && pendingCount > 0 ? String(pendingCount) : null },

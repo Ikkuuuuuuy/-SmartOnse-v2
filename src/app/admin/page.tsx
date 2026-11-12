@@ -35,6 +35,34 @@ import DashboardCharts, { AnalyticsData } from '@/components/admin/DashboardChar
 
 type TimeframeMode = 'day' | 'week' | 'month' | 'quarter' | 'year' | 'all' | 'custom';
 
+const DEFAULT_DOC_DESCRIPTIONS: Record<string, { category: string; desc: string; fee: string }> = {
+  BRGY_CLEARANCE: {
+    category: 'Civil & Employment Clearance',
+    desc: 'Official certificate certifying residency and good moral standing for employment, NBI, or business.',
+    fee: '₱50.00',
+  },
+  CERT_RESIDENCY: {
+    category: 'Residency Verification',
+    desc: 'Proof of bonafide residency in Barangay Onse for bank, school, or DFA requirements.',
+    fee: '₱30.00',
+  },
+  CERT_INDIGENCY: {
+    category: 'Social Welfare & Assistance',
+    desc: 'Zero-fee document for indigent residents applying for medical, hospital, or DSWD financial aid.',
+    fee: 'FREE',
+  },
+  FIRST_TIME_JOBSEEKER: {
+    category: 'Youth & Pre-Employment Privilege',
+    desc: 'Zero-fee clearance issued pursuant to RA 11261 for first-time job applicants.',
+    fee: 'FREE',
+  },
+  BUSINESS_CLEARANCE: {
+    category: 'Commercial & Trade Endorsement',
+    desc: 'Barangay endorsement required for commercial establishments & San Juan City Hall permits.',
+    fee: '₱250.00',
+  },
+};
+
 export default function AdminDashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('Monthly: August 2026');
   const [timeframeMode, setTimeframeMode] = useState<TimeframeMode>('month');
@@ -385,6 +413,14 @@ export default function AdminDashboardPage() {
 
           <div className="flex items-center gap-2.5">
             <Link
+              href="/admin/reports"
+              className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#0E1B33] dark:hover:bg-[#152747] text-slate-800 dark:text-slate-100 rounded-2xl font-black text-xs uppercase tracking-wider transition border border-slate-200 dark:border-blue-900/40 cursor-pointer"
+            >
+              <TrendingUp className="w-4 h-4 text-[#9C2007] dark:text-rose-400" />
+              <span>Report Analytics</span>
+            </Link>
+
+            <Link
               href="/admin/requests"
               className="flex items-center gap-2 px-4 py-2.5 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-md shadow-red-900/20 transition cursor-pointer"
             >
@@ -649,6 +685,126 @@ export default function AdminDashboardPage() {
             </span>
             <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-semibold">{analyticsData?.summary.collectionEfficiency ?? 100}% collection rate</span>
           </div>
+        </div>
+      </div>
+
+      {/* 4.5 Document Performance & Issuance Summary (Report Analytics) */}
+      <div className="bg-white dark:bg-[#0B1528] rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-blue-900/40 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-blue-900/40 pb-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-50 dark:bg-rose-950/70 text-[#9C2007] dark:text-rose-400 border border-rose-200 dark:border-rose-900/40">
+                Document Analytics
+              </span>
+              <span className="text-xs text-slate-400 font-bold">&bull;</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{selectedPeriod}</span>
+            </div>
+            <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-[#9C2007] dark:text-rose-400" />
+              Document Issuance Performance &amp; Completion Velocity
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Total requests gathered vs. successfully completed certificates per official document category.
+            </p>
+          </div>
+
+          <Link
+            href="/admin/reports"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-[#9C2007] text-slate-800 hover:text-white dark:bg-[#0E1B33] dark:text-slate-200 dark:hover:bg-[#9C2007] dark:hover:text-white rounded-2xl font-black text-xs uppercase tracking-wider transition border border-slate-200 dark:border-blue-900/40 shadow-xs shrink-0 cursor-pointer"
+          >
+            <span>Open Full Report Analytics</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {/* Document Breakdown Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {(analyticsData?.documentTypeBreakdown || [
+            { name: 'Barangay Clearance', code: 'BRGY_CLEARANCE', count: 9, completedCount: 5, completionRate: 56, revenue: 250, color: '#DC2626' },
+            { name: 'Certificate of Residency', code: 'CERT_RESIDENCY', count: 7, completedCount: 4, completionRate: 57, revenue: 120, color: '#3B82F6' },
+            { name: 'Certificate of Indigency', code: 'CERT_INDIGENCY', count: 5, completedCount: 3, completionRate: 60, revenue: 0, color: '#10B981' },
+            { name: 'First Time Jobseeker', code: 'FIRST_TIME_JOBSEEKER', count: 3, completedCount: 2, completionRate: 67, revenue: 0, color: '#F59E0B' },
+            { name: 'Business Clearance', code: 'BUSINESS_CLEARANCE', count: 2, completedCount: 2, completionRate: 100, revenue: 500, color: '#8B5CF6' },
+          ]).map((doc) => {
+            const descInfo = DEFAULT_DOC_DESCRIPTIONS[doc.code] || {
+              category: 'Barangay Certification',
+              desc: 'Official barangay document issued to verified residents.',
+              fee: doc.revenue === 0 ? 'FREE' : 'Official Rate',
+            };
+            const completed = doc.completedCount ?? Math.round((doc.count * (doc.completionRate || 60)) / 100);
+            const rate = doc.completionRate ?? (doc.count > 0 ? Math.round((completed / doc.count) * 100) : 0);
+
+            return (
+              <div
+                key={doc.code}
+                className="bg-slate-50/70 dark:bg-[#0E1B33]/60 rounded-2xl p-4 border border-slate-200/70 dark:border-blue-900/40 hover:border-[#9C2007]/30 transition space-y-3 flex flex-col justify-between"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-[9px] font-black px-1.5 py-0.5 rounded bg-white dark:bg-[#152747] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-blue-900/40">
+                          {doc.code}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase">
+                          {descInfo.category}
+                        </span>
+                      </div>
+                      <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase mt-1">
+                        {doc.name}
+                      </h3>
+                    </div>
+
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider shrink-0 ${
+                        doc.revenue === 0 || doc.code === 'CERT_INDIGENCY' || doc.code === 'FIRST_TIME_JOBSEEKER'
+                          ? 'bg-purple-100 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40'
+                          : 'bg-slate-100 dark:bg-[#152747] text-slate-800 dark:text-slate-200'
+                      }`}
+                    >
+                      {doc.code === 'CERT_INDIGENCY' || doc.code === 'FIRST_TIME_JOBSEEKER' ? 'FREE' : descInfo.fee}
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                    {descInfo.desc}
+                  </p>
+                </div>
+
+                {/* Metrics Row */}
+                <div className="space-y-2 pt-2 border-t border-slate-200/50 dark:border-blue-900/30">
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="text-slate-600 dark:text-slate-300">
+                      Completed: <strong className="text-emerald-700 dark:text-emerald-400 font-mono font-black">{completed}</strong> of <span className="font-mono text-slate-800 dark:text-slate-200">{doc.count}</span>
+                    </span>
+                    <span className="font-mono text-xs font-black text-slate-900 dark:text-white">
+                      {rate}%
+                    </span>
+                  </div>
+
+                  {/* Visual Completion Progress Bar */}
+                  <div className="w-full bg-slate-200/70 dark:bg-[#152747] h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                      style={{ width: `${Math.min(100, Math.max(8, rate))}%` }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+                    <span>
+                      {doc.revenue > 0 ? `₱${doc.revenue.toFixed(2)} collections` : 'Waived social aid'}
+                    </span>
+                    <Link
+                      href="/admin/reports"
+                      className="text-[#9C2007] dark:text-rose-400 hover:underline font-bold"
+                    >
+                      Full Details &rarr;
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

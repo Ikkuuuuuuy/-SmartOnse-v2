@@ -312,6 +312,10 @@ export async function GET(req: Request) {
       name: string;
       code: string;
       count: number;
+      completedCount: number;
+      readyCount: number;
+      processingCount: number;
+      pendingCount: number;
       revenue: number;
       color: string;
     }>();
@@ -369,10 +373,23 @@ export async function GET(req: Request) {
         name: typeName,
         code: typeCode,
         count: 0,
+        completedCount: 0,
+        readyCount: 0,
+        processingCount: 0,
+        pendingCount: 0,
         revenue: 0,
         color: TYPE_COLORS[typeCode] || DEFAULT_COLOR,
       };
       existingType.count += 1;
+      if (r.status === 'COMPLETED') {
+        existingType.completedCount += 1;
+      } else if (r.status === 'READY_FOR_PICKUP') {
+        existingType.readyCount += 1;
+      } else if (r.status === 'PROCESSING') {
+        existingType.processingCount += 1;
+      } else if (r.status === 'PENDING') {
+        existingType.pendingCount += 1;
+      }
       if (r.status === 'COMPLETED' || r.status === 'READY_FOR_PICKUP') {
         existingType.revenue += fee;
       }
@@ -398,10 +415,11 @@ export async function GET(req: Request) {
       }
     }
 
-    // Convert document type map to array with percentages
+    // Convert document type map to array with percentages and completion metrics
     const documentTypeBreakdown = Array.from(typeMap.values()).map((t) => ({
       ...t,
       percentage: totalRequests > 0 ? Math.round((t.count / totalRequests) * 100) : 0,
+      completionRate: t.count > 0 ? Math.round((t.completedCount / t.count) * 100) : 0,
     })).sort((a, b) => b.count - a.count);
 
     // Format velocity output (without start/end date properties)

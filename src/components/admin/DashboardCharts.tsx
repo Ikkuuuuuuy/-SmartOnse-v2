@@ -39,6 +39,11 @@ export interface AnalyticsData {
     name: string;
     code: string;
     count: number;
+    completedCount?: number;
+    readyCount?: number;
+    processingCount?: number;
+    pendingCount?: number;
+    completionRate?: number;
     revenue: number;
     percentage: number;
     color: string;
