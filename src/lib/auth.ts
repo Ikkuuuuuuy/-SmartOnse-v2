@@ -13,6 +13,7 @@ export interface SessionUser {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   role: string;
   roleTitle?: string;
   destination?: string;
@@ -46,7 +47,8 @@ export async function createSessionToken(user: SessionUser): Promise<string> {
   return new SignJWT({
     id: user.id,
     name: user.name,
-    email: user.email,
+    email: user.email || user.phone || '',
+    phone: user.phone || '',
     role: user.role,
     roleTitle: user.roleTitle,
     destination: user.destination,
@@ -66,7 +68,8 @@ export async function verifySessionToken(token: string): Promise<SessionUser | n
     return {
       id: payload.id as string,
       name: payload.name as string,
-      email: payload.email as string,
+      email: (payload.email as string) || '',
+      phone: (payload.phone as string) || undefined,
       role: payload.role as string,
       roleTitle: payload.roleTitle as string | undefined,
       destination: payload.destination as string | undefined,

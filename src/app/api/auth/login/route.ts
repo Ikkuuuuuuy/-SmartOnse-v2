@@ -56,28 +56,46 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const { email, password, trustDevice = true } = body;
+    const { email, identifier, loginId, phone, password, trustDevice = true } = body;
+    const rawIdentifier = (identifier || email || loginId || phone || '').trim();
 
-    if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
+    if (!rawIdentifier || !password || typeof rawIdentifier !== 'string' || typeof password !== 'string') {
       return NextResponse.json(
-        { error: 'Valid email and password strings are required.' },
+        { error: 'Valid mobile number or email address, and password are required.' },
         { status: 400 }
       );
     }
 
-    if (email.length > 255 || password.length > 255) {
+    if (rawIdentifier.length > 255 || password.length > 255) {
       return NextResponse.json(
         { error: 'Input exceeds maximum allowed length.' },
         { status: 400 }
       );
     }
 
-    const cleanEmail = email.trim().toLowerCase();
-    const user = await prisma.user.findUnique({ where: { email: cleanEmail } });
+    const cleanEmail = rawIdentifier.toLowerCase();
+    const phoneDigits = rawIdentifier.replace(/\D/g, '');
+    const phoneSearchList = [
+      rawIdentifier,
+      phoneDigits,
+      phoneDigits.length === 11 ? `${phoneDigits.slice(0, 4)}-${phoneDigits.slice(4, 7)}-${phoneDigits.slice(7)}` : '',
+      phoneDigits.length === 10 && phoneDigits.startsWith('9') ? `0${phoneDigits}` : '',
+      phoneDigits.length === 12 && phoneDigits.startsWith('639') ? `0${phoneDigits.slice(2)}` : '',
+    ].filter(Boolean);
+
+    // Support signing in via either Email OR Mobile Phone
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: cleanEmail },
+          { phone: { in: phoneSearchList } },
+        ],
+      },
+    });
 
     if (!user || !user.password) {
       return NextResponse.json(
-        { error: 'Invalid email or password.' },
+        { error: 'Invalid mobile number/email or password.' },
         { status: 401 }
       );
     }
@@ -88,14 +106,14 @@ export async function POST(req: Request) {
       await prisma.auditLog.create({
         data: {
           action: 'LOGIN_FAILED',
-          actor: cleanEmail,
+          actor: user.email || user.phone || rawIdentifier,
           details: 'Failed login attempt: incorrect password.',
           ip,
         },
       });
 
       return NextResponse.json(
-        { error: 'Invalid email or password.' },
+        { error: 'Invalid mobile number/email or password.' },
         { status: 401 }
       );
     }
@@ -130,8 +148,8 @@ export async function POST(req: Request) {
     const isRecognized = await isTrustedDevice(deviceCookie, user.id);
     const isNewDevice = !isRecognized;
 
-    // Challenge with Email OTP if 2FA is explicitly enabled OR if login is from a new/unrecognized device
-    if (user.mfaEnabled || isNewDevice) {
+    // Challenge with Email OTP if 2FA is explicitly enabled OR if login is from a new/unrecognized device (and user has email configured)
+    if ((user.mfaEnabled || isNewDevice) && user.email) {
       const otp = crypto.randomInt(100000, 999999).toString();
       const mfaOtpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
@@ -180,11 +198,13 @@ export async function POST(req: Request) {
     const role = normalizeRole(user.role);
     const destination = ROLE_DESTINATIONS[role] || '/portal/request';
     const roleTitle = ROLE_TITLES[role] || 'Citizen';
+    const userIdentifier = user.email || user.phone || 'Resident';
 
     const sessionPayload = {
       id: user.id,
       name: user.name,
-      email: user.email,
+      email: userIdentifier,
+      phone: user.phone || undefined,
       role,
       roleTitle,
       destination,
@@ -227,7 +247,7 @@ export async function POST(req: Request) {
     await prisma.auditLog.create({
       data: {
         action: 'USER_LOGIN',
-        actor: `${user.name} (${user.email})`,
+        actor: `${user.name} (${userIdentifier})`,
         details: `Citizen signed in successfully with role "${roleTitle}".`,
         ip,
       },

@@ -465,18 +465,23 @@ function LoginForm() {
           {/* Manual Login Form */}
           <form onSubmit={handleLogin} className="space-y-4 text-xs sm:text-sm">
             <div className="space-y-1.5">
-              <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs">Email Address</label>
+              <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs">
+                Mobile Number or Email Address
+              </label>
               <div className="relative">
                 <Mail className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="juan@example.com"
+                  placeholder="e.g. 0917-123-4567 or juan@example.com"
                   className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-2xl focus:ring-2 focus:ring-[#9C2007]/50 text-sm font-medium outline-none transition"
                 />
               </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Senior citizens and residents without an email address may sign in using their registered 11-digit mobile number.
+              </p>
             </div>
 
             <div className="space-y-1.5">

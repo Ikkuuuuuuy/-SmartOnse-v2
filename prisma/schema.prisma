@@ -11,7 +11,7 @@ generator client {
 model User {
   id            String              @id @default(cuid())
   name          String
-  email         String              @unique
+  email         String?             @unique
   password      String?
   role          String              @default("resident") // super_admin, barangay_captain, barangay_councilor, sk_chairperson, sk_councilor, staff, resident
   phone         String?

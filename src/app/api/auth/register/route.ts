@@ -18,9 +18,9 @@ export async function POST(req: Request) {
       idCardImage,
     } = body;
 
-    if (!name || !email || !password || typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
+    if (!name || !phone || !password || typeof name !== 'string' || typeof phone !== 'string' || typeof password !== 'string') {
       return NextResponse.json(
-        { error: 'Valid name, email, and password strings are required.' },
+        { error: 'Full name, mobile phone number, and password are required.' },
         { status: 400 }
       );
     }
@@ -32,15 +32,6 @@ export async function POST(req: Request) {
       );
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const cleanEmail = email.trim().toLowerCase();
-    if (!emailRegex.test(cleanEmail) || cleanEmail.length > 255) {
-      return NextResponse.json(
-        { error: 'Invalid email address format.' },
-        { status: 400 }
-      );
-    }
-
     if (name.trim().length > 120) {
       return NextResponse.json(
         { error: 'Name exceeds maximum allowed length.' },
@@ -48,13 +39,59 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check for existing email
-    const existing = await prisma.user.findUnique({ where: { email: cleanEmail } });
-    if (existing) {
+    // Validate Philippine Mobile Phone Number
+    const rawDigits = phone.replace(/\D/g, '');
+    let cleanPhone = phone.trim();
+    if (rawDigits.length === 11 && rawDigits.startsWith('09')) {
+      cleanPhone = rawDigits;
+    } else if (rawDigits.length === 12 && rawDigits.startsWith('639')) {
+      cleanPhone = '0' + rawDigits.slice(2);
+    } else if (rawDigits.length === 10 && rawDigits.startsWith('9')) {
+      cleanPhone = '0' + rawDigits;
+    } else {
       return NextResponse.json(
-        { error: 'An account with this email address already exists.' },
+        { error: 'Please provide a valid 11-digit Philippine mobile number (e.g. 09171234567).' },
+        { status: 400 }
+      );
+    }
+
+    // Check for existing mobile number
+    const formattedDashed = `${cleanPhone.slice(0, 4)}-${cleanPhone.slice(4, 7)}-${cleanPhone.slice(7)}`;
+    const existingPhone = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { phone: cleanPhone },
+          { phone: formattedDashed },
+        ],
+      },
+    });
+    if (existingPhone) {
+      return NextResponse.json(
+        { error: 'An account with this mobile phone number already exists. Please log in or use a different number.' },
         { status: 409 }
       );
+    }
+
+    // Email Address is OPTIONAL (Accommodates Senior Citizens & Residents without email)
+    let cleanEmail: string | null = null;
+    if (email && typeof email === 'string' && email.trim().length > 0) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      cleanEmail = email.trim().toLowerCase();
+      if (!emailRegex.test(cleanEmail) || cleanEmail.length > 255) {
+        return NextResponse.json(
+          { error: 'Invalid email address format. If you do not have an email, you may leave it blank.' },
+          { status: 400 }
+        );
+      }
+
+      // Check for existing email
+      const existing = await prisma.user.findUnique({ where: { email: cleanEmail } });
+      if (existing) {
+        return NextResponse.json(
+          { error: 'An account with this email address already exists.' },
+          { status: 409 }
+        );
+      }
     }
 
     // Securely hash password with bcrypt (10 rounds)
@@ -114,7 +151,7 @@ export async function POST(req: Request) {
         data: {
           name: name.trim(),
           email: cleanEmail,
-          phone: phone || null,
+          phone: cleanPhone,
           address: address || `${matchedInhabitant.houseNumber || ''} ${matchedInhabitant.street}, Barangay Onse`.trim(),
           password: hashedPassword,
           role: 'resident',
@@ -145,7 +182,7 @@ export async function POST(req: Request) {
       data: {
         name: name.trim(),
         email: cleanEmail,
-        phone: phone || null,
+        phone: cleanPhone,
         address: address || null,
         password: hashedPassword,
         role: 'resident',
