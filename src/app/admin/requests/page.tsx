@@ -25,6 +25,7 @@ import QRCodeImage from '@/components/ui/QRCodeImage';
 export interface ClearanceRequest {
   id: string;
   trackingNumber: string;
+  userId?: string | null;
   fullName: string;
   documentType: string;
   fee: number;
@@ -34,6 +35,7 @@ export interface ClearanceRequest {
   contactNumber: string;
   createdAt: string;
   remarks?: string | null;
+  pickupDate?: string | null;
 }
 
 const PRESET_REJECTION_REASONS = [
@@ -402,20 +404,20 @@ export default function AdminRequestsPage() {
         let notifType: 'request' | 'alert' | 'system' = 'request';
 
         if (newStatus === 'PROCESSING') {
-          title = 'Certificate Under Review';
-          description = `Application #${target.trackingNumber} (${target.documentType}) is now being processed by Barangay Onse staff.`;
+          title = 'Application Under Review ⏳';
+          description = `Your ${target.documentType} (#${target.trackingNumber}) is under verification by desk officers. Residency is being verified against the Barangay Registry of Inhabitants (RBI).`;
           notifType = 'request';
         } else if (newStatus === 'READY_FOR_PICKUP') {
           title = 'Document Ready for Pickup! 📄';
-          description = `Great news! Your ${target.documentType} (#${target.trackingNumber}) is ready for pickup at Barangay Onse Hall.`;
+          description = `Your ${target.documentType} (#${target.trackingNumber}) is signed, sealed, and ready! Claim at Window 2, Barangay Onse Hall (Mon-Fri 8:00 AM - 5:00 PM) within 5 business days. Bring 1 valid ID.`;
           notifType = 'request';
         } else if (newStatus === 'COMPLETED') {
           title = 'Document Completed & Released ✅';
-          description = `Your ${target.documentType} (#${target.trackingNumber}) has been officially completed and released.`;
+          description = `Your ${target.documentType} (#${target.trackingNumber}) has been officially released. Your certificate is permanently verifiable via QR code.`;
           notifType = 'system';
         } else if (newStatus === 'REJECTED') {
-          title = 'Certificate Request Rejected';
-          description = `Application #${target.trackingNumber} (${target.documentType}) was rejected.${remarks ? ` Reason: ${remarks}` : ''}`;
+          title = 'Certificate Request Rejected ⚠️';
+          description = `Application #${target.trackingNumber} (${target.documentType}) was rejected.${remarks ? ` Reason: ${remarks}.` : ''} Please review feedback on your tracking page or visit Window 2.`;
           notifType = 'alert';
         }
 
@@ -424,6 +426,7 @@ export default function AdminRequestsPage() {
           description,
           type: notifType,
           targetRole: 'resident',
+          targetUserId: target.userId || undefined,
           href: `/track?trackingNumber=${target.trackingNumber}`,
         });
       } catch (e) {

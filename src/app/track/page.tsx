@@ -21,9 +21,11 @@ import {
   X,
   XCircle,
   HelpCircle,
-  MessageSquare
+  MessageSquare,
+  Building2
 } from 'lucide-react';
 import QRCodeImage from '@/components/ui/QRCodeImage';
+import { calculatePickupDeadline, formatPickupDeadline } from '@/lib/tracking';
 
 interface TrackedDocument {
   id: string;
@@ -52,6 +54,17 @@ function TrackContent() {
   const [userRequests, setUserRequests] = useState<TrackedDocument[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const deadlineText = useMemo(() => {
+    if (docData?.pickupDate) {
+      return formatPickupDeadline(docData.pickupDate);
+    }
+    if (docData?.createdAt) {
+      const calculated = calculatePickupDeadline(new Date(docData.createdAt), 5);
+      return formatPickupDeadline(calculated);
+    }
+    return 'Within 5 business days';
+  }, [docData]);
 
   // Table Filtering & Pagination State
   const [tableSearchTerm, setTableSearchTerm] = useState('');
@@ -452,6 +465,115 @@ function TrackContent() {
                     Submit New Request &rarr;
                   </Link>
                 </div>
+              </div>
+            )}
+
+            {/* Ready for Pickup Notice & Claim Deadline Advisory */}
+            {docData.status === 'READY_FOR_PICKUP' && (
+              <div className="mx-6 p-6 rounded-3xl bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-300 dark:border-emerald-800/80 shadow-md space-y-4 animate-in zoom-in-95">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-600/30">
+                    <CheckCircle2 className="w-7 h-7" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">
+                      Document Ready for Pickup
+                    </div>
+                    <h4 className="text-lg font-black uppercase text-emerald-950 dark:text-emerald-100">
+                      Signed, Dry-Sealed &amp; Ready for Claiming
+                    </h4>
+                    <p className="text-xs text-emerald-800 dark:text-emerald-300">
+                      Your <strong className="font-bold">{docData.documentType}</strong> is complete and waiting for you at Window 2, Barangay Onse Hall.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pickup Deadline & Office Hours Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                  <div className="p-3.5 rounded-2xl bg-white dark:bg-[#0B1528] border border-emerald-200 dark:border-emerald-900/50 space-y-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      Claiming Deadline (5 Business Days):
+                    </span>
+                    <p className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                      {deadlineText}
+                    </p>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                      Documents unclaimed after 5 business days will be archived.
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-white dark:bg-[#0B1528] border border-emerald-200 dark:border-emerald-900/50 space-y-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5" />
+                      Office Hours &amp; Location:
+                    </span>
+                    <p className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                      Monday to Friday, 8:00 AM – 5:00 PM
+                    </p>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                      Window 2, Ground Floor, Barangay Onse Hall (Closed on weekends &amp; holidays)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Requirements to Bring */}
+                <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#0B1528]/80 border border-emerald-200/80 dark:border-emerald-900/40 text-xs space-y-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                    What to Bring for Claiming:
+                  </span>
+                  <ul className="space-y-1 text-[11px] text-slate-700 dark:text-slate-300 list-disc list-inside">
+                    <li>1 Valid Government-issued Photo ID (PhilSys ID, Driver&apos;s License, Passport, Postal ID)</li>
+                    <li>Official Tracking Code: <strong className="font-mono text-[#9C2007] dark:text-rose-400">{docData.trackingNumber}</strong></li>
+                    <li>Fee: <strong>{docData.fee === 0 ? 'FREE / Waived (No payment needed)' : `₱${docData.fee.toFixed(2)} exact payment`}</strong></li>
+                    <li>If representative: Authorization Letter signed by applicant + valid IDs of both applicant &amp; representative</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Processing State Advisory */}
+            {docData.status === 'PROCESSING' && (
+              <div className="mx-6 p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-xs space-y-2">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span className="font-bold uppercase tracking-wider text-blue-900 dark:text-blue-300 text-[11px]">
+                    Step Instructions: Document Under Verification &amp; Seal Preparation
+                  </span>
+                </div>
+                <p className="text-blue-800 dark:text-blue-300 leading-relaxed text-[11px]">
+                  Your request is being reviewed by desk officers and validated against the Barangay Registry of Inhabitants (RBI). No action is needed from you right now. Please keep your contact phone active if any clarification is needed.
+                </p>
+              </div>
+            )}
+
+            {/* Pending State Advisory */}
+            {docData.status === 'PENDING' && (
+              <div className="mx-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-xs space-y-2">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span className="font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300 text-[11px]">
+                    Step Instructions: Application Received &amp; Queued for Intake
+                  </span>
+                </div>
+                <p className="text-amber-800 dark:text-amber-300 leading-relaxed text-[11px]">
+                  Your application has been received into the queue and is pending intake by desk officers during barangay office hours (Mon-Fri, 8:00 AM - 5:00 PM).
+                </p>
+              </div>
+            )}
+
+            {/* Completed State Advisory */}
+            {docData.status === 'COMPLETED' && (
+              <div className="mx-6 p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/60 text-xs space-y-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span className="font-bold uppercase tracking-wider text-purple-900 dark:text-purple-300 text-[11px]">
+                    Step Instructions: Certificate Officially Claimed &amp; Released
+                  </span>
+                </div>
+                <p className="text-purple-800 dark:text-purple-300 leading-relaxed text-[11px]">
+                  This certificate has been completed and released to the applicant. The dry seal has been affixed and the cryptographic QR code is permanently active for verification.
+                </p>
               </div>
             )}
 

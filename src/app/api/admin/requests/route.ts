@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
 import { sendStatusUpdateEmail } from '@/lib/mailer';
+import { calculatePickupDeadline } from '@/lib/tracking';
 
 // GET /api/admin/requests - Fetch all clearance requests from database
 export async function GET(req: Request) {
@@ -51,6 +52,7 @@ export async function GET(req: Request) {
       return {
         id: r.id,
         trackingNumber: r.trackingNumber,
+        userId: r.userId,
         fullName: r.fullName,
         documentType: r.documentType.name,
         documentTypeCode: r.documentType.code,
@@ -95,7 +97,12 @@ export async function PATCH(req: Request) {
     }
 
     const updateData: Record<string, unknown> = {};
-    if (status) updateData.status = status;
+    if (status) {
+      updateData.status = status;
+      if (status === 'READY_FOR_PICKUP' && !pickupDate) {
+        updateData.pickupDate = calculatePickupDeadline(new Date(), 5);
+      }
+    }
     if (remarks !== undefined) updateData.remarks = remarks;
     if (pickupDate !== undefined) updateData.pickupDate = pickupDate ? new Date(pickupDate) : null;
 

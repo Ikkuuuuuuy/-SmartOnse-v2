@@ -454,15 +454,36 @@ export async function sendStatusUpdateEmail({
 
               <!-- Pickup Guidelines if Ready for Pickup -->
               ${status === 'READY_FOR_PICKUP' ? `
-              <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 14px 16px; border-radius: 8px; margin-bottom: 24px;">
-                <div style="font-weight: 800; font-size: 13px; color: #065f46; margin-bottom: 6px;">
-                  📋 Mga Dapat Dalhin sa Pag-claim:
+              <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 16px 18px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #a7f3d0;">
+                <div style="font-weight: 800; font-size: 14px; color: #065f46; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                  📋 Mga Tagubilin at Deadline sa Pag-claim (Window 2):
                 </div>
-                <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #047857; line-height: 1.6;">
-                  <li>Isang (1) Valid Government-issued Photo ID (PhilSys ID, Driver's License, Passport, Postal ID, etc.)</li>
-                  <li>Kopyahin o i-save ang Tracking Number: <strong>${trackingNumber}</strong></li>
-                  <li>Kung may authorized representative, magdala ng pirmadong Authorization Letter at Valid ID ng kinatawan</li>
+                ${formattedPickup ? `
+                <div style="background-color: #d1fae5; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 12px; font-weight: 700; color: #065f46;">
+                  ⏰ Deadline ng Pagkuha: <u>${formattedPickup} (Bago mag-5:00 PM)</u>
+                  <div style="font-weight: 500; font-size: 11px; color: #047857; margin-top: 2px;">(Mayroon kang 5 araw na may pasok para kunin ang dokumento bago ito i-archive)</div>
+                </div>
+                ` : `
+                <div style="background-color: #d1fae5; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 12px; font-weight: 700; color: #065f46;">
+                  ⏰ Deadline ng Pagkuha: Sa loob ng limang (5) araw na may pasok (Lunes - Biyernes, 8:00 AM - 5:00 PM)
+                </div>
+                `}
+                <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #047857; line-height: 1.7;">
+                  <li><strong>Lokasyon:</strong> Window 2, Ground Floor, Barangay Onse Hall (Lt. Artiaga St., San Juan City)</li>
+                  <li><strong>Oras ng Tanggapan:</strong> Lunes hanggang Biyernes, 8:00 AM – 5:00 PM (Sarado kapag Sabado, Linggo at pista opisyal)</li>
+                  <li><strong>Mga Dapat Dalhin:</strong> Isang (1) Valid Government-issued Photo ID (PhilSys ID, Driver's License, Passport, Postal ID, etc.)</li>
+                  <li>Ipakita ang iyong Opisyal na Tracking Number: <strong>${trackingNumber}</strong></li>
+                  <li>Kung kinatawan (Representative) ang kukuha: Magdala ng pirmadong Authorization Letter at Valid ID ng aplikante at ng kinatawan</li>
                 </ul>
+              </div>
+              ` : status === 'PROCESSING' ? `
+              <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 14px 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #bfdbfe;">
+                <div style="font-weight: 800; font-size: 13px; color: #1e40af; margin-bottom: 4px;">
+                  ℹ️ Katayuan ng Aplikasyon:
+                </div>
+                <p style="margin: 0; font-size: 12px; color: #1d4ed8; line-height: 1.5;">
+                  Kasalukuyang sinusuri at bineberipika ng desk officer ang iyong mga talaan sa Barangay Registry of Inhabitants (RBI). Panatilihing bukas ang iyong linya ng telepono kung sakaling may kailangang beripikasyon.
+                </p>
               </div>
               ` : ''}
 

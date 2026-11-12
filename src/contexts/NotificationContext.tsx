@@ -11,6 +11,7 @@ export interface NotificationItem {
   createdAt: string; // ISO date
   type: 'request' | 'system' | 'event' | 'alert' | 'transparency';
   targetRole?: 'all' | 'admin' | 'staff' | 'kagawad' | 'sk' | 'resident';
+  targetUserId?: string;
   href?: string;
   read: boolean;
 }
@@ -27,6 +28,7 @@ interface NotificationContextType {
     description: string;
     type?: 'request' | 'system' | 'event' | 'alert' | 'transparency';
     targetRole?: 'all' | 'admin' | 'staff' | 'kagawad' | 'sk' | 'resident';
+    targetUserId?: string;
     href?: string;
   }) => void;
 }
@@ -192,11 +194,15 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         const rawBroadcasts = localStorage.getItem(broadcastKey);
         if (rawBroadcasts) {
           const broadcasts: NotificationItem[] = JSON.parse(rawBroadcasts);
-          const relevant = broadcasts.filter(
-            (b) =>
-              (!b.targetRole || b.targetRole === 'all' || b.targetRole === user.role) &&
-              !currentNotifs.some((n) => n.id === b.id)
-          );
+          const relevant = broadcasts.filter((b) => {
+            if (currentNotifs.some((n) => n.id === b.id)) return false;
+            // Targeted to specific user
+            if (b.targetUserId) {
+              return b.targetUserId === user.id;
+            }
+            // Targeted by role
+            return !b.targetRole || b.targetRole === 'all' || b.targetRole === user.role;
+          });
           if (relevant.length > 0) {
             currentNotifs = [...relevant, ...currentNotifs].slice(0, 40);
           }
@@ -262,6 +268,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     description: string;
     type?: 'request' | 'system' | 'event' | 'alert' | 'transparency';
     targetRole?: 'all' | 'admin' | 'staff' | 'kagawad' | 'sk' | 'resident';
+    targetUserId?: string;
     href?: string;
   }) => {
     const newNotif: NotificationItem = {
@@ -272,11 +279,18 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       createdAt: new Date().toISOString(),
       type: item.type || 'system',
       targetRole: item.targetRole || 'all',
+      targetUserId: item.targetUserId,
       href: item.href,
       read: false,
     };
 
-    saveNotifications([newNotif, ...notifications]);
+    const isRelevantToCaller =
+      (!item.targetUserId || item.targetUserId === user?.id) &&
+      (!item.targetRole || item.targetRole === 'all' || item.targetRole === user?.role);
+
+    if (isRelevantToCaller) {
+      saveNotifications([newNotif, ...notifications]);
+    }
 
     // Also persist to system broadcast so other roles (especially residents) receive it
     if (typeof window !== 'undefined') {

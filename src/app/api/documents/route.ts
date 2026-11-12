@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { generateTrackingNumber } from '@/lib/utils';
+import { getNextSequentialTrackingNumber } from '@/lib/tracking';
 import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
 
@@ -116,67 +116,194 @@ export async function GET(req: Request) {
   }
 }
 
-// POST /api/documents - Submit a new document request
+// POST /api/documents - Submit a new document request (supports single or multi-clearance with copy counts)
 export async function POST(req: Request) {
   try {
     const sessionUser = await getSessionUser();
     const data = await req.json();
-    const trackingNumber = generateTrackingNumber();
 
     // Security Hardening (IDOR Prevention):
     // Users cannot spoof another citizen's userId. If authenticated, force their actual session ID.
     const resolvedUserId = sessionUser ? sessionUser.id : (isAdminUser(sessionUser?.role) ? data.userId : null);
 
-    // Match document type by code or name
-    const requestedCode = (data.documentTypeCode || '').trim();
-    let docType = await prisma.documentType.findFirst({
-      where: {
-        OR: [
-          { code: requestedCode },
-          { name: { contains: requestedCode } },
-        ],
-      },
-    });
-
-    if (!docType) {
-      // Fallback to Barangay Clearance if not found
-      docType = await prisma.documentType.findFirst({
-        where: { code: 'BRGY_CLEARANCE' },
+    // ==============================================================
+    // Anti-Troll & Anti-Spam Rate Limiting Guards
+    // ==============================================================
+    if (resolvedUserId) {
+      // 1. Cap on Active (Pending / Processing / Ready) Requests
+      const activeRequestsCount = await prisma.documentRequest.count({
+        where: {
+          userId: resolvedUserId,
+          status: { in: ['PENDING', 'PROCESSING', 'READY_FOR_PICKUP'] },
+        },
       });
+
+      if (activeRequestsCount >= 6) {
+        return NextResponse.json(
+          {
+            error:
+              'Anti-Spam Policy: You already have 6 active requests currently being processed or waiting for pickup. Please claim or wait for your existing requests to finish before submitting new applications.',
+          },
+          { status: 429 }
+        );
+      }
+
+      // 2. Cooldown timer against rapid-fire bot submissions (10 seconds)
+      const lastRequest = await prisma.documentRequest.findFirst({
+        where: { userId: resolvedUserId },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (lastRequest) {
+        const secondsSinceLast = (Date.now() - new Date(lastRequest.createdAt).getTime()) / 1000;
+        if (secondsSinceLast < 10) {
+          return NextResponse.json(
+            { error: 'Please wait at least 10 seconds before submitting another application.' },
+            { status: 429 }
+          );
+        }
+      }
     }
 
-    if (!docType) {
-      return NextResponse.json({ error: 'Invalid document type requested' }, { status: 400 });
+    // ==============================================================
+    // Parse Requested Items (Supports Multi-Document & Copy Count)
+    // ==============================================================
+    interface RequestedItem {
+      documentTypeCode: string;
+      copies: number;
     }
 
-    const newRequest = await prisma.documentRequest.create({
-      data: {
-        trackingNumber,
-        documentTypeId: docType.id,
-        fullName: data.fullName || 'Citizen Applicant',
-        contactNumber: data.contactNumber && String(data.contactNumber).trim() ? String(data.contactNumber).trim() : 'Unprovided',
-        email: data.email || null,
-        address: data.address || 'Barangay Onse, San Juan City',
-        purpose: data.purpose || 'Official Document Request',
-        civilStatus: data.civilStatus || 'Single',
-        yearsOfResidency: Number(data.yearsOfResidency) || 1,
-        userId: resolvedUserId,
-        status: 'PENDING',
-      },
-      include: {
-        documentType: true,
-      },
+    let itemsToProcess: RequestedItem[] = [];
+
+    if (Array.isArray(data.items) && data.items.length > 0) {
+      itemsToProcess = data.items
+        .map((it: any) => ({
+          documentTypeCode: String(it.documentTypeCode || it.code || '').trim(),
+          copies: Math.min(5, Math.max(1, parseInt(it.copies, 10) || 1)), // 1 to 5 copies per document type
+        }))
+        .filter((it: RequestedItem) => it.documentTypeCode);
+    } else if (data.documentTypeCode) {
+      itemsToProcess = [
+        {
+          documentTypeCode: String(data.documentTypeCode).trim(),
+          copies: Math.min(5, Math.max(1, parseInt(data.copies, 10) || 1)),
+        },
+      ];
+    }
+
+    if (itemsToProcess.length === 0) {
+      return NextResponse.json({ error: 'Please select at least one document to request.' }, { status: 400 });
+    }
+
+    // Calculate total copies across all requested certificates
+    const totalCopies = itemsToProcess.reduce((sum, item) => sum + item.copies, 0);
+
+    if (totalCopies > 10) {
+      return NextResponse.json(
+        { error: 'Application limit exceeded: A maximum of 10 total certificate copies can be requested in a single batch.' },
+        { status: 400 }
+      );
+    }
+
+    // Fetch all active document types from DB
+    const allDocTypes = await prisma.documentType.findMany({
+      where: { isActive: true },
     });
+
+    const fallbackDocType = allDocTypes.find((d) => d.code === 'BRGY_CLEARANCE') || allDocTypes[0];
+
+    // ==============================================================
+    // Generate Strictly Sequential Tracking Numbers
+    // ==============================================================
+    const sequentialTrackingNumbers = await getNextSequentialTrackingNumber(totalCopies);
+
+    // ==============================================================
+    // Create Document Requests in Database
+    // ==============================================================
+    const createdRequests: any[] = [];
+    const breakdown: Array<{
+      code: string;
+      name: string;
+      copies: number;
+      unitFee: number;
+      subtotal: number;
+      isFree: boolean;
+    }> = [];
+
+    let seqIndex = 0;
+    let totalFee = 0;
+
+    for (const item of itemsToProcess) {
+      const docType =
+        allDocTypes.find((d) => d.code.toLowerCase() === item.documentTypeCode.toLowerCase()) ||
+        fallbackDocType;
+
+      if (!docType) continue;
+
+      const unitFee = docType.fee;
+      const subtotal = unitFee * item.copies;
+      totalFee += subtotal;
+
+      breakdown.push({
+        code: docType.code,
+        name: docType.name,
+        copies: item.copies,
+        unitFee,
+        subtotal,
+        isFree: unitFee === 0,
+      });
+
+      for (let c = 1; c <= item.copies; c++) {
+        const trackingNum = sequentialTrackingNumbers[seqIndex++];
+        const copyRemark = item.copies > 1 ? ` (Copy ${c} of ${item.copies})` : '';
+
+        const created = await prisma.documentRequest.create({
+          data: {
+            trackingNumber: trackingNum,
+            documentTypeId: docType.id,
+            fullName: data.fullName || 'Citizen Applicant',
+            contactNumber:
+              data.contactNumber && String(data.contactNumber).trim()
+                ? String(data.contactNumber).trim()
+                : 'Unprovided',
+            email: data.email || null,
+            address: data.address || 'Barangay Onse, San Juan City',
+            purpose: (data.purpose || 'Official Document Request') + copyRemark,
+            civilStatus: data.civilStatus || 'Single',
+            yearsOfResidency: Number(data.yearsOfResidency) || 1,
+            userId: resolvedUserId,
+            status: 'PENDING',
+          },
+          include: {
+            documentType: true,
+          },
+        });
+
+        createdRequests.push({
+          id: created.id,
+          trackingNumber: created.trackingNumber,
+          documentType: created.documentType.name,
+          documentTypeCode: created.documentType.code,
+          fee: created.documentType.fee,
+          status: created.status,
+          copyNumber: c,
+          totalCopies: item.copies,
+        });
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      trackingNumber: newRequest.trackingNumber,
-      id: newRequest.id,
-      documentType: newRequest.documentType.name,
-      status: newRequest.status,
+      trackingNumber: createdRequests[0]?.trackingNumber || 'ONSE-2026-0000',
+      trackingNumbers: createdRequests.map((r) => r.trackingNumber),
+      requests: createdRequests,
+      totalCopies,
+      totalFee,
+      totalFeeDisplay: totalFee === 0 ? 'FREE' : `₱${totalFee.toFixed(2)}`,
+      breakdown,
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'An error occurred while creating document request';
+    const message = err instanceof Error ? err.message : 'An error occurred while creating document requests';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
