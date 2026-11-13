@@ -313,15 +313,6 @@ export default function ReportAnalyticsPage() {
       {/* ============================================================== */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-slate-200 dark:border-blue-900/40 pb-6 print:border-b-2 print:border-slate-800">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[#9C2007]/10 dark:bg-rose-950/60 text-[#9C2007] dark:text-rose-400 border border-[#9C2007]/20 dark:border-rose-800/40">
-              Official Civil Registry
-            </span>
-            <span className="text-slate-400 text-xs">•</span>
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              Barangay Onse, San Juan City
-            </span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-2.5">
             <TrendingUp className="w-7 h-7 text-[#9C2007] dark:text-rose-400 shrink-0" />
             Report Analytics &amp; Document Registry
@@ -705,7 +696,7 @@ export default function ReportAnalyticsPage() {
                     <th className="py-3 px-4 text-center">Rejected</th>
                     <th className="py-3 px-4">Completion Velocity</th>
                     <th className="py-3 px-4 text-right">Realized Revenue</th>
-                    <th className="py-3 px-4 text-center no-print">Specs</th>
+                    <th className="py-3 px-4 text-center no-print">Info</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-blue-900/30">

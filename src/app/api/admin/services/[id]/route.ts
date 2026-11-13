@@ -30,23 +30,40 @@ export async function PATCH(
     if (description !== undefined) updateData.description = description.trim();
     if (status) updateData.isActive = status === 'ACTIVE';
 
+    const existing = await prisma.service.findUnique({ where: { id } });
     const updated = await prisma.service.update({
       where: { id },
       data: updateData,
     });
 
-    // Sync isActive state with DocumentType if status was modified
-    if (status) {
-      await prisma.documentType.updateMany({
-        where: {
-          OR: [
-            { name: { equals: updated.title, mode: 'insensitive' } },
-            { name: { contains: updated.title, mode: 'insensitive' } },
-          ],
-        },
-        data: { isActive: status === 'ACTIVE' },
-      });
-    }
+    // Sync updated fields & active state into DocumentType so Document Definitions & Requirements stays current
+    const parsedFee =
+      updated.fee.toLowerCase().includes('free')
+        ? 0.0
+        : parseFloat(updated.fee.replace(/[^0-9.]/g, '')) || 0.0;
+    const parsedDays = updated.processingTime.toLowerCase().includes('2 day')
+      ? 2
+      : updated.processingTime.toLowerCase().includes('3 day')
+      ? 3
+      : 1;
+    const matchTitle = existing?.title || updated.title;
+
+    await prisma.documentType.updateMany({
+      where: {
+        OR: [
+          { name: { equals: matchTitle, mode: 'insensitive' } },
+          { name: { equals: updated.title, mode: 'insensitive' } },
+        ],
+      },
+      data: {
+        name: updated.title,
+        description: updated.description || `Official certificate for ${updated.title}`,
+        fee: parsedFee,
+        processingDays: parsedDays,
+        requirements: updated.requirements,
+        isActive: updated.isActive,
+      },
+    });
 
     return NextResponse.json({
       success: true,

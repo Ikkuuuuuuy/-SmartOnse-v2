@@ -16,6 +16,25 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+function parseRequirementsList(raw?: string | null): string[] {
+  if (!raw) return [];
+  const trimmed = raw.trim();
+  if (trimmed.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item).trim()).filter(Boolean);
+      }
+    } catch {
+      // Fallback to comma-separated parsing
+    }
+  }
+  return trimmed
+    .split(',')
+    .map((s) => s.replace(/^["'\[\s]+|["'\]\s]+$/g, '').trim())
+    .filter(Boolean);
+}
+
 const LEGAL_BASIS_MAP: Record<string, { category: string; legalBasis: string }> = {
   BRGY_CLEARANCE: {
     category: 'Civil & Employment Clearance',
@@ -197,7 +216,7 @@ export async function GET(req: Request) {
         fee: dt.fee,
         feeDisplay: dt.fee === 0 ? 'FREE' : `₱${dt.fee.toFixed(2)}`,
         processingDays: dt.processingDays,
-        requirements: dt.requirements ? dt.requirements.split(',').map((s) => s.trim()) : [],
+        requirements: parseRequirementsList(dt.requirements),
         category: legalInfo.category,
         legalBasis: legalInfo.legalBasis,
         totalRequested,
@@ -303,6 +322,10 @@ export async function GET(req: Request) {
             return true;
           case 'completed':
             return r.status === 'COMPLETED';
+          case 'pending':
+            return r.status === 'PENDING';
+          case 'ready':
+            return r.status === 'READY_FOR_PICKUP';
           case 'in-progress':
             return r.status === 'READY_FOR_PICKUP' || r.status === 'PROCESSING' || r.status === 'PENDING';
           case 'revenue':

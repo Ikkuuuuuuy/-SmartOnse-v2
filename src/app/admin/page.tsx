@@ -131,6 +131,27 @@ export default function AdminDashboardPage() {
   const waivedRevenue = analyticsData?.summary.waivedRevenue ?? 0;
   const freeGrantsCount = analyticsData?.summary.freeRequestsCount ?? clearances.filter((r) => r.fee === 'FREE').length;
 
+  const buildDashboardBreakdownHref = (metric: string) => {
+    const params = new URLSearchParams();
+    params.set('metric', metric);
+    params.set('timeframe', timeframeMode);
+    if (timeframeMode === 'custom') {
+      params.set('startDate', customStartDate);
+      params.set('endDate', customEndDate);
+    } else if (timeframeMode === 'day' || timeframeMode === 'week') {
+      params.set('day', selectedDay);
+    } else if (timeframeMode === 'month') {
+      params.set('year', String(selectedYear));
+      params.set('month', String(selectedMonth));
+    } else if (timeframeMode === 'quarter') {
+      params.set('year', String(selectedYear));
+      params.set('quarter', String(selectedQuarter));
+    } else if (timeframeMode === 'year') {
+      params.set('year', String(selectedYear));
+    }
+    return `/admin/reports/breakdown?${params.toString()}`;
+  };
+
   const kpiCards = useMemo(() => [
     {
       label: 'Total Requests Gathered',
@@ -139,6 +160,7 @@ export default function AdminDashboardPage() {
       badge: 'Volume',
       badgeColor: 'border-slate-500/30 bg-slate-500/10 text-slate-800 dark:text-slate-200',
       color: 'text-black dark:text-white',
+      href: buildDashboardBreakdownHref('total-filed'),
     },
     {
       label: 'Realized Fee Revenue',
@@ -147,6 +169,7 @@ export default function AdminDashboardPage() {
       badge: 'Collections',
       badgeColor: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
       color: 'text-emerald-600 dark:text-emerald-400',
+      href: buildDashboardBreakdownHref('revenue'),
     },
     {
       label: 'Pending Applications',
@@ -155,6 +178,7 @@ export default function AdminDashboardPage() {
       badge: 'Queue',
       badgeColor: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400',
       color: 'text-amber-600 dark:text-amber-400',
+      href: buildDashboardBreakdownHref('pending'),
     },
     {
       label: 'Ready for Pickup',
@@ -163,6 +187,7 @@ export default function AdminDashboardPage() {
       badge: 'Release',
       badgeColor: 'border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-400',
       color: 'text-blue-600 dark:text-blue-400',
+      href: buildDashboardBreakdownHref('ready'),
     },
     {
       label: 'Verified Residents',
@@ -171,8 +196,9 @@ export default function AdminDashboardPage() {
       badge: 'Registry',
       badgeColor: 'border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-400',
       color: 'text-purple-600 dark:text-purple-400',
+      href: '/admin/residents',
     },
-  ], [totalRequestsCount, completedCount, pendingCount, readyCount, realizedRevenue, pipelineRevenue, waivedRevenue, registeredCitizensCount, freeGrantsCount]);
+  ], [totalRequestsCount, completedCount, pendingCount, readyCount, realizedRevenue, pipelineRevenue, waivedRevenue, registeredCitizensCount, freeGrantsCount, timeframeMode, selectedYear, selectedMonth, selectedQuarter, selectedDay, customStartDate, customEndDate]);
 
   // Sync analytics dynamically whenever timeframe mode or date parameters change
   const fetchAnalyticsData = async () => {
@@ -401,13 +427,6 @@ export default function AdminDashboardPage() {
       <div className="bg-white dark:bg-[#0B1528] p-5 sm:p-6 rounded-3xl border border-slate-200/80 dark:border-blue-900/40 shadow-xs transition-colors space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 bg-rose-50 dark:bg-rose-950/70 border border-rose-200 dark:border-rose-900/50 px-2.5 py-0.5 rounded-full">
-                Executive Dashboard
-              </span>
-              <span className="text-[10px] font-bold text-slate-400">&bull;</span>
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">San Juan City &bull; District 1</span>
-            </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
               Dashboard Analytics &amp; Operations
             </h1>
@@ -664,12 +683,13 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* 2. Top KPI Cards Row (Clean Black Theme, Full Labels) */}
+      {/* 2. Top KPI Cards Row (Clean Black Theme, Clickable Drill-Down) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {kpiCards.map((card, idx) => (
-          <div
+          <Link
             key={idx}
-            className="bg-white dark:bg-[#0B1528] rounded-3xl p-5 border border-slate-200/80 dark:border-blue-900/40 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-3 relative overflow-hidden"
+            href={card.href}
+            className="group bg-white dark:bg-[#0B1528] rounded-3xl p-5 border border-slate-200/80 dark:border-blue-900/40 shadow-xs hover:shadow-md hover:border-slate-400 dark:hover:border-blue-700 transition-all flex flex-col justify-between space-y-3 relative overflow-hidden cursor-pointer"
           >
             <div className="flex items-start justify-between gap-2 min-h-[36px]">
               <span className="text-[11px] font-bold text-black dark:text-white uppercase tracking-wider leading-snug">
@@ -685,11 +705,16 @@ export default function AdminDashboardPage() {
                 {card.value}
               </div>
 
-              <p className="text-[11px] text-black/70 dark:text-white/70 font-medium leading-tight">
-                {card.subtext}
-              </p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] text-black/70 dark:text-white/70 font-medium leading-tight">
+                  {card.subtext}
+                </p>
+                <span className="text-[10px] font-bold text-slate-400 opacity-0 group-hover:opacity-100 transition shrink-0">
+                  View &rarr;
+                </span>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -714,7 +739,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <Link
-            href="/admin/requests"
+            href={buildDashboardBreakdownHref('total-filed')}
             className="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-black text-white dark:bg-white dark:text-black hover:bg-black/85 dark:hover:bg-white/85 font-bold text-xs uppercase tracking-wider transition"
           >
             <span>View All Requests</span>

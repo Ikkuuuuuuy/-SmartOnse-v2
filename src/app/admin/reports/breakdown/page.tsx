@@ -88,6 +88,20 @@ const METRIC_META: Record<
     accentClass: 'text-blue-700 dark:text-blue-400',
     badgeClass: 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300',
   },
+  pending: {
+    title: 'Pending Applications',
+    subtitle: 'Newly filed resident applications awaiting initial desk officer review.',
+    sourceRule: 'Source: DocumentRequest table filtered where status = "PENDING" within the active reporting window.',
+    accentClass: 'text-amber-700 dark:text-amber-400',
+    badgeClass: 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300',
+  },
+  ready: {
+    title: 'Ready for Pickup',
+    subtitle: 'Printed and sealed certificates awaiting resident claiming at Window 2.',
+    sourceRule: 'Source: DocumentRequest table filtered where status = "READY_FOR_PICKUP" within the active reporting window.',
+    accentClass: 'text-blue-700 dark:text-blue-400',
+    badgeClass: 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300',
+  },
   revenue: {
     title: 'Realized Revenue',
     subtitle: 'Fees collected from paid clearances and permits that are ready for pickup or completed.',
@@ -115,6 +129,8 @@ const METRIC_TABS = [
   { key: 'total-filed', label: 'Total Filed', icon: FileText },
   { key: 'completed', label: 'Completed', icon: CheckCircle2 },
   { key: 'in-progress', label: 'In-Progress', icon: Clock },
+  { key: 'pending', label: 'Pending', icon: Clock },
+  { key: 'ready', label: 'Ready for Pickup', icon: CheckCircle2 },
   { key: 'revenue', label: 'Revenue', icon: DollarSign },
   { key: 'free-issuances', label: 'Free Issuances', icon: Gift },
   { key: 'turnaround', label: 'Turnaround', icon: Timer },
@@ -240,6 +256,10 @@ function BreakdownContent() {
         return `${data.summary.totalCompleted} (${data.summary.overallCompletionRate}%)`;
       case 'in-progress':
         return String(data.summary.totalActive);
+      case 'pending':
+        return String(data.summary.totalPending);
+      case 'ready':
+        return String(data.summary.totalReady);
       case 'revenue':
         return `₱${data.summary.totalRealizedRevenue.toLocaleString()}`;
       case 'free-issuances':
