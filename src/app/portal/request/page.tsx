@@ -488,7 +488,7 @@ function RequestContent() {
           <AlertTriangle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
           <div className="space-y-0.5 text-[11px] leading-relaxed">
             <p className="font-bold uppercase tracking-wider text-blue-950 dark:text-blue-200">
-              Anti-Troll &amp; Fair Access Policy:
+              Policy:
             </p>
             <p>
               Citizens are limited to a maximum of <strong>5 active in-progress requests</strong> at any time. All applications are verified against the Barangay Registry of Inhabitants (RBI). Fictitious submissions or abuse are archived and flagged.
