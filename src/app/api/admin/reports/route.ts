@@ -58,6 +58,7 @@ export async function GET(req: Request) {
     const startDateParam = searchParams.get('startDate');
     const endDateParam = searchParams.get('endDate');
     const periodParam = searchParams.get('period') || '';
+    const metricParam = (searchParams.get('metric') || '').toLowerCase();
 
     const phNow = getPhNowParts();
 
@@ -143,9 +144,9 @@ export async function GET(req: Request) {
     // Filter requests based on time period if set
     const filteredRequests = filterStart && filterEnd
       ? allRequests.filter((r) => {
-          const d = new Date(r.createdAt);
-          return d >= filterStart! && d <= filterEnd!;
-        })
+        const d = new Date(r.createdAt);
+        return d >= filterStart! && d <= filterEnd!;
+      })
       : allRequests;
 
     // Aggregate statistics per document type
@@ -276,6 +277,69 @@ export async function GET(req: Request) {
         };
       });
 
+    // Optional metric-specific source records for drill-down audit
+    let sourceRecords: Array<{
+      id: string;
+      trackingNumber: string;
+      applicant: string;
+      contactNumber: string;
+      documentCode: string;
+      documentName: string;
+      purpose: string;
+      fee: number;
+      feeDisplay: string;
+      status: string;
+      dateFiled: string;
+      dateCompleted: string;
+      turnaroundDays: string;
+      remarks: string;
+    }> | undefined;
+
+    if (metricParam) {
+      const matched = filteredRequests.filter((r) => {
+        const dtFee = r.documentType?.fee ?? 0;
+        switch (metricParam) {
+          case 'total-filed':
+            return true;
+          case 'completed':
+            return r.status === 'COMPLETED';
+          case 'in-progress':
+            return r.status === 'READY_FOR_PICKUP' || r.status === 'PROCESSING' || r.status === 'PENDING';
+          case 'revenue':
+            return (r.status === 'COMPLETED' || r.status === 'READY_FOR_PICKUP') && dtFee > 0;
+          case 'free-issuances':
+            return r.status === 'COMPLETED' && dtFee === 0;
+          case 'turnaround':
+            return r.status === 'COMPLETED' && Boolean(r.updatedAt && r.createdAt);
+          default:
+            return true;
+        }
+      });
+
+      sourceRecords = matched.map((r) => {
+        const dtFee = r.documentType?.fee ?? 0;
+        const diffDays = r.updatedAt && r.createdAt
+          ? ((new Date(r.updatedAt).getTime() - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24)).toFixed(2)
+          : '0.00';
+        return {
+          id: r.id,
+          trackingNumber: r.trackingNumber,
+          applicant: r.fullName,
+          contactNumber: r.contactNumber || 'Unprovided',
+          documentCode: r.documentType?.code || 'DOC',
+          documentName: r.documentType?.name || 'Certificate',
+          purpose: r.purpose,
+          fee: dtFee,
+          feeDisplay: dtFee === 0 ? 'FREE' : `₱${dtFee.toFixed(2)}`,
+          status: r.status,
+          dateFiled: formatPhCompactDateTime(r.createdAt),
+          dateCompleted: formatPhCompactDateTime(r.updatedAt ?? r.createdAt),
+          turnaroundDays: `${diffDays} d`,
+          remarks: r.remarks || '',
+        };
+      });
+    }
+
     return NextResponse.json({
       success: true,
       reportMetadata: {
@@ -305,6 +369,7 @@ export async function GET(req: Request) {
       },
       documents: docTypeStats,
       completedRecords,
+      ...(sourceRecords !== undefined ? { sourceRecords } : {}),
     });
   } catch (error) {
     console.error('Failed to generate report analytics:', error);

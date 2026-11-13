@@ -282,6 +282,30 @@ export default function ReportAnalyticsPage() {
     return filteredRecords.slice(start, start + recordsPageSize);
   }, [filteredRecords, recordsCurrentPage, recordsPageSize]);
 
+  const buildBreakdownHref = useCallback(
+    (metric: string) => {
+      const params = new URLSearchParams();
+      params.set('metric', metric);
+      params.set('timeframe', timeframe);
+      if (timeframe === 'custom') {
+        params.set('startDate', customStart);
+        params.set('endDate', customEnd);
+      } else if (timeframe === 'day') {
+        params.set('day', selectedDay);
+      } else if (timeframe === 'month') {
+        params.set('year', String(selectedYear));
+        params.set('month', String(selectedMonth));
+      } else if (timeframe === 'quarter') {
+        params.set('year', String(selectedYear));
+        params.set('quarter', String(selectedQuarter));
+      } else if (timeframe === 'year') {
+        params.set('year', String(selectedYear));
+      }
+      return `/admin/reports/breakdown?${params.toString()}`;
+    },
+    [timeframe, customStart, customEnd, selectedDay, selectedYear, selectedMonth, selectedQuarter]
+  );
+
   return (
     <div className="space-y-8 print:p-0 print:space-y-4">
       {/* ============================================================== */}
@@ -505,66 +529,102 @@ export default function ReportAnalyticsPage() {
       </div>
 
       {/* ============================================================== */}
-      {/* 3. Top KPI Metric Summary Cards                                */}
+      {/* 3. Top KPI Metric Summary Cards (Clickable Data Source Links)  */}
       {/* ============================================================== */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
         {/* Total Filed */}
-        <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-blue-900/40 shadow-xs space-y-1">
-          <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Total Filed</span>
+        <Link
+          href={buildBreakdownHref('total-filed')}
+          className="group bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-blue-900/40 shadow-xs space-y-1 hover:border-slate-400 dark:hover:border-blue-700 hover:shadow-md transition cursor-pointer block text-left"
+        >
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Total Filed</span>
+            <span className="text-[10px] font-bold text-slate-400 opacity-0 group-hover:opacity-100 transition no-print">View &rarr;</span>
+          </div>
           <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
             {isLoading ? '...' : data?.summary.totalApplications || 0}
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">Across {data?.summary.totalCatalogedDocuments || 5} Document Types</p>
-        </div>
+        </Link>
 
         {/* Total Completed */}
-        <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-emerald-500/20 dark:border-emerald-800/40 shadow-xs space-y-1">
-          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block">Completed &amp; Released</span>
+        <Link
+          href={buildBreakdownHref('completed')}
+          className="group bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-emerald-500/20 dark:border-emerald-800/40 shadow-xs space-y-1 hover:border-emerald-500/60 hover:shadow-md transition cursor-pointer block text-left"
+        >
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block">Completed &amp; Released</span>
+            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition no-print">View &rarr;</span>
+          </div>
           <div className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-400 font-mono">
             {isLoading ? '...' : data?.summary.totalCompleted || 0}
           </div>
           <p className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
             {data?.summary.overallCompletionRate || 0}% Completion Rate
           </p>
-        </div>
+        </Link>
 
         {/* In-Progress Pipeline */}
-        <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-blue-500/20 dark:border-blue-800/40 shadow-xs space-y-1">
-          <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-400 block">In-Progress Queue</span>
+        <Link
+          href={buildBreakdownHref('in-progress')}
+          className="group bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-blue-500/20 dark:border-blue-800/40 shadow-xs space-y-1 hover:border-blue-500/60 hover:shadow-md transition cursor-pointer block text-left"
+        >
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-400 block">In-Progress Queue</span>
+            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition no-print">View &rarr;</span>
+          </div>
           <div className="text-2xl sm:text-3xl font-black text-blue-700 dark:text-blue-400 font-mono">
             {isLoading ? '...' : data?.summary.totalActive || 0}
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
             {data?.summary.totalReady || 0} Ready • {data?.summary.totalProcessing || 0} Proc.
           </p>
-        </div>
+        </Link>
 
         {/* Total Realized Revenue */}
-        <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-blue-900/40 shadow-xs space-y-1">
-          <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Realized Revenue</span>
+        <Link
+          href={buildBreakdownHref('revenue')}
+          className="group bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-blue-900/40 shadow-xs space-y-1 hover:border-slate-400 dark:hover:border-blue-700 hover:shadow-md transition cursor-pointer block text-left"
+        >
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Realized Revenue</span>
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-300 opacity-0 group-hover:opacity-100 transition no-print">View &rarr;</span>
+          </div>
           <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
             {isLoading ? '...' : `₱${(data?.summary.totalRealizedRevenue || 0).toLocaleString()}`}
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">Clearances &amp; Permits</p>
-        </div>
+        </Link>
 
         {/* Free Grants (RA 11261 / Indigent) */}
-        <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-purple-500/20 dark:border-purple-800/40 shadow-xs space-y-1">
-          <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-400 block">Free Issuances</span>
+        <Link
+          href={buildBreakdownHref('free-issuances')}
+          className="group bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-purple-500/20 dark:border-purple-800/40 shadow-xs space-y-1 hover:border-purple-500/60 hover:shadow-md transition cursor-pointer block text-left"
+        >
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-400 block">Free Issuances</span>
+            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 opacity-0 group-hover:opacity-100 transition no-print">View &rarr;</span>
+          </div>
           <div className="text-2xl sm:text-3xl font-black text-purple-700 dark:text-purple-400 font-mono">
             {isLoading ? '...' : data?.summary.totalFreeGrants || 0}
           </div>
           <p className="text-[11px] text-purple-600 dark:text-purple-400 font-medium">RA 11261 &amp; Indigency</p>
-        </div>
+        </Link>
 
         {/* Average Turnaround SLA */}
-        <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-amber-500/20 dark:border-amber-800/40 shadow-xs space-y-1">
-          <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400 block">Avg. Turnaround</span>
+        <Link
+          href={buildBreakdownHref('turnaround')}
+          className="group bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-amber-500/20 dark:border-amber-800/40 shadow-xs space-y-1 hover:border-amber-500/60 hover:shadow-md transition cursor-pointer block text-left"
+        >
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400 block">Avg. Turnaround</span>
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 opacity-0 group-hover:opacity-100 transition no-print">View &rarr;</span>
+          </div>
           <div className="text-2xl sm:text-3xl font-black text-amber-700 dark:text-amber-400 font-mono">
             {isLoading ? '...' : `${data?.summary.avgTurnaroundDays || '1.0'} d`}
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">Intake to Window 2</p>
-        </div>
+        </Link>
       </div>
 
       {/* ============================================================== */}
