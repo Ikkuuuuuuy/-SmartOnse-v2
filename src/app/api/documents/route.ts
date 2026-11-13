@@ -76,6 +76,7 @@ export async function GET(req: Request) {
           remarks: documentRequest.remarks,
           pickupDate: documentRequest.pickupDate,
           createdAt: documentRequest.createdAt.toISOString(),
+          updatedAt: documentRequest.updatedAt.toISOString(),
         },
       });
     }
@@ -107,7 +108,9 @@ export async function GET(req: Request) {
           purpose: r.purpose,
           status: r.status,
           remarks: r.remarks,
+          pickupDate: r.pickupDate,
           createdAt: r.createdAt.toISOString(),
+          updatedAt: r.updatedAt.toISOString(),
         })),
       });
     }

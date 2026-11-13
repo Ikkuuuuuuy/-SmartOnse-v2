@@ -293,17 +293,6 @@ export default function ProfilePage() {
               Account &amp; Profile Settings
             </h1>
           </div>
-
-          {/* KYC Status Pill */}
-          <div className="flex items-center gap-3 bg-white dark:bg-[#0E1B33] p-3 px-5 rounded-2xl border border-slate-200 dark:border-blue-900/50 shadow-xs self-start sm:self-auto">
-            <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-widest">Verification Status</p>
-              <p className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
-                {formData.is_verified ? '✓ Verified Resident (KYC Approved)' : '⏳ Pending KYC Review'}
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Tab Switcher */}

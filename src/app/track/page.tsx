@@ -24,7 +24,6 @@ import {
   MessageSquare,
   Building2
 } from 'lucide-react';
-import QRCodeImage from '@/components/ui/QRCodeImage';
 import { calculatePickupDeadline, formatPickupDeadline } from '@/lib/tracking';
 
 interface TrackedDocument {
@@ -42,6 +41,7 @@ interface TrackedDocument {
   remarks?: string | null;
   pickupDate?: string | null;
   createdAt: string;
+  updatedAt?: string;
 }
 
 function TrackContent() {
@@ -572,7 +572,7 @@ function TrackContent() {
                   </span>
                 </div>
                 <p className="text-purple-800 dark:text-purple-300 leading-relaxed text-[11px]">
-                  This certificate has been completed and released to the applicant. The dry seal has been affixed and the cryptographic QR code is permanently active for verification.
+                  This certificate has been completed and released to the applicant. The dry seal has been affixed and this record is permanently logged for verification.
                 </p>
               </div>
             )}
@@ -646,6 +646,32 @@ function TrackContent() {
                     {formatPhDateTime(docData.createdAt)}
                   </p>
                 </div>
+                {docData.status === 'COMPLETED' && (
+                  <div>
+                    <span className="text-purple-600 dark:text-purple-400 font-bold uppercase text-[10px]">Date &amp; Time Released / Picked Up</span>
+                    <p className="text-purple-700 dark:text-purple-300 font-bold">
+                      {formatPhDateTime(docData.updatedAt || docData.createdAt)}
+                    </p>
+                  </div>
+                )}
+                {docData.status === 'READY_FOR_PICKUP' && (
+                  <div>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase text-[10px]">Ready for Pickup Since</span>
+                    <p className="text-emerald-700 dark:text-emerald-300 font-bold">
+                      {formatPhDateTime(docData.updatedAt || docData.createdAt)}
+                    </p>
+                  </div>
+                )}
+                {(docData.status === 'PROCESSING' || docData.status === 'REJECTED') && (
+                  <div>
+                    <span className="text-slate-400 font-bold uppercase text-[10px]">
+                      {docData.status === 'REJECTED' ? 'Date & Time Rejected' : 'Last Status Update'}
+                    </span>
+                    <p className="text-slate-700 dark:text-slate-200 font-medium">
+                      {formatPhDateTime(docData.updatedAt || docData.createdAt)}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {docData.remarks && (
