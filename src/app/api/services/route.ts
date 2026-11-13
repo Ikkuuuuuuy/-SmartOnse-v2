@@ -3,10 +3,15 @@ import prisma from '@/lib/prisma';
 
 export const revalidate = 0; // Dynamic, real-time
 
+function normalizeTitle(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
 // GET /api/services - Public endpoint returning all active services & document types
 export async function GET() {
   try {
-    // Prefer DocumentType table for requestable certificates, fallback/enrich with Service table
+    // Use Service table (managed in /admin/services) as the single source of truth
+    // so the resident request portal always mirrors Admin Service Management 1-to-1.
     const [docTypes, services] = await Promise.all([
       prisma.documentType.findMany({
         where: { isActive: true },
@@ -18,54 +23,34 @@ export async function GET() {
       }),
     ]);
 
-    // Format document types for request portal
-    const certificates = docTypes.map((dt) => {
-      // Find matching service for processing time or requirements
-      const matchingService = services.find(
-        (s) =>
-          s.title.toLowerCase().includes(dt.name.toLowerCase()) ||
-          dt.name.toLowerCase().includes(s.title.toLowerCase())
-      );
+    const certificates = services.map((s) => {
+      const normService = normalizeTitle(s.title);
+      const matchingDocType = docTypes.find((dt) => {
+        const normDoc = normalizeTitle(dt.name);
+        return (
+          normDoc === normService ||
+          normDoc.includes(normService) ||
+          normService.includes(normDoc)
+        );
+      });
 
-      const feeFormatted = dt.fee === 0 ? 'FREE' : `₱${dt.fee.toFixed(2)}`;
-      const timeFormatted = matchingService
-        ? matchingService.processingTime
-        : dt.processingDays === 1
-        ? 'Same Day'
-        : `${dt.processingDays} Days`;
+      const fallbackCode =
+        s.title
+          .toUpperCase()
+          .replace(/[^A-Z0-9]+/g, '_')
+          .replace(/^_+|_+$/g, '')
+          .slice(0, 30) || 'SERVICE_DOC';
 
       return {
-        id: dt.id,
-        code: dt.code,
-        name: dt.name,
-        description: dt.description,
-        fee: feeFormatted,
-        time: timeFormatted,
-        requirements: dt.requirements,
+        id: matchingDocType?.id || s.id,
+        code: matchingDocType?.code || fallbackCode,
+        name: s.title,
+        description: s.description,
+        fee: s.fee,
+        time: s.processingTime,
+        requirements: s.requirements,
       };
     });
-
-    // Also include any active services created in admin portal that are not yet in DocumentType
-    for (const s of services) {
-      const alreadyIncluded = certificates.some(
-        (c) =>
-          c.name.toLowerCase() === s.title.toLowerCase() ||
-          c.name.toLowerCase().includes(s.title.toLowerCase()) ||
-          s.title.toLowerCase().includes(c.name.toLowerCase())
-      );
-      if (!alreadyIncluded) {
-        const code = s.title.toUpperCase().replace(/[^A-Z0-9]+/g, '_').slice(0, 30);
-        certificates.push({
-          id: s.id,
-          code,
-          name: s.title,
-          description: s.description,
-          fee: s.fee,
-          time: s.processingTime,
-          requirements: s.requirements,
-        });
-      }
-    }
 
     // Format all public services
     const publicServices = services.map((s) => ({
