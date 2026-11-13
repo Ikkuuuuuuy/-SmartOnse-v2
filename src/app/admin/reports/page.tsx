@@ -158,7 +158,7 @@ export default function ReportAnalyticsPage() {
       if (timeframe === 'custom') {
         params.set('startDate', customStart);
         params.set('endDate', customEnd);
-      } else if (timeframe === 'day' || timeframe === 'week') {
+      } else if (timeframe === 'day') {
         params.set('day', selectedDay);
       } else if (timeframe === 'month') {
         params.set('year', String(selectedYear));
@@ -387,7 +387,6 @@ export default function ReportAnalyticsPage() {
                 <option value="month">Current Month ({initialPh.monthName} {initialPh.year})</option>
                 <option value="quarter">Current Quarter (Q{initialPh.quarter} {initialPh.year})</option>
                 <option value="year">Full Year (FY {initialPh.year})</option>
-                <option value="week">Select Week</option>
                 <option value="day">Select Single Day</option>
                 <option value="custom">Custom Date Range</option>
               </select>
@@ -455,7 +454,7 @@ export default function ReportAnalyticsPage() {
               </select>
             )}
 
-            {(timeframe === 'day' || timeframe === 'week') && (
+            {timeframe === 'day' && (
               <div className="flex items-center gap-1.5 text-xs">
                 <input
                   type="date"
