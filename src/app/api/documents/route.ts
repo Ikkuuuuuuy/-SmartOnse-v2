@@ -4,6 +4,8 @@ import { getNextSequentialTrackingNumber } from '@/lib/tracking';
 import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
 import { formatPhDateTime } from '@/lib/ph-time';
+import { createNotification } from '@/lib/notifications';
+import { sendStatusUpdateEmail } from '@/lib/mailer';
 
 function maskName(name: string): string {
   if (!name) return 'Citizen Applicant';
@@ -295,10 +297,52 @@ export async function POST(req: Request) {
       }
     }
 
+    const trackingList = createdRequests.map((r) => r.trackingNumber);
+    const primaryTracking = trackingList[0] || 'ONSE-2026-0000';
+    const docSummary = breakdown.map((b) => `${b.copies}x ${b.name}`).join(', ');
+
+    // 1. Real-time notification for Barangay Staff & Admin
+    await createNotification({
+      title: `New Certificate Request (${totalCopies} ${totalCopies === 1 ? 'Copy' : 'Copies'})`,
+      description: `${data.fullName || 'Resident'} submitted ${docSummary} (${trackingList.join(', ')}).`,
+      type: 'request',
+      targetRole: 'admin',
+      href: '/admin/requests',
+    });
+
+    // 2. Real-time notification for the Resident
+    if (resolvedUserId) {
+      await createNotification({
+        title: `Application Submitted (#${primaryTracking})`,
+        description: `Your request for ${docSummary} has been received and is pending desk review.`,
+        type: 'request',
+        targetRole: 'resident',
+        targetUserId: resolvedUserId,
+        href: `/track?code=${encodeURIComponent(primaryTracking)}`,
+      });
+    }
+
+    // 3. Initial PENDING confirmation email via SMTP (awaited for serverless reliability)
+    const applicantEmail = data.email || sessionUser?.email;
+    if (applicantEmail) {
+      try {
+        await sendStatusUpdateEmail({
+          to: applicantEmail,
+          recipientName: data.fullName || sessionUser?.name || 'Resident',
+          trackingNumber: trackingList.join(', '),
+          documentType: docSummary,
+          status: 'PENDING',
+          remarks: `Total Fee: ${totalFee === 0 ? 'FREE' : `₱${totalFee.toFixed(2)}`}. Filed at ${createdRequests[0]?.filedAtPh || formatPhDateTime(new Date())}.`,
+        });
+      } catch (emailErr) {
+        console.error('[SMTP Initial Submission Email Error]:', emailErr);
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      trackingNumber: createdRequests[0]?.trackingNumber || 'ONSE-2026-0000',
-      trackingNumbers: createdRequests.map((r) => r.trackingNumber),
+      trackingNumber: primaryTracking,
+      trackingNumbers: trackingList,
       requests: createdRequests,
       totalCopies,
       totalFee,

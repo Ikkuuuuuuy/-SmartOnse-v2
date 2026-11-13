@@ -5,6 +5,7 @@ import { isAdminUser } from '@/lib/rbac';
 import { sendStatusUpdateEmail } from '@/lib/mailer';
 import { calculatePickupDeadline } from '@/lib/tracking';
 import { formatPhCompactDateTime } from '@/lib/ph-time';
+import { createNotification, getStatusNotificationCopy } from '@/lib/notifications';
 
 // GET /api/admin/requests - Fetch all clearance requests from database
 export async function GET(req: Request) {
@@ -132,24 +133,47 @@ export async function PATCH(req: Request) {
       },
     });
 
-    // Send SMTP status update email to applicant if recipient email is available
-    const recipientEmail = updated.email || updated.user?.email;
-    if (recipientEmail && status) {
-      sendStatusUpdateEmail({
-        to: recipientEmail,
-        recipientName: updated.fullName,
+    // Create real-time in-app notification for the resident when status changes
+    if (status && updated.userId) {
+      const notifCopy = getStatusNotificationCopy({
+        status: updated.status,
         trackingNumber: updated.trackingNumber,
         documentType: updated.documentType.name,
-        status: updated.status,
-        remarks: updated.remarks || undefined,
-        pickupDate: updated.pickupDate || undefined,
-      }).catch((emailErr) => {
-        console.error('[SMTP Status Update Email Error]:', emailErr);
+        remarks: updated.remarks,
       });
+      await createNotification({
+        title: notifCopy.title,
+        description: notifCopy.description,
+        type: notifCopy.type,
+        targetRole: 'resident',
+        targetUserId: updated.userId,
+        href: `/track?code=${encodeURIComponent(updated.trackingNumber)}`,
+      });
+    }
+
+    // Send SMTP status update email to applicant (awaited so serverless runtime completes SMTP before returning)
+    const recipientEmail = updated.email || updated.user?.email;
+    let emailSent = false;
+    if (recipientEmail && status) {
+      try {
+        const emailResult = await sendStatusUpdateEmail({
+          to: recipientEmail,
+          recipientName: updated.fullName,
+          trackingNumber: updated.trackingNumber,
+          documentType: updated.documentType.name,
+          status: updated.status,
+          remarks: updated.remarks || undefined,
+          pickupDate: updated.pickupDate || undefined,
+        });
+        emailSent = Boolean(emailResult?.realSent);
+      } catch (emailErr) {
+        console.error('[SMTP Status Update Email Error]:', emailErr);
+      }
     }
 
     return NextResponse.json({
       success: true,
+      emailSent,
       request: {
         id: updated.id,
         trackingNumber: updated.trackingNumber,

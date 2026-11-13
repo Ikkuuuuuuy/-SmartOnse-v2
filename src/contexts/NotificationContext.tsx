@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface NotificationItem {
@@ -35,275 +35,117 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
-// Tailored initial notifications per account role
-const ROLE_NOTIFICATIONS: Record<string, NotificationItem[]> = {
-  admin: [
-    {
-      id: 'admin-1',
-      title: 'New Clearance Application',
-      description: 'Juan Dela Cruz submitted Barangay Clearance #ONSE-2026-8891 for Employment review.',
-      timestamp: '10m ago',
-      createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-      type: 'request',
-      targetRole: 'admin',
-      href: '/admin/requests',
-      read: false,
-    },
-    {
-      id: 'admin-2',
-      title: 'DILG Full Disclosure Due',
-      description: 'Q3 Financial report upload scheduled for mandatory submission under Form 83.',
-      timestamp: '2h ago',
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      type: 'transparency',
-      targetRole: 'admin',
-      href: '/admin/transparency',
-      read: false,
-    },
-    {
-      id: 'admin-3',
-      title: 'System Security Audit Completed',
-      description: 'Cryptographic SHA-256 ledger integrity check verified 100% valid with 0 tamper flags.',
-      timestamp: '1d ago',
-      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      type: 'system',
-      targetRole: 'admin',
-      href: '/admin/audit-logs',
-      read: true,
-    },
-  ],
-  staff: [
-    {
-      id: 'staff-1',
-      title: 'Document Review Queue Active',
-      description: '4 pending clearance applications awaiting document verification and receipt generation.',
-      timestamp: '15m ago',
-      createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-      type: 'request',
-      targetRole: 'staff',
-      href: '/admin/requests',
-      read: false,
-    },
-    {
-      id: 'staff-2',
-      title: 'Certificates Scheduled for Pickup',
-      description: '12 approved citizen clearances printed and waiting for resident claim at Desk Window 2.',
-      timestamp: '1h ago',
-      createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-      type: 'system',
-      targetRole: 'staff',
-      href: '/admin/requests',
-      read: false,
-    },
-  ],
-  kagawad: [
-    {
-      id: 'kagawad-1',
-      title: 'Health Committee Advisory',
-      description: 'Barangay Medical & Dental mission logistics finalized for Friday at the Onse Health Center.',
-      timestamp: '30m ago',
-      createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-      type: 'event',
-      targetRole: 'kagawad',
-      href: '/admin/services',
-      read: false,
-    },
-    {
-      id: 'kagawad-2',
-      title: 'Regular Council Session Notice',
-      description: 'Sangguniang Barangay ordinance review session scheduled for Wednesday 9:00 AM.',
-      timestamp: '3h ago',
-      createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-      type: 'system',
-      targetRole: 'kagawad',
-      href: '/admin/officials',
-      read: false,
-    },
-  ],
-  sk: [
-    {
-      id: 'sk-1',
-      title: 'SK Youth Tournament Registration',
-      description: '8 Basketball & Volleyball team rosters submitted and awaiting bracket verification.',
-      timestamp: '20m ago',
-      createdAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
-      type: 'event',
-      targetRole: 'sk',
-      href: '/sk-programs',
-      read: false,
-    },
-    {
-      id: 'sk-2',
-      title: 'Katipunan ng Kabataan Assembly',
-      description: 'Youth leadership workshop and educational assistance orientation set for this weekend.',
-      timestamp: '4h ago',
-      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-      type: 'system',
-      targetRole: 'sk',
-      href: '/sk-programs',
-      read: false,
-    },
-  ],
-  resident: [
-    {
-      id: 'res-1',
-      title: 'Clearance Application Received',
-      description: 'Your Barangay Clearance #ONSE-2026-8891 is currently being reviewed by desk staff.',
-      timestamp: '15m ago',
-      createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-      type: 'request',
-      targetRole: 'resident',
-      href: '/track?trackingNumber=ONSE-2026-8891',
-      read: false,
-    },
-    {
-      id: 'res-2',
-      title: 'Free Medical & Flu Shots Mission',
-      description: 'Free healthcare checkups and flu vaccinations at Onse Covered Court this Saturday, 8:00 AM.',
-      timestamp: '2h ago',
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      type: 'event',
-      targetRole: 'resident',
-      href: '/events',
-      read: false,
-    },
-  ],
-};
-
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
-  // Load account-specific notifications whenever user logs in, logs out, or switches accounts
+  const fetchNotifications = useCallback(async () => {
+    if (!user) {
+      setNotifications([]);
+      return;
+    }
+    try {
+      const res = await fetch('/api/notifications', { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.notifications)) {
+          setNotifications(data.notifications);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch real-time notifications:', err);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!user) {
       setNotifications([]);
       return;
     }
 
-    const loadUserNotifs = () => {
-      const userKey = `smartonse_notifs_${user.id || user.role || user.email}`;
-      try {
-        const stored = localStorage.getItem(userKey);
-        let currentNotifs: NotificationItem[] = stored
-          ? JSON.parse(stored)
-          : (ROLE_NOTIFICATIONS[user.role] || ROLE_NOTIFICATIONS.resident);
+    fetchNotifications();
 
-        // Check cross-role broadcast queue (e.g. status changes pushed by admin)
-        const broadcastKey = 'smartonse_system_broadcasts';
-        const rawBroadcasts = localStorage.getItem(broadcastKey);
-        if (rawBroadcasts) {
-          const broadcasts: NotificationItem[] = JSON.parse(rawBroadcasts);
-          const relevant = broadcasts.filter((b) => {
-            if (currentNotifs.some((n) => n.id === b.id)) return false;
-            // Targeted to specific user
-            if (b.targetUserId) {
-              return b.targetUserId === user.id;
-            }
-            // Targeted by role
-            return !b.targetRole || b.targetRole === 'all' || b.targetRole === user.role;
-          });
-          if (relevant.length > 0) {
-            currentNotifs = [...relevant, ...currentNotifs].slice(0, 40);
-          }
-        }
+    // Real-time polling every 10 seconds + refresh when window regains focus
+    const interval = setInterval(fetchNotifications, 10000);
+    const handleFocus = () => fetchNotifications();
+    window.addEventListener('focus', handleFocus);
 
-        setNotifications(currentNotifs);
-        localStorage.setItem(userKey, JSON.stringify(currentNotifs));
-      } catch (e) {
-        console.error('Failed to load user notifications:', e);
-        const defaultRoleNotifs = ROLE_NOTIFICATIONS[user.role] || ROLE_NOTIFICATIONS.resident;
-        setNotifications(defaultRoleNotifs);
-      }
-    };
-
-    loadUserNotifs();
-
-    // Listen for storage events across browser tabs/windows
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'smartonse_system_broadcasts' || e.key?.startsWith('smartonse_notifs_')) {
-        loadUserNotifs();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
     };
-  }, [user]);
+  }, [user, fetchNotifications]);
 
-  // Save to current user's localStorage
-  const saveNotifications = (newNotifs: NotificationItem[]) => {
-    setNotifications(newNotifs);
-    if (!user) return;
-    const userKey = `smartonse_notifs_${user.id || user.role || user.email}`;
+  const markAsRead = useCallback(async (id: string) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     try {
-      localStorage.setItem(userKey, JSON.stringify(newNotifs));
-    } catch (e) {
-      console.error('Failed to save notifications:', e);
+      await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+    } catch (err) {
+      console.error('Failed to mark notification read:', err);
     }
-  };
+  }, []);
 
-  const markAsRead = (id: string) => {
-    const updated = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
-    saveNotifications(updated);
-  };
-
-  const markAllAsRead = () => {
-    const updated = notifications.map((n) => ({ ...n, read: true }));
-    saveNotifications(updated);
-  };
-
-  const deleteNotification = (id: string) => {
-    const updated = notifications.filter((n) => n.id !== id);
-    saveNotifications(updated);
-  };
-
-  const clearAll = () => {
-    saveNotifications([]);
-  };
-
-  const addNotification = (item: {
-    title: string;
-    description: string;
-    type?: 'request' | 'system' | 'event' | 'alert' | 'transparency';
-    targetRole?: 'all' | 'admin' | 'staff' | 'kagawad' | 'sk' | 'resident';
-    targetUserId?: string;
-    href?: string;
-  }) => {
-    const newNotif: NotificationItem = {
-      id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-      title: item.title,
-      description: item.description,
-      timestamp: 'Just now',
-      createdAt: new Date().toISOString(),
-      type: item.type || 'system',
-      targetRole: item.targetRole || 'all',
-      targetUserId: item.targetUserId,
-      href: item.href,
-      read: false,
-    };
-
-    const isRelevantToCaller =
-      (!item.targetUserId || item.targetUserId === user?.id) &&
-      (!item.targetRole || item.targetRole === 'all' || item.targetRole === user?.role);
-
-    if (isRelevantToCaller) {
-      saveNotifications([newNotif, ...notifications]);
+  const markAllAsRead = useCallback(async () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    try {
+      await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markAll: true }),
+      });
+    } catch (err) {
+      console.error('Failed to mark all notifications read:', err);
     }
+  }, []);
 
-    // Also persist to system broadcast so other roles (especially residents) receive it
-    if (typeof window !== 'undefined') {
+  const deleteNotification = useCallback(async (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    try {
+      await fetch(`/api/notifications?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+    } catch (err) {
+      console.error('Failed to delete notification:', err);
+    }
+  }, []);
+
+  const clearAll = useCallback(async () => {
+    setNotifications([]);
+    try {
+      await fetch('/api/notifications?clearAll=true', {
+        method: 'DELETE',
+      });
+    } catch (err) {
+      console.error('Failed to clear notifications:', err);
+    }
+  }, []);
+
+  const addNotification = useCallback(
+    async (item: {
+      title: string;
+      description: string;
+      type?: 'request' | 'system' | 'event' | 'alert' | 'transparency';
+      targetRole?: 'all' | 'admin' | 'staff' | 'kagawad' | 'sk' | 'resident';
+      targetUserId?: string;
+      href?: string;
+    }) => {
       try {
-        const broadcastKey = 'smartonse_system_broadcasts';
-        const existing: NotificationItem[] = JSON.parse(localStorage.getItem(broadcastKey) || '[]');
-        const updated = [newNotif, ...existing.filter((x) => x.id !== newNotif.id)].slice(0, 50);
-        localStorage.setItem(broadcastKey, JSON.stringify(updated));
-      } catch (e) {
-        console.error('Failed to broadcast notification:', e);
+        await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item),
+        });
+        await fetchNotifications();
+      } catch (err) {
+        console.error('Failed to create notification:', err);
       }
-    }
-  };
+    },
+    [fetchNotifications]
+  );
 
   const unreadCount = user ? notifications.filter((n) => !n.read).length : 0;
 

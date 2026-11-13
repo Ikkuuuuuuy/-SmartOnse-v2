@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
+import { createNotification } from '@/lib/notifications';
 
 export async function PATCH(
   req: Request,
@@ -86,6 +87,16 @@ export async function PATCH(
           details: `Approved resident account for ${updatedUser.name} (${updatedUser.email}) and assigned RBI census number ${rbiNumber}.`,
           ip,
         },
+      });
+
+      // Notify the verified resident in real time
+      await createNotification({
+        title: 'Resident Account Verified',
+        description: `Your Barangay Onse account has been approved and enrolled (RBI: ${rbiNumber}). You can now request certificates online.`,
+        type: 'system',
+        targetRole: 'resident',
+        targetUserId: updatedUser.id,
+        href: '/portal/request',
       });
 
       return NextResponse.json({

@@ -287,3 +287,19 @@ model SkComment {
   createdAt    DateTime @default(now())
 }
 
+model Notification {
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  type         String   @default("request")
+  targetRole   String   @default("resident")
+  targetUserId String?
+  href         String?
+  read         Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([targetUserId])
+  @@index([targetRole])
+  @@index([createdAt])
+}
+

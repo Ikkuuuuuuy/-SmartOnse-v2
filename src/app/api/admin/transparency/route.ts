@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
+import { createNotification } from '@/lib/notifications';
 
 // GET /api/admin/transparency - List all transparency disclosures
 export async function GET() {
@@ -80,6 +81,14 @@ export async function POST(req: Request) {
     });
 
     const count = await prisma.transparencyDocument.count();
+
+    await createNotification({
+      title: `New Transparency Disclosure Published`,
+      description: `${newDoc.title} (${newDoc.quarter} • ${newDoc.category}) is now available in the public ledger.`,
+      type: 'transparency',
+      targetRole: 'all',
+      href: '/transparency',
+    });
 
     return NextResponse.json({
       success: true,

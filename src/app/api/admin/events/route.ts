@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
+import { createNotification } from '@/lib/notifications';
 
 // GET /api/admin/events - List all community events
 export async function GET() {
@@ -94,6 +95,14 @@ export async function POST(req: Request) {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
+    });
+
+    await createNotification({
+      title: `New Barangay Event: ${newEvt.title}`,
+      description: `${dateStr} at ${newEvt.location} (${newEvt.category}).`,
+      type: 'event',
+      targetRole: 'all',
+      href: '/events',
     });
 
     return NextResponse.json({
