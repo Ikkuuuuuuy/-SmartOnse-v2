@@ -83,7 +83,7 @@ export default function PrivacyConsentModal() {
           </div>
 
           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-            Barangay Onse protects your personal identity records in accordance with the <strong className="text-slate-900 dark:text-white">Data Privacy Act of 2012 (R.A. 10173)</strong>. Your submitted data is securely processed solely for official citizen services, clearances, and community welfare.
+            Barangay Onse protects your personal identity records in accordance with the <strong className="text-slate-900 dark:text-white">Data Privacy Act of 2012 (R.A. 10173)</strong>. Your submitted data is securely processed solely for official resident services, clearances, and community welfare.
           </p>
 
           {/* Expandable "See Summary" Toggle */}

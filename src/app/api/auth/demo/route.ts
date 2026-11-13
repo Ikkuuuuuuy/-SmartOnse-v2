@@ -98,7 +98,7 @@ const DEMO_ACCOUNTS: Record<string, DemoAccount> = {
     name: 'Juan Dela Cruz',
     email: 'juan@onse.ph',
     role: 'resident',
-    roleTitle: 'Resident Citizen',
+    roleTitle: 'Verified Resident',
     destination: '/portal/request',
     phone: '0917-111-0007',
     address: '3 J V Panganiban, Barangay Onse, San Juan City',

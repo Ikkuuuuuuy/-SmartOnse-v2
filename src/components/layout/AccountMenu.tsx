@@ -212,7 +212,7 @@ export default function AccountMenu() {
                     🎖️ Kagawad Florano
                   </button>
                   <button
-                    onClick={() => switchRole('resident', 'Juan Dela Cruz', 'juan@onse.ph', '/portal/request', 'Resident Citizen')}
+                    onClick={() => switchRole('resident', 'Juan Dela Cruz', 'juan@onse.ph', '/portal/request', 'Verified Resident')}
                     className="p-2 rounded-xl border border-slate-200 dark:border-blue-900/60 hover:border-[#9C2007] bg-slate-50 dark:bg-[#152747]/60 hover:bg-rose-50/50 text-left transition text-[11px] font-bold text-slate-700 dark:text-slate-200"
                   >
                     👤 Resident Juan

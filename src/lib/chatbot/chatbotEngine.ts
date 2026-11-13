@@ -511,7 +511,7 @@ async function handleServicesQuery(q: string, historyTopic: string | null): Prom
         reply:
           `🪪 **Barangay Onse Resident ID**\n\n` +
           `• **Requirements:** 1 Valid ID o Birth Certificate, Proof of Address sa Barangay Onse, at RBI Registration.\n` +
-          `• **Paano Kumuha:** Magrehistro muna sa [Citizen Registration](/register) at magsadya sa Barangay Hall para sa litrato at pirma.`,
+          `• **Paano Kumuha:** Magrehistro muna sa [Resident Registration](/register) at magsadya sa Barangay Hall para sa litrato at pirma.`,
         category: 'services',
         suggestions: ['Requirements sa Barangay Clearance?', 'Paano mag-register sa portal?'],
       };
@@ -522,7 +522,7 @@ async function handleServicesQuery(q: string, historyTopic: string | null): Prom
       return {
         reply:
           `📝 **Paano Kumuha ng Dokumento Online (Step-by-Step):**\n\n` +
-          `1. **Mag-log in o Mag-register:** Pumunta sa [Citizen Login](/login) o [Register](/register).\n` +
+          `1. **Mag-log in o Mag-register:** Pumunta sa [Resident Login](/login) o [Register](/register).\n` +
           `2. **Pumili ng Dokumento:** Buksan ang [Online Document Request](/portal/request) at piliin ang kailangang clearance o certificate.\n` +
           `3. **I-save ang Tracking Code:** Makakatanggap ka ng reference code (hal. \`ONSE-2026-XXXX\`).\n` +
           `4. **Pickup sa Hall:** Kapag **Ready for Pickup** na sa [Track Request](/track), dalhin ang Valid ID sa **Window 2** ng Barangay Onse Hall.`,
@@ -847,7 +847,7 @@ function handleDirectoryAndLinksQuery(q: string): ChatbotResponse | null {
       reply:
         `🔑 **Tulong sa Account / Password:**\n\n` +
         `• Kung nakalimutan ang password, gamitin ang **Forgot Password** sa [Login Page](/login).\n` +
-        `• Kung wala pang account, gumawa rito: [Citizen Registration](/register).`,
+        `• Kung wala pang account, gumawa rito: [Resident Registration](/register).`,
       category: 'directory',
       suggestions: ['Paano mag-apply online?', 'Emergency Hotlines sa Onse?'],
     };
@@ -873,7 +873,7 @@ function handleDirectoryAndLinksQuery(q: string): ChatbotResponse | null {
 
   if (hasTerm(q, ['register', 'rehistro', 'sign up', 'gumawa ng account'])) {
     return {
-      reply: '📝 Magrehistro bilang residente rito: [Citizen Registration](/register) | May account na? [Portal Login](/login)',
+      reply: '📝 Magrehistro bilang residente rito: [Resident Registration](/register) | May account na? [Portal Login](/login)',
       category: 'directory',
       suggestions: ['Requirements sa Barangay Clearance?', 'Paano mag-apply online?'],
     };

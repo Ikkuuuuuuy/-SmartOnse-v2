@@ -21,7 +21,7 @@ const ROLE_TITLES: Record<string, string> = {
   sk_chairperson: 'SK Chairperson',
   sk_councilor: 'SK Kagawad',
   staff: 'Desk Staff',
-  resident: 'Resident Citizen',
+  resident: 'Verified Resident',
 };
 
 export async function POST(req: Request) {

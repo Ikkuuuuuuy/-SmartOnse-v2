@@ -219,9 +219,9 @@ export async function sendPasswordResetEmail({
   <div style="max-width: 500px; margin: auto; background: #ffffff; padding: 30px; border-radius: 16px; border: 1px solid #e2e8f0;">
     <div style="text-align: center; margin-bottom: 24px;">
       <h1 style="color: #9C2007; margin: 0; font-size: 22px;">Barangay Onse, San Juan City</h1>
-      <p style="color: #64748b; font-size: 13px; margin: 4px 0;">Official Citizen Account Recovery</p>
+      <p style="color: #64748b; font-size: 13px; margin: 4px 0;">Official Resident Account Recovery</p>
     </div>
-    <p style="font-size: 14px; color: #1e293b;">Magandang araw, <strong>${recipientName || 'Citizen'}</strong>!</p>
+    <p style="font-size: 14px; color: #1e293b;">Magandang araw, <strong>${recipientName || 'Resident'}</strong>!</p>
     <p style="font-size: 14px; color: #334155; line-height: 1.6;">
       We received a request to reset your SmartOnse account password. Click the button below to set a new password. This link is valid for 1 hour.
     </p>
@@ -381,7 +381,7 @@ export async function sendStatusUpdateEmail({
               
               <!-- Greeting -->
               <h2 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 800; color: #0f172a;">
-                Magandang araw, ${recipientName || 'Citizen'}! 👋
+                Magandang araw, ${recipientName || 'Resident'}! 👋
               </h2>
               <p style="margin: 0 0 22px 0; font-size: 14px; line-height: 1.6; color: #475569;">
                 May mahalagang update ukol sa iyong hiniling na sertipikasyon / dokumento sa <strong>Barangay Onse Online Portal</strong>:

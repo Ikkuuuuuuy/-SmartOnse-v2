@@ -529,7 +529,7 @@ export default function RegisterPage() {
             href="/login"
             className="inline-block w-full py-3.5 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-[#9C2007]/25 transition cursor-pointer"
           >
-            Proceed to Citizen Login
+            Proceed to Resident Login
           </Link>
         </div>
       </div>
@@ -549,7 +549,7 @@ export default function RegisterPage() {
             Resident Registration
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            Official Barangay Onse Citizen Profile & RBI Census Enrollment
+            Official Barangay Onse Resident Profile & RBI Census Enrollment
           </p>
         </div>
 
@@ -703,7 +703,7 @@ export default function RegisterPage() {
                 />
               </div>
               <p className="text-[10px] text-slate-400">
-                <strong className="text-[#9C2007] dark:text-rose-400">Required:</strong> Used for SMS status updates, document pickup advisories, and citizen sign-in.
+                <strong className="text-[#9C2007] dark:text-rose-400">Required:</strong> Used for SMS status updates, document pickup advisories, and resident sign-in.
               </p>
             </div>
 

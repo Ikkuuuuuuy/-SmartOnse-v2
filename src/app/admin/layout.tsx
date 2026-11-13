@@ -140,7 +140,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Restricted Admin Area
             </h1>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              You are signed in as <strong className="text-slate-900 dark:text-white">{user.name}</strong> (<span className="text-[#9C2007] dark:text-rose-400 font-bold">{user.roleTitle || 'Resident Citizen'}</span>). 
+              You are signed in as <strong className="text-slate-900 dark:text-white">{user.name}</strong> (<span className="text-[#9C2007] dark:text-rose-400 font-bold">{user.roleTitle || 'Verified Resident'}</span>). 
               The Admin Portal is restricted to Barangay Officials and Desk Staff.
             </p>
           </div>
@@ -151,7 +151,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className="flex-1 py-3 rounded-xl bg-[#9C2007] hover:bg-[#8B1A05] text-white font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center gap-1.5"
             >
               <FileText className="w-4 h-4" />
-              <span>Citizen Services</span>
+              <span>Resident Services</span>
             </Link>
 
             <Link

@@ -300,7 +300,7 @@ export default function AdminResidentsPage() {
         </div>
 
         <div className="bg-white dark:bg-[#0B1528] p-5 rounded-3xl border border-slate-200/80 dark:border-blue-900/40 shadow-xs space-y-1">
-          <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider">Verified Citizens</span>
+          <span className="text-[10px] font-bold text-black/70 dark:text-white/70 uppercase tracking-wider">Verified Residents</span>
           <div className="text-2xl font-black text-black dark:text-white">
             {residents.filter((r) => r.verified).length}
           </div>
@@ -489,7 +489,7 @@ export default function AdminResidentsPage() {
             </button>
 
             <h3 className="text-xl font-black uppercase text-slate-900 dark:text-white">Register Resident</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Add a new verified citizen profile to the Barangay Onse database registry.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Add a new verified resident profile to the Barangay Onse database registry.</p>
 
             <form onSubmit={handleAddSubmit} className="space-y-4 text-xs">
               <div className="space-y-1">
@@ -599,7 +599,7 @@ export default function AdminResidentsPage() {
             </button>
 
             <h3 className="text-xl font-black uppercase text-slate-900 dark:text-white">Edit Resident Record</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Modify information for citizen record ID: {editingResident.id}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Modify information for resident record ID: {editingResident.id}</p>
 
             <form onSubmit={handleEditSubmit} className="space-y-4 text-xs">
               <div className="space-y-1">

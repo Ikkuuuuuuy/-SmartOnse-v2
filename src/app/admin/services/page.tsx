@@ -224,7 +224,7 @@ export default function AdminServicesPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#9C2007] dark:text-rose-400 bg-rose-50 dark:bg-rose-950/70 border border-rose-200 dark:border-rose-900/50 px-2.5 py-0.5 rounded-full">
-              Citizen&apos;s Charter &bull; Service Catalog
+              Resident&apos;s Charter &bull; Service Catalog
             </span>
             <span className="text-[10px] font-bold text-slate-400">&bull;</span>
             <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">R.A. 11032 Anti-Red Tape</span>

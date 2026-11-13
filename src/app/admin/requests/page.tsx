@@ -1051,7 +1051,7 @@ export default function AdminRequestsPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <label className="text-[11px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Citizen Feedback Message *
+                  Resident Feedback Message *
                 </label>
                 <span className="text-[10px] text-slate-400 font-mono">
                   {rejectionReason.length} characters

@@ -52,7 +52,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Col 2: Citizen E-Services & Quick Links */}
+        {/* Col 2: Resident E-Services & Quick Links */}
         <div className="space-y-4">
           <h3 className="text-xs font-black uppercase tracking-widest text-slate-200 flex items-center gap-2">
             <FileText className="w-4 h-4 text-[#9C2007]" />
@@ -214,7 +214,7 @@ export default function Footer() {
           </Link>
           <span>&bull;</span>
           <Link href="/transparency" className="hover:text-white transition">
-            Citizen&apos;s Charter
+            Resident&apos;s Charter
           </Link>
         </div>
       </div>

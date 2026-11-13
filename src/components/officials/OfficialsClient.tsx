@@ -121,8 +121,8 @@ export default function OfficialsClient({ barangayOfficials, skOfficials }: Offi
             </h3>
             <p className="text-white/80 text-sm max-w-xl">
               {isFil
-                ? 'Magsumite ng kahilingan para sa mga sertipiko at mga katanungan online gamit ang 24/7 SmartOnse citizen portal.'
-                : 'File certificate requests and citizen inquiries directly online through our 24/7 SmartOnse citizen portal.'}
+                ? 'Magsumite ng kahilingan para sa mga sertipiko at mga katanungan online gamit ang 24/7 SmartOnse resident portal.'
+                : 'File certificate requests and resident inquiries directly online through our 24/7 SmartOnse resident portal.'}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 shrink-0">

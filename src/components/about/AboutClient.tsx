@@ -45,7 +45,7 @@ export default function AboutClient({ stats, officials }: AboutClientProps) {
     },
     {
       id: '4',
-      label: isFil ? 'Tugon sa Mamamayan' : 'Citizen Inquiries',
+      label: isFil ? 'Tugon sa Residente' : 'Resident Inquiries',
       value: '12,500+',
       subtext: isFil ? 'Frontline ng SmartOnse' : 'SmartOnse Frontline',
     },

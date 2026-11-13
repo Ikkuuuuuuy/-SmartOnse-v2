@@ -163,7 +163,7 @@ export default function AdminDashboardPage() {
       color: 'text-blue-600 dark:text-blue-400',
     },
     {
-      label: 'Verified Citizens',
+      label: 'Verified Residents',
       value: registeredCitizensCount.toLocaleString(),
       subtext: `${freeGrantsCount} Free Grants (RA 11261)`,
       badge: 'Registry',
@@ -641,7 +641,7 @@ export default function AdminDashboardPage() {
                 Internal Revenue &amp; Operational Audit (On-System Report)
               </h3>
               <p className="text-[11px] text-black/60 dark:text-white/60 font-medium">
-                Live ledger compiled from verified citizen document requests, official fee payments, and statutory assistance waivers.
+                Live ledger compiled from verified resident document requests, official fee payments, and statutory assistance waivers.
               </p>
             </div>
           </div>
@@ -833,7 +833,7 @@ export default function AdminDashboardPage() {
                   : 'bg-slate-100 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#152747]'
               }`}
             >
-              Citizen Roster ({citizens.length})
+              Resident Roster ({citizens.length})
             </button>
 
             <button
@@ -1037,7 +1037,7 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* TAB 2: CITIZEN ROSTER */}
+        {/* TAB 2: RESIDENT ROSTER */}
         {activeTableTab === 'citizens' && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
@@ -1078,7 +1078,7 @@ export default function AdminDashboardPage() {
                 {paginatedCitizens.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-10 text-center text-slate-400">
-                      No citizen records found matching your search.
+                      No resident records found matching your search.
                     </td>
                   </tr>
                 ) : (

@@ -720,7 +720,7 @@ export default function ReportAnalyticsPage() {
               Barangay Onse Document Catalog &amp; Documentary Requirements
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              Complete inventory of official barangay issuances, their legal foundations, standard processing turnarounds (SLA), authorized fees, and prerequisites required from citizen applicants.
+              Complete inventory of official barangay issuances, their legal foundations, standard processing turnarounds (SLA), authorized fees, and prerequisites required from resident applicants.
             </p>
           </div>
 
@@ -777,7 +777,7 @@ export default function ReportAnalyticsPage() {
                   {/* Requirements List */}
                   <div className="space-y-1.5">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">
-                      Required Citizen Documents:
+                      Required Resident Documents:
                     </span>
                     <ul className="space-y-1 text-xs">
                       {doc.requirements.map((req, idx) => (
