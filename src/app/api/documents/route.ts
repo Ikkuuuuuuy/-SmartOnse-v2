@@ -204,11 +204,29 @@ export async function POST(req: Request) {
     // Calculate total copies across all requested certificates
     const totalCopies = itemsToProcess.reduce((sum, item) => sum + item.copies, 0);
 
-    if (totalCopies > 10) {
+    if (totalCopies > 5) {
       return NextResponse.json(
-        { error: 'Application limit exceeded: A maximum of 10 total certificate copies can be requested in a single batch.' },
+        { error: 'Policy Limit: A maximum of 5 total certificate copies can be requested in a single submission.' },
         { status: 400 }
       );
+    }
+
+    if (resolvedUserId) {
+      const activeRequestsCount = await prisma.documentRequest.count({
+        where: {
+          userId: resolvedUserId,
+          status: { in: ['PENDING', 'PROCESSING', 'READY_FOR_PICKUP'] },
+        },
+      });
+      if (activeRequestsCount + totalCopies > 5) {
+        const remaining = Math.max(0, 5 - activeRequestsCount);
+        return NextResponse.json(
+          {
+            error: `Policy Limit: You currently have ${activeRequestsCount} active in-progress request(s). You can only request up to ${remaining} more copy/copies (maximum of 5 active in-progress requests at any time).`,
+          },
+          { status: 429 }
+        );
+      }
     }
 
     // Fetch all active document types from DB

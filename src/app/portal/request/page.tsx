@@ -174,6 +174,12 @@ function RequestContent() {
       if (next[code]) {
         delete next[code];
       } else {
+        const currentTotal = Object.values(prev).reduce((sum, n) => sum + n, 0);
+        if (currentTotal >= 5) {
+          setErrorMessage('Policy Limit: You can only select up to 5 total certificate copies across all document types.');
+          return prev;
+        }
+        setErrorMessage(null);
         next[code] = 1;
       }
       return next;
@@ -183,7 +189,12 @@ function RequestContent() {
   const handleIncrementCopies = (code: string) => {
     setSelectedItems((prev) => {
       const current = prev[code] || 0;
-      if (current >= 5) return prev; // Maximum 5 copies per document type
+      const currentTotal = Object.values(prev).reduce((sum, n) => sum + n, 0);
+      if (current >= 5 || currentTotal >= 5) {
+        setErrorMessage('Policy Limit: Maximum of 5 total certificate copies allowed per submission.');
+        return prev;
+      }
+      setErrorMessage(null);
       return { ...prev, [code]: current + 1 };
     });
   };
@@ -483,16 +494,24 @@ function RequestContent() {
           </div>
         </div>
 
-        {/* Anti-Spam & Fair Usage Notice */}
+        {/* Policy Notice */}
         <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 flex items-start gap-3 text-xs text-blue-900 dark:text-blue-300">
           <AlertTriangle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-          <div className="space-y-0.5 text-[11px] leading-relaxed">
+          <div className="space-y-1 text-[11px] leading-relaxed">
             <p className="font-bold uppercase tracking-wider text-blue-950 dark:text-blue-200">
               Policy:
             </p>
-            <p>
-              Citizens are limited to a maximum of <strong>5 active in-progress requests</strong> at any time. All applications are verified against the Barangay Registry of Inhabitants (RBI). Fictitious submissions or abuse are archived and flagged.
-            </p>
+            <ul className="list-disc pl-4 space-y-0.5">
+              <li>
+                <strong>Active Request Limit:</strong> Residents are limited to a maximum of <strong>5 total active in-progress requests</strong> at any time across all certificate types combined (Pending, Processing, and Ready for Pickup).
+              </li>
+              <li>
+                <strong>Batch Copy Limit:</strong> You may request up to <strong>5 total copies per submission</strong> (e.g., 3 Barangay Clearances + 2 Certificates of Indigency).
+              </li>
+              <li>
+                <strong>RBI Verification:</strong> All applications are verified against the Barangay Registry of Inhabitants (RBI). Fictitious submissions or abuse are archived and flagged.
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -510,8 +529,8 @@ function RequestContent() {
               <label className="font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
                 1. Select Certificates &amp; Number of Copies *
               </label>
-              <span className="text-[11px] font-bold text-slate-400">
-                {computation.totalCopiesCount} {computation.totalCopiesCount === 1 ? 'Copy' : 'Copies'} Selected
+              <span className={`text-[11px] font-bold ${computation.totalCopiesCount >= 5 ? 'text-[#9C2007] dark:text-rose-400' : 'text-slate-400'}`}>
+                {computation.totalCopiesCount} / 5 {computation.totalCopiesCount === 1 ? 'Copy' : 'Copies'} Selected
               </span>
             </div>
 
