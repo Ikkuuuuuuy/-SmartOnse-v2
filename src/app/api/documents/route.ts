@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { getNextSequentialTrackingNumber } from '@/lib/tracking';
 import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
+import { formatPhDateTime } from '@/lib/ph-time';
 
 function maskName(name: string): string {
   if (!name) return 'Citizen Applicant';
@@ -288,6 +289,8 @@ export async function POST(req: Request) {
           status: created.status,
           copyNumber: c,
           totalCopies: item.copies,
+          createdAt: created.createdAt.toISOString(),
+          filedAtPh: formatPhDateTime(created.createdAt),
         });
       }
     }
@@ -301,6 +304,7 @@ export async function POST(req: Request) {
       totalFee,
       totalFeeDisplay: totalFee === 0 ? 'FREE' : `₱${totalFee.toFixed(2)}`,
       breakdown,
+      filedAtPh: createdRequests[0]?.filedAtPh || formatPhDateTime(new Date()),
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'An error occurred while creating document requests';

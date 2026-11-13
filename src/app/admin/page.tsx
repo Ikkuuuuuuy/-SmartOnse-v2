@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import { getPhNowParts, MONTH_NAMES_FULL } from '@/lib/ph-time';
 import { 
   BarChart3, 
   Receipt, 
@@ -64,14 +65,15 @@ const DEFAULT_DOC_DESCRIPTIONS: Record<string, { category: string; desc: string;
 };
 
 export default function AdminDashboardPage() {
-  const [selectedPeriod, setSelectedPeriod] = useState('Monthly: August 2026');
+  const initialPh = getPhNowParts();
+  const [selectedPeriod, setSelectedPeriod] = useState(`Monthly: ${initialPh.monthName} ${initialPh.year}`);
   const [timeframeMode, setTimeframeMode] = useState<TimeframeMode>('month');
-  const [selectedYear, setSelectedYear] = useState<number>(2026);
-  const [selectedMonth, setSelectedMonth] = useState<number>(8); // August default
-  const [selectedQuarter, setSelectedQuarter] = useState<number>(3); // Q3 default
-  const [selectedDay, setSelectedDay] = useState<string>('2026-08-28');
-  const [customStartDate, setCustomStartDate] = useState<string>('2026-05-01');
-  const [customEndDate, setCustomEndDate] = useState<string>('2026-08-31');
+  const [selectedYear, setSelectedYear] = useState<number>(initialPh.year);
+  const [selectedMonth, setSelectedMonth] = useState<number>(initialPh.month);
+  const [selectedQuarter, setSelectedQuarter] = useState<number>(initialPh.quarter);
+  const [selectedDay, setSelectedDay] = useState<string>(initialPh.dateStr);
+  const [customStartDate, setCustomStartDate] = useState<string>(`${initialPh.year}-${String(initialPh.month).padStart(2, '0')}-01`);
+  const [customEndDate, setCustomEndDate] = useState<string>(initialPh.dateStr);
 
   const [activeTableTab, setActiveTableTab] = useState<'requests' | 'citizens' | 'audit'>('requests');
   const [searchFilter, setSearchFilter] = useState('');
@@ -555,13 +557,78 @@ export default function AdminDashboardPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setSelectedDay('2026-08-28')}
+                  onClick={() => setSelectedDay(getPhNowParts().dateStr)}
                   className="px-2.5 py-1.5 bg-slate-100 dark:bg-[#152747] hover:bg-slate-200 dark:hover:bg-[#1c345f] text-slate-700 dark:text-slate-300 rounded-xl font-bold text-[10px] uppercase transition cursor-pointer"
                 >
-                  Aug 28
+                  Today
                 </button>
               </div>
             )}
+
+            {/* Quick Philippine-Time Presets */}
+            <div className="flex items-center gap-1 pl-2 border-l border-slate-200 dark:border-blue-900/60">
+              <button
+                type="button"
+                onClick={() => {
+                  const now = getPhNowParts();
+                  setTimeframeMode('day');
+                  setSelectedDay(now.dateStr);
+                }}
+                className={`px-2.5 py-1.5 rounded-xl font-bold text-[10px] uppercase transition cursor-pointer ${
+                  timeframeMode === 'day'
+                    ? 'bg-[#9C2007] text-white'
+                    : 'bg-slate-100 dark:bg-[#152747] hover:bg-slate-200 dark:hover:bg-[#1c345f] text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const now = getPhNowParts();
+                  setTimeframeMode('week');
+                  setSelectedDay(now.dateStr);
+                }}
+                className={`px-2.5 py-1.5 rounded-xl font-bold text-[10px] uppercase transition cursor-pointer ${
+                  timeframeMode === 'week'
+                    ? 'bg-[#9C2007] text-white'
+                    : 'bg-slate-100 dark:bg-[#152747] hover:bg-slate-200 dark:hover:bg-[#1c345f] text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                This Week
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const now = getPhNowParts();
+                  setTimeframeMode('month');
+                  setSelectedYear(now.year);
+                  setSelectedMonth(now.month);
+                }}
+                className={`px-2.5 py-1.5 rounded-xl font-bold text-[10px] uppercase transition cursor-pointer ${
+                  timeframeMode === 'month'
+                    ? 'bg-[#9C2007] text-white'
+                    : 'bg-slate-100 dark:bg-[#152747] hover:bg-slate-200 dark:hover:bg-[#1c345f] text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                {MONTH_NAMES_FULL[initialPh.month - 1].slice(0, 3)} {initialPh.year}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const now = getPhNowParts();
+                  setTimeframeMode('year');
+                  setSelectedYear(now.year);
+                }}
+                className={`px-2.5 py-1.5 rounded-xl font-bold text-[10px] uppercase transition cursor-pointer ${
+                  timeframeMode === 'year'
+                    ? 'bg-[#9C2007] text-white'
+                    : 'bg-slate-100 dark:bg-[#152747] hover:bg-slate-200 dark:hover:bg-[#1c345f] text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                FY {initialPh.year}
+              </button>
+            </div>
 
             {timeframeMode === 'custom' && (
               <div className="flex items-center gap-1.5">

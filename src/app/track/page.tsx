@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import TablePagination from '@/components/ui/TablePagination';
+import { formatPhDateTime } from '@/lib/ph-time';
 import { 
   Search, 
   CheckCircle2, 
@@ -321,7 +322,7 @@ function TrackContent() {
                               {req.purpose}
                             </td>
                             <td className="py-3.5 px-4 font-mono text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                              {new Date(req.createdAt).toLocaleDateString()}
+                              {formatPhDateTime(req.createdAt)}
                             </td>
                             <td className="py-3.5 px-4 whitespace-nowrap">
                               {getStatusBadge(req.status)}
@@ -641,13 +642,9 @@ function TrackContent() {
                   <p className="text-slate-700 dark:text-slate-200 font-medium">{docData.purpose}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-bold uppercase text-[10px]">Date Filed</span>
+                  <span className="text-slate-400 font-bold uppercase text-[10px]">Date &amp; Time Filed</span>
                   <p className="text-slate-700 dark:text-slate-200 font-medium">
-                    {new Date(docData.createdAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
+                    {formatPhDateTime(docData.createdAt)}
                   </p>
                 </div>
               </div>

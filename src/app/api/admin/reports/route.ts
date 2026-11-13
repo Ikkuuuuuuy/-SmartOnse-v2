@@ -2,6 +2,17 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
+import {
+  getPhNowParts,
+  phDateStart,
+  phDateEnd,
+  phMonthStart,
+  phMonthEnd,
+  shiftPhDateStr,
+  formatPhCompactDateTime,
+  MONTH_NAMES_SHORT,
+  MONTH_NAMES_FULL,
+} from '@/lib/ph-time';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,63 +59,60 @@ export async function GET(req: Request) {
     const endDateParam = searchParams.get('endDate');
     const periodParam = searchParams.get('period') || '';
 
+    const phNow = getPhNowParts();
+
     // Determine timeframe mode
     let mode = timeframeParam;
     if (!mode) {
-      if (periodParam.includes('August') || periodParam.toLowerCase() === 'month') mode = 'month';
-      else if (periodParam.includes('Q3') || periodParam.includes('Quarter') || periodParam.toLowerCase() === 'quarter') mode = 'quarter';
-      else if (periodParam.includes('Annual') || periodParam.toLowerCase() === 'year') mode = 'year';
+      if (periodParam.toLowerCase().includes('month')) mode = 'month';
+      else if (periodParam.toLowerCase().includes('quarter') || /^q[1-4]/i.test(periodParam)) mode = 'quarter';
+      else if (periodParam.toLowerCase().includes('annual') || periodParam.toLowerCase().includes('year')) mode = 'year';
       else if (startDateParam && endDateParam) mode = 'custom';
       else if (dayParam) mode = 'day';
       else mode = 'all'; // Default report shows comprehensive all-time unless filtered
     }
 
-    const selectedYear = yearParam ? parseInt(yearParam, 10) : 2026;
-    const selectedMonth = monthParam ? parseInt(monthParam, 10) : 8; // Aug default
-    const selectedQuarter = quarterParam ? parseInt(quarterParam, 10) : 3;
-
-    const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const MONTH_NAMES_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const selectedYear = yearParam ? parseInt(yearParam, 10) : phNow.year;
+    const selectedMonth = monthParam ? parseInt(monthParam, 10) : phNow.month;
+    const selectedQuarter = quarterParam ? parseInt(quarterParam, 10) : phNow.quarter;
 
     let filterStart: Date | null = null;
     let filterEnd: Date | null = null;
     let periodLabel = 'All Time Records';
 
     if (mode === 'day') {
-      const targetDayStr = dayParam || (startDateParam || '2026-08-28');
-      filterStart = new Date(`${targetDayStr}T00:00:00.000Z`);
-      filterEnd = new Date(`${targetDayStr}T23:59:59.999Z`);
-      periodLabel = `Daily Report: ${targetDayStr}`;
+      const targetDayStr = dayParam || startDateParam || phNow.dateStr;
+      filterStart = phDateStart(targetDayStr);
+      filterEnd = phDateEnd(targetDayStr);
+      periodLabel = `Daily Report: ${targetDayStr} (PHT)`;
     } else if (mode === 'week') {
-      const baseDate = startDateParam ? new Date(startDateParam) : new Date('2026-08-28T00:00:00.000Z');
-      const dayOfWeek = baseDate.getUTCDay();
+      const anchorStr = dayParam || startDateParam || phNow.dateStr;
+      const dayOfWeek = new Date(`${anchorStr}T12:00:00Z`).getUTCDay();
       const diffToMonday = (dayOfWeek + 6) % 7;
-      filterStart = new Date(baseDate);
-      filterStart.setUTCDate(baseDate.getUTCDate() - diffToMonday);
-      filterStart.setUTCHours(0, 0, 0, 0);
+      const weekStartStr = shiftPhDateStr(anchorStr, -diffToMonday);
+      const weekEndStr = shiftPhDateStr(weekStartStr, 6);
 
-      filterEnd = new Date(filterStart);
-      filterEnd.setUTCDate(filterStart.getUTCDate() + 6);
-      filterEnd.setUTCHours(23, 59, 59, 999);
-      periodLabel = `Weekly Report: ${filterStart.toISOString().slice(0, 10)} to ${filterEnd.toISOString().slice(0, 10)}`;
+      filterStart = phDateStart(weekStartStr);
+      filterEnd = phDateEnd(weekEndStr);
+      periodLabel = `Weekly Report: ${weekStartStr} to ${weekEndStr} (PHT)`;
     } else if (mode === 'month') {
-      filterStart = new Date(Date.UTC(selectedYear, selectedMonth - 1, 1, 0, 0, 0));
-      filterEnd = new Date(Date.UTC(selectedYear, selectedMonth, 0, 23, 59, 59, 999));
+      filterStart = phMonthStart(selectedYear, selectedMonth);
+      filterEnd = phMonthEnd(selectedYear, selectedMonth);
       periodLabel = `Monthly Report: ${MONTH_NAMES_FULL[selectedMonth - 1]} ${selectedYear}`;
     } else if (mode === 'quarter') {
-      const startM = (selectedQuarter - 1) * 3;
+      const startM = (selectedQuarter - 1) * 3 + 1;
       const endM = startM + 2;
-      filterStart = new Date(Date.UTC(selectedYear, startM, 1, 0, 0, 0));
-      filterEnd = new Date(Date.UTC(selectedYear, endM + 1, 0, 23, 59, 59, 999));
-      periodLabel = `Quarterly Report: Q${selectedQuarter} (${MONTH_NAMES_SHORT[startM]} - ${MONTH_NAMES_SHORT[endM]} ${selectedYear})`;
+      filterStart = phMonthStart(selectedYear, startM);
+      filterEnd = phMonthEnd(selectedYear, endM);
+      periodLabel = `Quarterly Report: Q${selectedQuarter} (${MONTH_NAMES_SHORT[startM - 1]} - ${MONTH_NAMES_SHORT[endM - 1]} ${selectedYear})`;
     } else if (mode === 'year') {
-      filterStart = new Date(Date.UTC(selectedYear, 0, 1, 0, 0, 0));
-      filterEnd = new Date(Date.UTC(selectedYear, 11, 31, 23, 59, 59, 999));
+      filterStart = phMonthStart(selectedYear, 1);
+      filterEnd = phMonthEnd(selectedYear, 12);
       periodLabel = `Annual Fiscal Report: FY ${selectedYear}`;
     } else if (mode === 'custom' && startDateParam && endDateParam) {
-      filterStart = new Date(`${startDateParam}T00:00:00.000Z`);
-      filterEnd = new Date(`${endDateParam}T23:59:59.999Z`);
-      periodLabel = `Custom Audit Window: ${startDateParam} to ${endDateParam}`;
+      filterStart = phDateStart(startDateParam);
+      filterEnd = phDateEnd(endDateParam);
+      periodLabel = `Custom Audit Window: ${startDateParam} to ${endDateParam} (PHT)`;
     } else {
       mode = 'all';
       periodLabel = 'Complete Historical Registry (All Time)';
@@ -260,8 +268,8 @@ export async function GET(req: Request) {
           fee: dtFee,
           feeDisplay: dtFee === 0 ? 'FREE' : `₱${dtFee.toFixed(2)}`,
           feeStatus: dtFee === 0 ? 'FREE' : 'PAID',
-          dateFiled: r.createdAt.toISOString().slice(0, 10),
-          dateCompleted: r.updatedAt ? r.updatedAt.toISOString().slice(0, 10) : r.createdAt.toISOString().slice(0, 10),
+          dateFiled: formatPhCompactDateTime(r.createdAt),
+          dateCompleted: formatPhCompactDateTime(r.updatedAt ?? r.createdAt),
           turnaroundDays: `${diffDays} days`,
           status: r.status,
           remarks: r.remarks || 'Officially verified and released.',

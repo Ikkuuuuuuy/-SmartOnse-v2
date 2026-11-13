@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { formatPhDateTime } from '@/lib/ph-time';
 import { 
   FileText, 
   CheckCircle2, 
@@ -84,6 +85,7 @@ interface SubmissionSuccessData {
   totalCopies: number;
   totalFee: number;
   totalFeeDisplay: string;
+  filedAtPh?: string;
   breakdown: Array<{
     code: string;
     name: string;
@@ -121,6 +123,14 @@ function RequestContent() {
 
   // Submission success result
   const [successData, setSuccessData] = useState<SubmissionSuccessData | null>(null);
+  const [phClock, setPhClock] = useState<string>(() => formatPhDateTime(new Date()));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPhClock(formatPhDateTime(new Date()));
+    }, 15000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Dynamically load active certificate types from database
   useEffect(() => {
@@ -388,6 +398,12 @@ function RequestContent() {
             <p className="text-[10px] text-slate-500 dark:text-slate-400">
               * Payment is collected upon claiming at Window 2 (exact amount preferred). Free certificates (R.A. 11261 and Indigency) require zero payment.
             </p>
+            <div className="pt-2 border-t border-slate-200 dark:border-blue-900/40 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-300">
+              <span className="font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Filed Timestamp (Philippines Time):</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white">
+                {successData.filedAtPh || formatPhDateTime(new Date())}
+              </span>
+            </div>
           </div>
 
           {/* Pickup Deadline & Office Hours Advisory */}
@@ -457,9 +473,14 @@ function RequestContent() {
               <p className="text-[11px] text-emerald-700 dark:text-emerald-400">Verified Citizen Session &bull; Auto-filled details</p>
             </div>
           </div>
-          <Link href="/profile" className="text-[11px] font-black uppercase tracking-wider text-[#9C2007] dark:text-rose-400 hover:underline shrink-0">
-            Edit Info &rarr;
-          </Link>
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/80 dark:bg-[#0E1B33] border border-emerald-200 dark:border-emerald-800/60 font-mono text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
+              <Clock className="w-3 h-3" /> {phClock}
+            </span>
+            <Link href="/profile" className="text-[11px] font-black uppercase tracking-wider text-[#9C2007] dark:text-rose-400 hover:underline shrink-0">
+              Edit Info &rarr;
+            </Link>
+          </div>
         </div>
 
         {/* Anti-Spam & Fair Usage Notice */}

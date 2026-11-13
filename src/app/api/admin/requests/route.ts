@@ -4,6 +4,7 @@ import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
 import { sendStatusUpdateEmail } from '@/lib/mailer';
 import { calculatePickupDeadline } from '@/lib/tracking';
+import { formatPhCompactDateTime } from '@/lib/ph-time';
 
 // GET /api/admin/requests - Fetch all clearance requests from database
 export async function GET(req: Request) {
@@ -46,8 +47,7 @@ export async function GET(req: Request) {
     });
 
     const formattedRequests = requests.map((r) => {
-      const d = new Date(r.createdAt);
-      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      const dateStr = formatPhCompactDateTime(r.createdAt);
 
       return {
         id: r.id,

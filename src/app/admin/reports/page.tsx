@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { getPhNowParts, MONTH_NAMES_FULL } from '@/lib/ph-time';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -114,10 +115,15 @@ export default function ReportAnalyticsPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Timeframe filter state
+  // Timeframe filter state (auto-adapted to Philippine Standard Time)
+  const initialPh = getPhNowParts();
   const [timeframe, setTimeframe] = useState<string>('all');
-  const [customStart, setCustomStart] = useState<string>('2026-08-01');
-  const [customEnd, setCustomEnd] = useState<string>('2026-08-31');
+  const [selectedYear, setSelectedYear] = useState<number>(initialPh.year);
+  const [selectedMonth, setSelectedMonth] = useState<number>(initialPh.month);
+  const [selectedQuarter, setSelectedQuarter] = useState<number>(initialPh.quarter);
+  const [selectedDay, setSelectedDay] = useState<string>(initialPh.dateStr);
+  const [customStart, setCustomStart] = useState<string>(`${initialPh.year}-${String(initialPh.month).padStart(2, '0')}-01`);
+  const [customEnd, setCustomEnd] = useState<string>(initialPh.dateStr);
 
   // Filter & Search states for the itemized completed records table
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -152,14 +158,16 @@ export default function ReportAnalyticsPage() {
       if (timeframe === 'custom') {
         params.set('startDate', customStart);
         params.set('endDate', customEnd);
+      } else if (timeframe === 'day' || timeframe === 'week') {
+        params.set('day', selectedDay);
       } else if (timeframe === 'month') {
-        params.set('year', '2026');
-        params.set('month', '8');
+        params.set('year', String(selectedYear));
+        params.set('month', String(selectedMonth));
       } else if (timeframe === 'quarter') {
-        params.set('year', '2026');
-        params.set('quarter', '3');
+        params.set('year', String(selectedYear));
+        params.set('quarter', String(selectedQuarter));
       } else if (timeframe === 'year') {
-        params.set('year', '2026');
+        params.set('year', String(selectedYear));
       }
 
       const res = await fetch(`/api/admin/reports?${params.toString()}`);
@@ -178,7 +186,7 @@ export default function ReportAnalyticsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [timeframe, customStart, customEnd]);
+  }, [timeframe, customStart, customEnd, selectedDay, selectedYear, selectedMonth, selectedQuarter]);
 
   useEffect(() => {
     fetchReport();
@@ -376,17 +384,94 @@ export default function ReportAnalyticsPage() {
                 className="appearance-none pl-3 pr-8 py-1.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider cursor-pointer outline-none focus:ring-1 focus:ring-[#9C2007]"
               >
                 <option value="all">All Time (Complete Registry)</option>
-                <option value="month">Current Month (August 2026)</option>
-                <option value="quarter">Current Quarter (Q3 2026)</option>
-                <option value="year">Full Year (FY 2026)</option>
-                <option value="week">Current Week</option>
-                <option value="day">Today / Single Day</option>
+                <option value="month">Current Month ({initialPh.monthName} {initialPh.year})</option>
+                <option value="quarter">Current Quarter (Q{initialPh.quarter} {initialPh.year})</option>
+                <option value="year">Full Year (FY {initialPh.year})</option>
+                <option value="week">Select Week</option>
+                <option value="day">Select Single Day</option>
                 <option value="custom">Custom Date Range</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
                 <ChevronRight className="w-3.5 h-3.5 rotate-90" />
               </div>
             </div>
+
+            {timeframe === 'month' && (
+              <div className="flex items-center gap-1.5 text-xs">
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                  className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-lg text-xs font-bold text-slate-900 dark:text-white cursor-pointer"
+                >
+                  {MONTH_NAMES_FULL.map((name, idx) => (
+                    <option key={name} value={idx + 1}>{name}</option>
+                  ))}
+                </select>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-lg text-xs font-bold text-slate-900 dark:text-white cursor-pointer"
+                >
+                  {[2024, 2025, 2026, 2027].map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {timeframe === 'quarter' && (
+              <div className="flex items-center gap-1.5 text-xs">
+                <select
+                  value={selectedQuarter}
+                  onChange={(e) => setSelectedQuarter(Number(e.target.value))}
+                  className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-lg text-xs font-bold text-slate-900 dark:text-white cursor-pointer"
+                >
+                  <option value={1}>Q1 (Jan – Mar)</option>
+                  <option value={2}>Q2 (Apr – Jun)</option>
+                  <option value={3}>Q3 (Jul – Sep)</option>
+                  <option value={4}>Q4 (Oct – Dec)</option>
+                </select>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-lg text-xs font-bold text-slate-900 dark:text-white cursor-pointer"
+                >
+                  {[2024, 2025, 2026, 2027].map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {timeframe === 'year' && (
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-lg text-xs font-bold text-slate-900 dark:text-white cursor-pointer"
+              >
+                {[2024, 2025, 2026, 2027].map((y) => (
+                  <option key={y} value={y}>FY {y}</option>
+                ))}
+              </select>
+            )}
+
+            {(timeframe === 'day' || timeframe === 'week') && (
+              <div className="flex items-center gap-1.5 text-xs">
+                <input
+                  type="date"
+                  value={selectedDay}
+                  onChange={(e) => setSelectedDay(e.target.value)}
+                  className="px-2.5 py-1 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-lg text-xs font-bold text-slate-900 dark:text-white cursor-pointer"
+                />
+                <button
+                  type="button"
+                  onClick={() => setSelectedDay(getPhNowParts().dateStr)}
+                  className="px-2.5 py-1.5 bg-slate-100 dark:bg-[#152747] hover:bg-slate-200 dark:hover:bg-[#1c345f] text-slate-700 dark:text-slate-300 rounded-lg font-bold text-[10px] uppercase transition cursor-pointer"
+                >
+                  Today
+                </button>
+              </div>
+            )}
 
             {timeframe === 'custom' && (
               <div className="flex items-center gap-1.5 text-xs">

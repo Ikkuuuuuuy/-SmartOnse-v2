@@ -2,6 +2,16 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth';
 import { isAdminUser } from '@/lib/rbac';
+import {
+  getPhNowParts,
+  phDateStart,
+  phDateEnd,
+  phMonthStart,
+  phMonthEnd,
+  shiftPhDateStr,
+  MONTH_NAMES_SHORT,
+  MONTH_NAMES_FULL,
+} from '@/lib/ph-time';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,20 +64,18 @@ export async function GET(req: Request) {
     // Determine timeframe mode
     let mode = timeframeParam;
     if (!mode) {
-      if (periodParam.includes('August') || periodParam.toLowerCase() === 'month') mode = 'month';
-      else if (periodParam.includes('Q3') || periodParam.includes('Quarter') || periodParam.toLowerCase() === 'quarter') mode = 'quarter';
-      else if (periodParam.includes('Annual') || periodParam.toLowerCase() === 'year') mode = 'year';
+      if (periodParam.toLowerCase().includes('month')) mode = 'month';
+      else if (periodParam.toLowerCase().includes('quarter') || periodParam.includes('Q')) mode = 'quarter';
+      else if (periodParam.toLowerCase().includes('annual') || periodParam.toLowerCase().includes('year')) mode = 'year';
       else if (startDateParam && endDateParam) mode = 'custom';
       else if (dayParam) mode = 'day';
       else mode = 'month';
     }
 
-    const selectedYear = yearParam ? parseInt(yearParam, 10) : 2026;
-    const selectedMonth = monthParam ? parseInt(monthParam, 10) : 8; // 1-12 (Aug default for seed)
-    const selectedQuarter = quarterParam ? parseInt(quarterParam, 10) : 3; // 1-4
-
-    const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const MONTH_NAMES_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const phNow = getPhNowParts();
+    const selectedYear = yearParam ? parseInt(yearParam, 10) : phNow.year;
+    const selectedMonth = monthParam ? parseInt(monthParam, 10) : phNow.month; // 1-12
+    const selectedQuarter = quarterParam ? parseInt(quarterParam, 10) : phNow.quarter; // 1-4
 
     interface VelocityBucket {
       label: string;
@@ -86,18 +94,18 @@ export async function GET(req: Request) {
     let labelTitle = '';
 
     if (mode === 'day') {
-      const targetDayStr = dayParam || (startDateParam || '2026-08-28');
-      filterStart = new Date(`${targetDayStr}T00:00:00.000Z`);
-      filterEnd = new Date(`${targetDayStr}T23:59:59.999Z`);
-      labelTitle = `Daily: ${targetDayStr}`;
+      const targetDayStr = dayParam || startDateParam || phNow.dateStr;
+      filterStart = phDateStart(targetDayStr);
+      filterEnd = phDateEnd(targetDayStr);
+      labelTitle = `Daily (PHT): ${targetDayStr}`;
 
-      // 6 Hourly slots: 8am, 10am, 12pm, 2pm, 4pm, 6pm
-      const hours = [8, 10, 12, 14, 16, 18];
+      // Hourly slots across the 24-hour Philippine day (00:00 to 23:59)
+      const hours = [0, 6, 9, 12, 15, 18];
       hours.forEach((h, idx) => {
-        const slotStart = new Date(`${targetDayStr}T${String(h).padStart(2, '0')}:00:00.000Z`);
-        const nextH = idx < hours.length - 1 ? hours[idx + 1] : 23;
-        const slotEnd = new Date(`${targetDayStr}T${String(nextH).padStart(2, '0')}:59:59.999Z`);
-        const displayTime = h === 12 ? '12:00 PM' : h < 12 ? `${h}:00 AM` : `${h - 12}:00 PM`;
+        const slotStart = new Date(`${targetDayStr}T${String(h).padStart(2, '0')}:00:00.000+08:00`);
+        const nextH = idx < hours.length - 1 ? hours[idx + 1] - 1 : 23;
+        const slotEnd = new Date(`${targetDayStr}T${String(nextH).padStart(2, '0')}:59:59.999+08:00`);
+        const displayTime = h === 0 ? '12:00 AM' : h === 12 ? '12:00 PM' : h < 12 ? `${h}:00 AM` : `${h - 12}:00 PM`;
         velocityBuckets.push({
           label: displayTime,
           monthYear: `${targetDayStr} ${displayTime}`,
@@ -110,25 +118,21 @@ export async function GET(req: Request) {
         });
       });
     } else if (mode === 'week') {
-      const refDayStr = dayParam || startDateParam || '2026-08-28';
-      const refDate = new Date(`${refDayStr}T12:00:00.000Z`);
-      
-      // 7 consecutive days up to reference date
-      const daysList: Date[] = [];
+      const refDayStr = dayParam || startDateParam || phNow.dateStr;
+      const daysStrList: string[] = [];
       for (let i = 6; i >= 0; i--) {
-        const d = new Date(refDate);
-        d.setDate(d.getDate() - i);
-        daysList.push(d);
+        daysStrList.push(shiftPhDateStr(refDayStr, -i));
       }
 
-      filterStart = new Date(daysList[0].toISOString().slice(0, 10) + 'T00:00:00.000Z');
-      filterEnd = new Date(daysList[daysList.length - 1].toISOString().slice(0, 10) + 'T23:59:59.999Z');
-      labelTitle = `Weekly: ${filterStart.toISOString().slice(0, 10)} to ${filterEnd.toISOString().slice(0, 10)}`;
+      filterStart = phDateStart(daysStrList[0]);
+      filterEnd = phDateEnd(daysStrList[daysStrList.length - 1]);
+      labelTitle = `Weekly (PHT): ${daysStrList[0]} to ${daysStrList[daysStrList.length - 1]}`;
 
       const dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      daysList.forEach((d) => {
-        const dStr = d.toISOString().slice(0, 10);
-        const dayLabel = `${dayNamesShort[d.getUTCDay()]} ${d.getUTCDate()}`;
+      daysStrList.forEach((dStr) => {
+        const [y, m, d] = dStr.split('-').map(Number);
+        const utcRef = new Date(Date.UTC(y, m - 1, d));
+        const dayLabel = `${dayNamesShort[utcRef.getUTCDay()]} ${d}`;
         velocityBuckets.push({
           label: dayLabel,
           monthYear: dStr,
@@ -136,18 +140,18 @@ export async function GET(req: Request) {
           clearances: 0,
           revenue: 0,
           completed: 0,
-          start: new Date(`${dStr}T00:00:00.000Z`),
-          end: new Date(`${dStr}T23:59:59.999Z`),
+          start: phDateStart(dStr),
+          end: phDateEnd(dStr),
         });
       });
     } else if (mode === 'month') {
-      filterStart = new Date(Date.UTC(selectedYear, selectedMonth - 1, 1, 0, 0, 0));
-      filterEnd = new Date(Date.UTC(selectedYear, selectedMonth, 0, 23, 59, 59, 999));
+      filterStart = phMonthStart(selectedYear, selectedMonth);
+      filterEnd = phMonthEnd(selectedYear, selectedMonth);
       const mName = MONTH_NAMES_FULL[selectedMonth - 1];
       const mShort = MONTH_NAMES_SHORT[selectedMonth - 1];
       labelTitle = `Monthly: ${mName} ${selectedYear}`;
 
-      const totalDaysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+      const totalDaysInMonth = new Date(Date.UTC(selectedYear, selectedMonth, 0)).getUTCDate();
       const intervals = [
         { label: `W1 (${mShort} 1-7)`, startDay: 1, endDay: 7 },
         { label: `W2 (${mShort} 8-14)`, startDay: 8, endDay: 14 },
@@ -156,23 +160,26 @@ export async function GET(req: Request) {
         ...(totalDaysInMonth > 28 ? [{ label: `W5 (${mShort} 29-${totalDaysInMonth})`, startDay: 29, endDay: totalDaysInMonth }] : []),
       ];
 
+      const mm = String(selectedMonth).padStart(2, '0');
       intervals.forEach((inv, idx) => {
+        const sd = String(inv.startDay).padStart(2, '0');
+        const ed = String(inv.endDay).padStart(2, '0');
         velocityBuckets.push({
           label: inv.label,
           monthYear: `${inv.label} ${selectedYear}`,
-          sortKey: `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-W${idx + 1}`,
+          sortKey: `${selectedYear}-${mm}-W${idx + 1}`,
           clearances: 0,
           revenue: 0,
           completed: 0,
-          start: new Date(Date.UTC(selectedYear, selectedMonth - 1, inv.startDay, 0, 0, 0)),
-          end: new Date(Date.UTC(selectedYear, selectedMonth - 1, inv.endDay, 23, 59, 59, 999)),
+          start: phDateStart(`${selectedYear}-${mm}-${sd}`),
+          end: phDateEnd(`${selectedYear}-${mm}-${ed}`),
         });
       });
     } else if (mode === 'quarter') {
       const startMonthIdx = (selectedQuarter - 1) * 3;
       const endMonthIdx = startMonthIdx + 2;
-      filterStart = new Date(Date.UTC(selectedYear, startMonthIdx, 1, 0, 0, 0));
-      filterEnd = new Date(Date.UTC(selectedYear, endMonthIdx + 1, 0, 23, 59, 59, 999));
+      filterStart = phMonthStart(selectedYear, startMonthIdx + 1);
+      filterEnd = phMonthEnd(selectedYear, endMonthIdx + 1);
       labelTitle = `Quarterly: Q${selectedQuarter} ${selectedYear} (${MONTH_NAMES_SHORT[startMonthIdx]} – ${MONTH_NAMES_SHORT[endMonthIdx]})`;
 
       for (let m = startMonthIdx; m <= endMonthIdx; m++) {
@@ -185,13 +192,13 @@ export async function GET(req: Request) {
           clearances: 0,
           revenue: 0,
           completed: 0,
-          start: new Date(Date.UTC(selectedYear, m, 1, 0, 0, 0)),
-          end: new Date(Date.UTC(selectedYear, m + 1, 0, 23, 59, 59, 999)),
+          start: phMonthStart(selectedYear, m + 1),
+          end: phMonthEnd(selectedYear, m + 1),
         });
       }
     } else if (mode === 'year') {
-      filterStart = new Date(Date.UTC(selectedYear, 0, 1, 0, 0, 0));
-      filterEnd = new Date(Date.UTC(selectedYear, 11, 31, 23, 59, 59, 999));
+      filterStart = phMonthStart(selectedYear, 1);
+      filterEnd = phMonthEnd(selectedYear, 12);
       labelTitle = `Annual: Full Year ${selectedYear}`;
 
       for (let m = 0; m < 12; m++) {
@@ -204,55 +211,54 @@ export async function GET(req: Request) {
           clearances: 0,
           revenue: 0,
           completed: 0,
-          start: new Date(Date.UTC(selectedYear, m, 1, 0, 0, 0)),
-          end: new Date(Date.UTC(selectedYear, m + 1, 0, 23, 59, 59, 999)),
+          start: phMonthStart(selectedYear, m + 1),
+          end: phMonthEnd(selectedYear, m + 1),
         });
       }
     } else if (mode === 'custom' && startDateParam && endDateParam) {
-      filterStart = new Date(`${startDateParam}T00:00:00.000Z`);
-      filterEnd = new Date(`${endDateParam}T23:59:59.999Z`);
-      labelTitle = `Custom: ${startDateParam} to ${endDateParam}`;
+      filterStart = phDateStart(startDateParam);
+      filterEnd = phDateEnd(endDateParam);
+      labelTitle = `Custom (PHT): ${startDateParam} to ${endDateParam}`;
 
-      // Calculate days difference
       const diffDays = Math.max(1, Math.round((filterEnd.getTime() - filterStart.getTime()) / (1000 * 60 * 60 * 24)));
       if (diffDays <= 14) {
-        // Daily breakdown
         for (let i = 0; i < diffDays; i++) {
-          const d = new Date(filterStart);
-          d.setDate(d.getDate() + i);
-          const dStr = d.toISOString().slice(0, 10);
+          const dStr = shiftPhDateStr(startDateParam, i);
+          const [, mm, dd] = dStr.split('-').map(Number);
           velocityBuckets.push({
-            label: `${MONTH_NAMES_SHORT[d.getUTCMonth()]} ${d.getUTCDate()}`,
+            label: `${MONTH_NAMES_SHORT[mm - 1]} ${dd}`,
             monthYear: dStr,
             sortKey: dStr,
             clearances: 0,
             revenue: 0,
             completed: 0,
-            start: new Date(`${dStr}T00:00:00.000Z`),
-            end: new Date(`${dStr}T23:59:59.999Z`),
+            start: phDateStart(dStr),
+            end: phDateEnd(dStr),
           });
         }
       } else {
-        // Monthly breakdown
-        const curr = new Date(filterStart);
-        while (curr <= filterEnd) {
-          const y = curr.getUTCFullYear();
-          const m = curr.getUTCMonth();
-          const mLabel = MONTH_NAMES_SHORT[m];
-          const mKey = `${y}-${String(m + 1).padStart(2, '0')}`;
-          const bStart = new Date(Date.UTC(y, m, 1, 0, 0, 0));
-          const bEnd = new Date(Date.UTC(y, m + 1, 0, 23, 59, 59, 999));
+        const [sy, sm] = startDateParam.split('-').map(Number);
+        const [ey, em] = endDateParam.split('-').map(Number);
+        let cy = sy;
+        let cm = sm;
+        while (cy < ey || (cy === ey && cm <= em)) {
+          const mLabel = MONTH_NAMES_SHORT[cm - 1];
+          const mKey = `${cy}-${String(cm).padStart(2, '0')}`;
           velocityBuckets.push({
-            label: `${mLabel} ${y}`,
-            monthYear: `${mLabel} ${y}`,
+            label: `${mLabel} ${cy}`,
+            monthYear: `${mLabel} ${cy}`,
             sortKey: mKey,
             clearances: 0,
             revenue: 0,
             completed: 0,
-            start: bStart,
-            end: bEnd,
+            start: phMonthStart(cy, cm),
+            end: phMonthEnd(cy, cm),
           });
-          curr.setUTCMonth(curr.getUTCMonth() + 1);
+          cm += 1;
+          if (cm > 12) {
+            cm = 1;
+            cy += 1;
+          }
         }
       }
     } else {
