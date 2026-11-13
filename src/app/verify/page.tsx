@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { QrCode, Search, ShieldCheck, ArrowRight, FileCheck } from 'lucide-react';
+import { Search, ShieldCheck, ArrowRight, FileCheck } from 'lucide-react';
 
 export default function VerifyIndexPage() {
   const router = useRouter();
@@ -65,9 +65,9 @@ export default function VerifyIndexPage() {
 
         <div className="pt-4 border-t border-slate-100 dark:border-blue-900/40 grid grid-cols-2 gap-3 text-left">
           <div className="p-3 bg-slate-50 dark:bg-[#0B1528] rounded-2xl border border-slate-100 dark:border-blue-900/30">
-            <QrCode className="w-5 h-5 text-[#9C2007] dark:text-rose-400 mb-1" />
-            <h2 className="text-[11px] font-bold text-slate-900 dark:text-white">Scan QR Code</h2>
-            <p className="text-[10px] text-slate-500">Scan the QR code printed at the lower right of your official seal.</p>
+            <Search className="w-5 h-5 text-[#9C2007] dark:text-rose-400 mb-1" />
+            <h2 className="text-[11px] font-bold text-slate-900 dark:text-white">Enter Tracking Code</h2>
+            <p className="text-[10px] text-slate-500">Type the ONSE tracking number printed on your official document.</p>
           </div>
           <div className="p-3 bg-slate-50 dark:bg-[#0B1528] rounded-2xl border border-slate-100 dark:border-blue-900/30">
             <FileCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mb-1" />

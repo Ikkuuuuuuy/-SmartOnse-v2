@@ -944,31 +944,15 @@ export default function AdminRequestsPage() {
                 </p>
               </div>
 
-              {/* Signatures & Anti-Counterfeiting QR Code */}
-              <div className="pt-8 grid grid-cols-1 sm:grid-cols-3 gap-6 items-end text-center text-xs">
-                <div className="order-1">
-                  <div className="w-32 border-b border-slate-400 mx-auto mb-1"></div>
+              {/* Signatures & Official Tracking Reference */}
+              <div className="pt-8 grid grid-cols-1 sm:grid-cols-2 gap-6 items-end text-center text-xs">
+                <div>
+                  <div className="w-36 border-b border-slate-400 mx-auto mb-1"></div>
                   <p className="font-bold uppercase text-[10px] text-slate-700">Applicant Signature</p>
-                </div>
-                
-                {/* Official Scannable Anti-Counterfeit QR Code */}
-                <div className="order-2 flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 bg-slate-50/80">
-                  <div className="p-1 bg-white rounded-lg border border-slate-200 shadow-2xs">
-                    <QRCodeImage
-                      value={`https://smartonse.vercel.app/verify/${selectedRequest.trackingNumber}`}
-                      size={68}
-                      alt={`Verification QR Code for ${selectedRequest.trackingNumber}`}
-                    />
-                  </div>
-                  <span className="font-mono text-[9px] font-black text-slate-800 mt-1 uppercase tracking-wider">
-                    SCAN TO VERIFY
-                  </span>
-                  <span className="text-[8px] text-slate-500 font-mono font-bold">
-                    {selectedRequest.trackingNumber}
-                  </span>
+                  <p className="text-[9px] text-slate-500 font-mono mt-1">{selectedRequest.trackingNumber}</p>
                 </div>
 
-                <div className="order-3">
+                <div>
                   <p className="font-black text-sm uppercase text-[#9C2007]">HON. ROBERTO B. ALBA</p>
                   <p className="text-[11px] font-bold text-slate-600 uppercase">Punong Barangay</p>
                 </div>

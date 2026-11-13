@@ -109,9 +109,9 @@ export default function WelcomePage() {
     },
     {
       num: '03',
-      title: 'QR & Digital Cryptographic Signing',
-      desc: 'The certificate is signed by Captain Roberto Alba and stamped with a unique anti-counterfeit QR code.',
-      icon: <QrCode className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />,
+      title: 'Official Signing & Verification',
+      desc: 'The certificate is signed by Captain Roberto Alba and assigned a unique tracking number for registry verification.',
+      icon: <ShieldCheck className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />,
     },
     {
       num: '04',
