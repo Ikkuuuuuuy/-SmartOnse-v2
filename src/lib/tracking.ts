@@ -1,34 +1,40 @@
 import prisma from '@/lib/prisma';
 
+const PH_TIMEZONE = 'Asia/Manila';
+const PH_OFFSET_MS = 8 * 60 * 60 * 1000;
+
 /**
  * Calculates the official pickup deadline by adding business days (Mon-Fri)
+ * in Philippine Time (UTC+8, Asia/Manila).
  * Barangay Hall Office Hours: Monday to Friday, 8:00 AM to 5:00 PM.
  * Skips Saturdays and Sundays.
  */
 export function calculatePickupDeadline(startDate: Date = new Date(), businessDays: number = 5): Date {
-  const current = new Date(startDate);
+  // Shift into PH wall-clock time using UTC fields so server timezone (e.g. UTC) never skews day/hour math.
+  const phClock = new Date(startDate.getTime() + PH_OFFSET_MS);
   let addedDays = 0;
 
   while (addedDays < businessDays) {
-    current.setDate(current.getDate() + 1);
-    const dayOfWeek = current.getDay();
+    phClock.setUTCDate(phClock.getUTCDate() + 1);
+    const dayOfWeek = phClock.getUTCDay();
     // 0 = Sunday, 6 = Saturday
     if (dayOfWeek !== 0 && dayOfWeek !== 6) {
       addedDays++;
     }
   }
 
-  // Set to 5:00 PM (End of barangay office hours)
-  current.setHours(17, 0, 0, 0);
-  return current;
+  // Set to 5:00 PM PH Time (End of barangay office hours) and convert back to UTC Date
+  phClock.setUTCHours(17, 0, 0, 0);
+  return new Date(phClock.getTime() - PH_OFFSET_MS);
 }
 
 /**
- * Human-readable format for pickup deadline and office hours advisory
+ * Human-readable format for pickup deadline in Philippine Time (Asia/Manila)
  */
 export function formatPickupDeadline(deadline: Date | string): string {
   const dateObj = typeof deadline === 'string' ? new Date(deadline) : deadline;
   return new Intl.DateTimeFormat('en-PH', {
+    timeZone: PH_TIMEZONE,
     weekday: 'long',
     month: 'long',
     day: 'numeric',
