@@ -479,8 +479,216 @@ export default function AdminRequestsPage() {
     }
   };
 
+  // Official Receipt Number input for certificate footer (OR No: _________)
+  const [orNumber, setOrNumber] = useState<string>('');
+
+  const getOrdinalDay = (day: number) => {
+    if (day > 3 && day < 21) return `${day}th`;
+    switch (day % 10) {
+      case 1:
+        return `${day}st`;
+      case 2:
+        return `${day}nd`;
+      case 3:
+        return `${day}rd`;
+      default:
+        return `${day}th`;
+    }
+  };
+
+  const getCertificateBody = (req: ClearanceRequest) => {
+    const typeLower = req.documentType.toLowerCase();
+    const purpose = req.purpose || 'General Legal Requirement';
+
+    if (typeLower.includes('residency')) {
+      return {
+        heading: 'C E R T I F I C A T E',
+        secondParagraph: `This certification is issued upon request of aforementioned for verification of residency as a requirement for ${purpose}.`,
+      };
+    }
+    if (typeLower.includes('indigency')) {
+      return {
+        heading: 'C E R T I F I C A T E   O F   I N D I G E N C Y',
+        secondParagraph: `This certification is issued upon request of aforementioned to certify that he/she belongs to an indigent family in this barangay, as a requirement for ${purpose}.`,
+      };
+    }
+    if (typeLower.includes('jobseeker')) {
+      return {
+        heading: 'C E R T I F I C A T E',
+        secondParagraph: `This certification is issued upon request of aforementioned pursuant to Republic Act No. 11261 (First Time Jobseekers Assistance Act) as a requirement for ${purpose}.`,
+      };
+    }
+    if (typeLower.includes('business')) {
+      return {
+        heading: 'B A R A N G A Y   B U S I N E S S   C L E A R A N C E',
+        secondParagraph: `This certification is issued upon request of aforementioned for verification of business operation and barangay endorsement as a requirement for ${purpose}.`,
+      };
+    }
+    return {
+      heading: 'C E R T I F I C A T E',
+      secondParagraph: `This certification is issued upon request of aforementioned for verification of residency and good standing as a requirement for ${purpose}.`,
+    };
+  };
+
   const handlePrint = () => {
-    window.print();
+    if (!selectedRequest || typeof window === 'undefined') return;
+    const nowPh = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+    const ordinalDay = getOrdinalDay(nowPh.getDate());
+    const monthYear = nowPh.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const certInfo = getCertificateBody(selectedRequest);
+    const cleanAddr = selectedRequest.address.replace(/,?\s*Barangay Onse.*$/i, '').trim();
+
+    const printWin = window.open('', '_blank', 'width=850,height=1100');
+    if (!printWin) {
+      window.print();
+      return;
+    }
+
+    printWin.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Certificate - ${selectedRequest.fullName} (${selectedRequest.trackingNumber})</title>
+          <style>
+            @page { size: 8.5in 11in; margin: 0; }
+            * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            html, body {
+              width: 8.5in;
+              height: 11in;
+              margin: 0;
+              padding: 0;
+              font-family: Arial, Helvetica, sans-serif;
+              color: #111111;
+              background: #ffffff;
+            }
+            .cert-page {
+              position: relative;
+              width: 8.5in;
+              height: 11in;
+              background-image: url('/images/barangay-onse-letterhead.jpg');
+              background-size: 100% 100%;
+              background-repeat: no-repeat;
+              background-position: center;
+              padding: 2.55in 1.05in 1.35in 1.05in;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+            }
+            .cert-title {
+              text-align: center;
+              font-size: 20px;
+              font-weight: 800;
+              letter-spacing: 0.22em;
+              text-decoration: underline;
+              text-underline-offset: 5px;
+              margin: 8px 0 36px 0;
+              color: #111111;
+            }
+            .cert-body p {
+              font-size: 15.5px;
+              line-height: 1.55;
+              margin: 0 0 26px 0;
+              text-indent: 0.65in;
+              text-align: left;
+              color: #111111;
+            }
+            .cert-body strong {
+              font-weight: 800;
+            }
+            .sig-row {
+              display: flex;
+              justify-content: flex-end;
+              margin-top: 38px;
+              padding-right: 0.25in;
+            }
+            .sig-block {
+              text-align: left;
+              min-width: 220px;
+            }
+            .sig-script {
+              font-family: 'Brush Script MT', 'Segoe Script', 'Lucida Handwriting', cursive;
+              font-size: 32px;
+              color: #111111;
+              line-height: 1;
+              margin-bottom: -4px;
+              padding-left: 4px;
+            }
+            .sig-name {
+              font-size: 15px;
+              font-weight: 800;
+              letter-spacing: 0.03em;
+              color: #111111;
+              text-transform: uppercase;
+            }
+            .sig-role {
+              font-size: 13px;
+              color: #222222;
+              line-height: 1.3;
+            }
+            .footer-or {
+              margin-top: auto;
+              padding-left: 0.15in;
+              padding-bottom: 0.35in;
+              font-size: 12px;
+              font-weight: 700;
+              line-height: 1.35;
+              color: #111111;
+            }
+            .or-line {
+              display: inline-block;
+              min-width: 145px;
+              border-bottom: 1.5px solid #111111;
+              padding: 0 4px;
+              font-family: 'Courier New', monospace;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="cert-page">
+            <div>
+              <div class="cert-title">${certInfo.heading}</div>
+              <div class="cert-body">
+                <p>
+                  This is to certify that <strong>${selectedRequest.fullName.toUpperCase()}</strong>,
+                  is a resident of ${cleanAddr}, Barangay Onse, City of San Juan Metro Manila.
+                </p>
+                <p>
+                  ${certInfo.secondParagraph}
+                </p>
+                <p>
+                  Given this ${ordinalDay} day of ${monthYear} at the Barangay Onse Hall, City of San Juan Metro Manila.
+                </p>
+              </div>
+
+              <div class="sig-row">
+                <div class="sig-block">
+                  <div class="sig-script">Roberto Alba</div>
+                  <div class="sig-name">ROBERTO B. ALBA</div>
+                  <div class="sig-role">Punong Barangay</div>
+                  <div class="sig-role">Barangay Onse SJMM</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="footer-or">
+              <div>OR No: <span class="or-line">${orNumber || ''}</span></div>
+              <div>Valid within 6 months after Issuance</div>
+              <div>Not valid without Brgy. Onse seal</div>
+            </div>
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.focus();
+                window.print();
+              }, 300);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWin.document.close();
   };
 
   const handleDeleteRequest = async (id: string, trackingNumber: string) => {
@@ -901,63 +1109,103 @@ export default function AdminRequestsPage() {
               </div>
             </div>
 
-            {/* Official Certificate Paper */}
-            <div className="border-4 border-double border-[#9C2007] p-8 sm:p-12 space-y-6 text-slate-900 bg-white">
-              {/* Header */}
-              <div className="text-center space-y-1 border-b-2 border-[#9C2007] pb-4">
-                <div className="flex justify-center mb-2">
-                  <div className="w-16 h-16 rounded-full overflow-hidden p-1 bg-white">
-                    <img src="/images/barangay-onse-seal.png" alt="Barangay Onse Seal" className="w-full h-full object-contain" />
+            {/* Official Barangay Onse Certificate Preview (Exact Match to Official Barangay Onse Letterhead) */}
+            <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/40 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-700 dark:text-slate-300 uppercase text-[11px]">
+                  Official Receipt (OR No.):
+                </span>
+                <input
+                  type="text"
+                  value={orNumber}
+                  onChange={(e) => setOrNumber(e.target.value)}
+                  placeholder="Leave blank for manual write-in or enter OR #"
+                  className="px-3 py-1.5 rounded-xl bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/50 text-slate-900 dark:text-white text-xs w-64 outline-none focus:ring-1 focus:ring-[#9C2007]"
+                />
+              </div>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Tracking Ref: <strong className="font-mono text-[#9C2007] dark:text-rose-400">{selectedRequest.trackingNumber}</strong>
+              </span>
+            </div>
+
+            {(() => {
+              const nowPh = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+              const ordinalDay = getOrdinalDay(nowPh.getDate());
+              const monthYear = nowPh.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+              const certInfo = getCertificateBody(selectedRequest);
+              const cleanAddr = selectedRequest.address.replace(/,?\s*Barangay Onse.*$/i, '').trim();
+
+              return (
+                <div
+                  className="relative mx-auto w-full max-w-[680px] aspect-[8.5/11] bg-white text-slate-900 shadow-2xl border border-slate-300 overflow-hidden flex flex-col justify-between"
+                  style={{
+                    backgroundImage: "url('/images/barangay-onse-letterhead.jpg')",
+                    backgroundSize: '100% 100%',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    padding: '23% 12% 12% 12%',
+                  }}
+                >
+                  <div>
+                    {/* Certificate Title */}
+                    <div className="text-center my-2 mb-7">
+                      <h1 className="text-base sm:text-lg font-extrabold uppercase tracking-[0.22em] underline underline-offset-4 text-slate-900">
+                        {certInfo.heading}
+                      </h1>
+                    </div>
+
+                    {/* Indented Certificate Paragraphs matching official Barangay Onse format */}
+                    <div className="space-y-5 text-xs sm:text-[13.5px] leading-relaxed text-slate-900">
+                      <p className="indent-10">
+                        This is to certify that <strong className="font-extrabold">{selectedRequest.fullName.toUpperCase()}</strong>,
+                        is a resident of {cleanAddr}, Barangay Onse, City of San Juan Metro Manila.
+                      </p>
+
+                      <p className="indent-10">
+                        {certInfo.secondParagraph}
+                      </p>
+
+                      <p className="indent-10">
+                        Given this {ordinalDay} day of {monthYear} at the Barangay Onse Hall, City of San Juan Metro Manila.
+                      </p>
+                    </div>
+
+                    {/* Right-aligned Punong Barangay Signature Block */}
+                    <div className="mt-10 flex justify-end pr-4">
+                      <div className="text-left min-w-[180px]">
+                        <div
+                          className="text-2xl sm:text-3xl text-slate-900 leading-none -mb-1 pl-1 select-none"
+                          style={{ fontFamily: "'Brush Script MT', 'Segoe Script', 'Lucida Handwriting', cursive" }}
+                        >
+                          Roberto Alba
+                        </div>
+                        <p className="font-extrabold text-xs sm:text-sm uppercase tracking-wide text-slate-900">
+                          ROBERTO B. ALBA
+                        </p>
+                        <p className="text-[11px] sm:text-xs text-slate-800 leading-tight">
+                          Punong Barangay
+                        </p>
+                        <p className="text-[11px] sm:text-xs text-slate-800 leading-tight">
+                          Barangay Onse SJMM
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom-left OR No. & Validity Block */}
+                  <div className="pb-4 pl-2 text-[10px] sm:text-[11px] font-bold text-slate-900 leading-snug">
+                    <div>
+                      OR No:{' '}
+                      <span className="inline-block min-w-[120px] border-b border-slate-900 px-1 font-mono">
+                        {orNumber}
+                      </span>
+                    </div>
+                    <div>Valid within 6 months after Issuance</div>
+                    <div>Not valid without Brgy. Onse seal</div>
                   </div>
                 </div>
-                <p className="text-xs uppercase font-semibold text-slate-600">Republic of the Philippines &bull; City of San Juan</p>
-                <h2 className="text-xl font-black uppercase text-[#9C2007]">OFFICE OF THE PUNONG BARANGAY</h2>
-                <p className="text-xs font-bold text-slate-800 uppercase tracking-widest">BARANGAY ONSE</p>
-              </div>
-
-              {/* Title */}
-              <div className="text-center py-2">
-                <h1 className="text-2xl font-black uppercase tracking-wider underline decoration-[#9C2007] decoration-2">
-                  {selectedRequest.documentType}
-                </h1>
-                <p className="text-xs font-mono font-bold text-slate-500 mt-1">
-                  Control No: {selectedRequest.trackingNumber}
-                </p>
-              </div>
-
-              {/* Body */}
-              <div className="space-y-4 text-xs sm:text-sm leading-relaxed text-justify">
-                <p>
-                  <strong>TO WHOM IT MAY CONCERN:</strong>
-                </p>
-                <p>
-                  This is to certify that <strong>{selectedRequest.fullName.toUpperCase()}</strong>, of legal age, is a bonafide resident of <strong>{selectedRequest.address}</strong>, Barangay Onse, San Juan City.
-                </p>
-                <p>
-                  Based on records of this office, the aforementioned individual is known to be of good moral character, a law-abiding citizen, and has no derogatory records or pending criminal case filed in the Lupong Tagapamayapa.
-                </p>
-                <p>
-                  This certification is issued upon the request of the interested party for the purpose of <strong>{selectedRequest.purpose.toUpperCase()}</strong> and for whatever legal purposes it may serve.
-                </p>
-                <p>
-                  Issued this <strong>{new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</strong> at Barangay Onse, San Juan City, Metro Manila.
-                </p>
-              </div>
-
-              {/* Signatures & Official Tracking Reference */}
-              <div className="pt-8 grid grid-cols-1 sm:grid-cols-2 gap-6 items-end text-center text-xs">
-                <div>
-                  <div className="w-36 border-b border-slate-400 mx-auto mb-1"></div>
-                  <p className="font-bold uppercase text-[10px] text-slate-700">Applicant Signature</p>
-                  <p className="text-[9px] text-slate-500 font-mono mt-1">{selectedRequest.trackingNumber}</p>
-                </div>
-
-                <div>
-                  <p className="font-black text-sm uppercase text-[#9C2007]">HON. ROBERTO B. ALBA</p>
-                  <p className="text-[11px] font-bold text-slate-600 uppercase">Punong Barangay</p>
-                </div>
-              </div>
-            </div>
+              );
+            })()}
           </div>
         </div>
       )}

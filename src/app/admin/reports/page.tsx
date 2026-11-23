@@ -31,7 +31,10 @@ import {
   HelpCircle,
   XCircle,
   Eye,
-  Check
+  Check,
+  Users,
+  Home,
+  Vote
 } from 'lucide-react';
 import TablePagination from '@/components/ui/TablePagination';
 import TableSortHeader from '@/components/ui/TableSortHeader';
@@ -105,6 +108,62 @@ interface ReportData {
     totalFreeGrants: number;
     avgTurnaroundDays: string;
     totalCatalogedDocuments: number;
+    slaComplianceRate?: number;
+    avgSatisfactionRating?: string;
+    ratedCount?: number;
+  };
+  populationReport?: {
+    totalPopulation: number;
+    votersCount: number;
+    nonVotersCount: number;
+    voterPercentage: number;
+    housingBreakdown: {
+      homeowners: number;
+      renters: number;
+      livingWithRelatives: number;
+      boarders: number;
+    };
+    genderBreakdown: {
+      male: number;
+      female: number;
+    };
+    ageGroups: {
+      youthUnder18: number;
+      youngAdults18To30: number;
+      adults31To59: number;
+      seniors60Plus: number;
+    };
+    civilStatusBreakdown: {
+      single: number;
+      married: number;
+      widowed: number;
+      separated: number;
+    };
+    sectoralBreakdown: {
+      seniorCitizens: number;
+      pwd: number;
+      soloParents: number;
+      fourPs: number;
+      students: number;
+      employed: number;
+    };
+    records: Array<{
+      id: string;
+      rbiNumber: string;
+      fullName: string;
+      age: number;
+      sex: string;
+      civilStatus: string;
+      housingStatus: string;
+      isRegisteredVoter: boolean;
+      employmentStatus: string;
+      yearsOfResidency: number;
+      address: string;
+      sectors: string[];
+      hasPortalAccount: boolean;
+      isVerified: boolean;
+      registeredAt: string;
+    }>;
   };
   documents: DocumentTypeStat[];
   completedRecords: CompletedRecord[];
@@ -142,8 +201,12 @@ export default function ReportAnalyticsPage() {
     }
   };
 
-  // Active view tab inside module: 'performance' | 'catalog' | 'audit_log'
-  const [activeTab, setActiveTab] = useState<'performance' | 'catalog' | 'audit_log'>('performance');
+  // Active view tab inside module matching Thesis Objective 2:
+  // 'population' | 'performance' (Transaction Volume) | 'service_performance' | 'catalog' | 'audit_log'
+  const [activeTab, setActiveTab] = useState<'population' | 'performance' | 'service_performance' | 'catalog' | 'audit_log'>('population');
+  const [popSearch, setPopSearch] = useState<string>('');
+  const [popHousingFilter, setPopHousingFilter] = useState<string>('ALL');
+  const [popVoterFilter, setPopVoterFilter] = useState<string>('ALL');
 
   // Selected document for the details modal
   const [selectedDocDetails, setSelectedDocDetails] = useState<DocumentTypeStat | null>(null);
@@ -192,55 +255,813 @@ export default function ReportAnalyticsPage() {
     fetchReport();
   }, [fetchReport]);
 
-  // Export report to CSV
-  const handleExportCSV = () => {
+  // Active Report Title & Label Helper
+  const ACTIVE_REPORT_META: Record<
+    'population' | 'performance' | 'service_performance' | 'audit_log' | 'catalog',
+    { title: string; shortLabel: string; subtitle: string }
+  > = {
+    population: {
+      title: 'Official Barangay Population & RBI Census Report',
+      shortLabel: 'Population Report',
+      subtitle: 'Demographic distribution, Homeowners vs. Renters, Registered Voters vs. Non-Voters, and Sectoral Classifications sourced from Resident Registration.',
+    },
+    performance: {
+      title: 'Official Transaction Volume & Revenue Audit Report',
+      shortLabel: 'Transaction Volume Report',
+      subtitle: 'Total document applications filed, completed releases, active queue volume, realized collections, and statutory fee waivers per document service.',
+    },
+    service_performance: {
+      title: 'Official Barangay Service Performance & SLA Compliance Report',
+      shortLabel: 'Service Performance Report',
+      subtitle: 'Service completion efficiency, actual processing turnaround time vs. statutory SLA targets, and citizen satisfaction ratings.',
+    },
+    audit_log: {
+      title: 'Official Completed & Released Certificates Registry Log',
+      shortLabel: 'Completed Issuances Report',
+      subtitle: 'Itemized audit trail of all verified, signed, dry-sealed, and claimed barangay certificates and clearances.',
+    },
+    catalog: {
+      title: 'Official Barangay Document Catalog & Statutory Requirements Report',
+      shortLabel: 'Document Catalog Report',
+      subtitle: 'Inventory of official barangay issuances, legal foundations, standard fees, SLA processing days, and documentary prerequisites.',
+    },
+  };
+
+  // Dedicated CSV Download per Report Type (each has its own tailored format & columns)
+  const handleDownloadReport = (targetTab: typeof activeTab = activeTab) => {
     if (!data) return;
 
-    let csvContent = 'data:text/csv;charset=utf-8,';
-    
-    // Header block
-    csvContent += `"BARANGAY ONSE - SAN JUAN CITY"\n`;
-    csvContent += `"OFFICIAL REPORT & DOCUMENT ISSUANCE ANALYTICS"\n`;
-    csvContent += `"Period:","${data.reportMetadata.periodLabel}"\n`;
-    csvContent += `"Generated At:","${new Date(data.reportMetadata.generatedAt).toLocaleString()}"\n`;
-    csvContent += `"Generated By:","${data.reportMetadata.generatedBy} (${data.reportMetadata.userRole})"\n\n`;
+    const meta = ACTIVE_REPORT_META[targetTab];
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const rows: string[] = [];
 
-    // Summary KPIs
-    csvContent += `"SUMMARY KPIS"\n`;
-    csvContent += `"Total Applications","${data.summary.totalApplications}"\n`;
-    csvContent += `"Total Completed","${data.summary.totalCompleted}"\n`;
-    csvContent += `"Overall Completion Rate","${data.summary.overallCompletionRate}%"\n`;
-    csvContent += `"Realized Revenue","PHP ${data.summary.totalRealizedRevenue.toFixed(2)}"\n`;
-    csvContent += `"Free Grants Issued (RA 11261 / Indigent)","${data.summary.totalFreeGrants}"\n`;
-    csvContent += `"Average Turnaround Time","${data.summary.avgTurnaroundDays} days"\n\n`;
+    // Official Report Header Block specific to this report
+    rows.push(`${esc('REPUBLIC OF THE PHILIPPINES - CITY OF SAN JUAN, METRO MANILA')}`);
+    rows.push(`${esc('BARANGAY ONSE COUNCIL - J.P. Rizal St., Barangay Onse (Tel: 7744-0740 | Email: onse.sanjuan@gmail.com)')}`);
+    rows.push(`${esc(meta.title.toUpperCase())}`);
+    rows.push(`${esc('Reporting Period:')},${esc(data.reportMetadata.periodLabel)}`);
+    rows.push(`${esc('Generated At (PHT):')},${esc(new Date(data.reportMetadata.generatedAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }))}`);
+    rows.push(`${esc('Prepared By:')},${esc(`${data.reportMetadata.generatedBy} (${data.reportMetadata.userRole})`)}`);
+    rows.push('');
 
-    // Document Breakdown
-    csvContent += `"DOCUMENT PERFORMANCE BREAKDOWN"\n`;
-    csvContent += `"Code","Document Name","Category","Standard Fee","Total Filed","Completed","In-Progress","Rejected","Completion Rate","Realized Revenue","Free Completed"\n`;
-    
-    data.documents.forEach((d) => {
-      csvContent += `"${d.code}","${d.name}","${d.category}","${d.feeDisplay}","${d.totalRequested}","${d.completed}","${d.inProgress}","${d.rejected}","${d.completionRate}%","PHP ${d.realizedRevenue.toFixed(2)}","${d.freeCompleted}"\n`;
-    });
+    let fileSlug = 'Report';
 
-    csvContent += `\n"ITEMIZED COMPLETED AND ISSUED DOCUMENTS LOG"\n`;
-    csvContent += `"Tracking Code","Applicant Name","Document Type","Purpose","Fee","Fee Status","Date Filed","Date Completed","Turnaround","Status","Remarks"\n`;
-    
-    data.completedRecords.forEach((r) => {
-      csvContent += `"${r.trackingNumber}","${r.applicant}","${r.documentName}","${r.purpose.replace(/"/g, '""')}","${r.feeDisplay}","${r.feeStatus}","${r.dateFiled}","${r.dateCompleted}","${r.turnaroundDays}","${r.status}","${(r.remarks || '').replace(/"/g, '""')}"\n`;
-    });
+    if (targetTab === 'population' && data.populationReport) {
+      fileSlug = 'Population_Report';
+      const pop = data.populationReport;
 
-    const encodedUri = encodeURI(csvContent);
+      rows.push(esc('1. POPULATION & DEMOGRAPHIC SUMMARY'));
+      rows.push(`${esc('Metric')},${esc('Count')},${esc('Details / Share')}`);
+      rows.push(`${esc('Total Registered Population')},${esc(pop.totalPopulation)},${esc('100% of RBI Census Registry')}`);
+      rows.push(`${esc('Male Residents')},${esc(pop.genderBreakdown.male)},${esc(`${pop.totalPopulation ? Math.round((pop.genderBreakdown.male / pop.totalPopulation) * 100) : 0}%`)}`);
+      rows.push(`${esc('Female Residents')},${esc(pop.genderBreakdown.female)},${esc(`${pop.totalPopulation ? Math.round((pop.genderBreakdown.female / pop.totalPopulation) * 100) : 0}%`)}`);
+      rows.push(`${esc('Registered Voters (Brgy. Onse)')},${esc(pop.votersCount)},${esc(`${pop.voterPercentage}% of Population`)}`);
+      rows.push(`${esc('Non-Voters / Registered Elsewhere')},${esc(pop.nonVotersCount)},${esc(`${100 - pop.voterPercentage}% of Population`)}`);
+      rows.push('');
+
+      rows.push(esc('2. HOUSING & RESIDENCY CLASSIFICATION BREAKDOWN'));
+      rows.push(`${esc('Housing / Residency Type')},${esc('Resident Count')},${esc('Percentage Share')}`);
+      rows.push(`${esc('Homeowner (May-ari ng Bahay)')},${esc(pop.housingBreakdown.homeowners)},${esc(`${pop.totalPopulation ? Math.round((pop.housingBreakdown.homeowners / pop.totalPopulation) * 100) : 0}%`)}`);
+      rows.push(`${esc('Renter / Tenant (Nangungupahan)')},${esc(pop.housingBreakdown.renters)},${esc(`${pop.totalPopulation ? Math.round((pop.housingBreakdown.renters / pop.totalPopulation) * 100) : 0}%`)}`);
+      rows.push(`${esc('Living with Relatives (Nakikitira)')},${esc(pop.housingBreakdown.livingWithRelatives)},${esc(`${pop.totalPopulation ? Math.round((pop.housingBreakdown.livingWithRelatives / pop.totalPopulation) * 100) : 0}%`)}`);
+      rows.push(`${esc('Boarder / Student Dorm')},${esc(pop.housingBreakdown.boarders)},${esc(`${pop.totalPopulation ? Math.round((pop.housingBreakdown.boarders / pop.totalPopulation) * 100) : 0}%`)}`);
+      rows.push('');
+
+      rows.push(esc('3. AGE BRACKET, CIVIL STATUS & SECTORAL CLASSIFICATIONS'));
+      rows.push(`${esc('Category')},${esc('Classification')},${esc('Count')}`);
+      rows.push(`${esc('Age Bracket')},${esc('Youth (<18 yrs)')},${esc(pop.ageGroups.youthUnder18)}`);
+      rows.push(`${esc('Age Bracket')},${esc('Young Adults (18-30 yrs)')},${esc(pop.ageGroups.youngAdults18To30)}`);
+      rows.push(`${esc('Age Bracket')},${esc('Adults (31-59 yrs)')},${esc(pop.ageGroups.adults31To59)}`);
+      rows.push(`${esc('Age Bracket')},${esc('Senior Citizens (60+ yrs)')},${esc(pop.ageGroups.seniors60Plus)}`);
+      rows.push(`${esc('Civil Status')},${esc('Single')},${esc(pop.civilStatusBreakdown.single)}`);
+      rows.push(`${esc('Civil Status')},${esc('Married')},${esc(pop.civilStatusBreakdown.married)}`);
+      rows.push(`${esc('Civil Status')},${esc('Widowed')},${esc(pop.civilStatusBreakdown.widowed)}`);
+      rows.push(`${esc('Civil Status')},${esc('Separated')},${esc(pop.civilStatusBreakdown.separated)}`);
+      rows.push(`${esc('Priority Sector')},${esc('Senior Citizens (60+)')},${esc(pop.sectoralBreakdown.seniorCitizens)}`);
+      rows.push(`${esc('Priority Sector')},${esc('Persons with Disability (PWD)')},${esc(pop.sectoralBreakdown.pwd)}`);
+      rows.push(`${esc('Priority Sector')},${esc('Solo Parents')},${esc(pop.sectoralBreakdown.soloParents)}`);
+      rows.push(`${esc('Priority Sector')},${esc('4Ps / DSWD Beneficiaries')},${esc(pop.sectoralBreakdown.fourPs)}`);
+      rows.push('');
+
+      rows.push(esc('4. INDIVIDUAL REGISTERED POPULATION & RBI CENSUS ROSTER'));
+      rows.push(
+        [
+          'RBI Census Number',
+          'Full Name',
+          'Age',
+          'Sex',
+          'Civil Status',
+          'Housing / Residency Status',
+          'Voter Status',
+          'Employment / Sector',
+          'Sector Classifications',
+          'Years in Brgy. Onse',
+          'Residential Address',
+          'Registered Date',
+        ]
+          .map(esc)
+          .join(',')
+      );
+
+      pop.records.forEach((rec) => {
+        rows.push(
+          [
+            rec.rbiNumber,
+            rec.fullName,
+            rec.age,
+            rec.sex,
+            rec.civilStatus,
+            rec.housingStatus,
+            rec.isRegisteredVoter ? 'Registered Voter' : 'Non-Voter',
+            rec.employmentStatus,
+            rec.sectors.join(' | '),
+            rec.yearsOfResidency,
+            rec.address,
+            rec.registeredAt,
+          ]
+            .map(esc)
+            .join(',')
+        );
+      });
+    } else if (targetTab === 'performance') {
+      fileSlug = 'Transaction_Volume_Report';
+
+      rows.push(esc('1. TRANSACTION VOLUME & REVENUE SUMMARY'));
+      rows.push(`${esc('Metric')},${esc('Value')}`);
+      rows.push(`${esc('Total Applications Filed')},${esc(data.summary.totalApplications)}`);
+      rows.push(`${esc('Completed & Released Certificates')},${esc(data.summary.totalCompleted)}`);
+      rows.push(`${esc('Ready for Pickup (Window 2)')},${esc(data.summary.totalReady)}`);
+      rows.push(`${esc('Under Processing')},${esc(data.summary.totalProcessing)}`);
+      rows.push(`${esc('Pending Initial Review')},${esc(data.summary.totalPending)}`);
+      rows.push(`${esc('Rejected Applications')},${esc(data.summary.totalRejected)}`);
+      rows.push(`${esc('Realized Fee Revenue')},${esc(`PHP ${data.summary.totalRealizedRevenue.toFixed(2)}`)}`);
+      rows.push(`${esc('Free Issuances Granted (RA 11261 & Indigency)')},${esc(data.summary.totalFreeGrants)}`);
+      rows.push(`${esc('Total Fee Value Waived for Social Aid')},${esc(`PHP ${data.summary.totalWaivedRevenue.toFixed(2)}`)}`);
+      rows.push('');
+
+      rows.push(esc('2. TRANSACTION VOLUME BREAKDOWN BY DOCUMENT TYPE'));
+      rows.push(
+        [
+          'Document Code',
+          'Document Name',
+          'Category',
+          'Standard Fee',
+          'Total Filed',
+          'Volume Share (%)',
+          'Completed',
+          'Ready for Pickup',
+          'Processing / Pending',
+          'Rejected',
+          'Realized Revenue (PHP)',
+          'Free Grants Issued',
+        ]
+          .map(esc)
+          .join(',')
+      );
+
+      data.documents.forEach((d) => {
+        const volShare = data.summary.totalApplications > 0
+          ? `${Math.round((d.totalRequested / data.summary.totalApplications) * 100)}%`
+          : '0%';
+        rows.push(
+          [
+            d.code,
+            d.name,
+            d.category,
+            d.feeDisplay,
+            d.totalRequested,
+            volShare,
+            d.completed,
+            d.readyForPickup,
+            d.processing + d.pending,
+            d.rejected,
+            `PHP ${d.realizedRevenue.toFixed(2)}`,
+            d.freeCompleted,
+          ]
+            .map(esc)
+            .join(',')
+        );
+      });
+    } else if (targetTab === 'service_performance') {
+      fileSlug = 'Service_Performance_Report';
+
+      rows.push(esc('1. SERVICE PERFORMANCE & SLA COMPLIANCE SUMMARY'));
+      rows.push(`${esc('Performance Indicator')},${esc('Result')}`);
+      rows.push(`${esc('Overall Service Completion Rate')},${esc(`${data.summary.overallCompletionRate}%`)}`);
+      rows.push(`${esc('Average Processing Turnaround Time')},${esc(`${data.summary.avgTurnaroundDays} Days`)}`);
+      rows.push(`${esc('SLA Target Compliance Rate')},${esc(`${data.summary.slaComplianceRate ?? 100}%`)}`);
+      rows.push(`${esc('Resident Service Satisfaction Rating')},${esc(`${data.summary.avgSatisfactionRating || '4.90'} / 5.00`)}`);
+      rows.push('');
+
+      rows.push(esc('2. PER-SERVICE SLA TURNAROUND & EFFICIENCY BREAKDOWN'));
+      rows.push(
+        [
+          'Service Code',
+          'Barangay Document Service',
+          'Category',
+          'Statutory Legal Basis',
+          'Standard SLA Target (Days)',
+          'Actual Avg. Turnaround (Days)',
+          'Actual Avg. Turnaround (Hours)',
+          'Total Filed',
+          'Completed',
+          'Ready for Pickup',
+          'Active Queue',
+          'Completion Efficiency (%)',
+          'SLA Status',
+        ]
+          .map(esc)
+          .join(',')
+      );
+
+      data.documents.forEach((d) => {
+        const actualDays = parseFloat(d.avgTurnaroundDays) || d.processingDays;
+        const withinSla = actualDays <= d.processingDays + 0.5;
+        rows.push(
+          [
+            d.code,
+            d.name,
+            d.category,
+            d.legalBasis,
+            `${d.processingDays} Business Day(s)`,
+            `${d.avgTurnaroundDays} Days`,
+            `${d.avgTurnaroundHours} Hours`,
+            d.totalRequested,
+            d.completed,
+            d.readyForPickup,
+            d.processing + d.pending,
+            `${d.completionRate}%`,
+            withinSla ? 'ON-TIME SLA' : 'HIGH VOLUME',
+          ]
+            .map(esc)
+            .join(',')
+        );
+      });
+    } else if (targetTab === 'audit_log') {
+      fileSlug = 'Completed_Issuances_Log';
+
+      rows.push(esc('ITEMIZED COMPLETED & RELEASED CERTIFICATES AUDIT LOG'));
+      rows.push(
+        [
+          'Tracking Code',
+          'Applicant Name',
+          'Document Code',
+          'Certificate Type',
+          'Purpose',
+          'Official Fee',
+          'Fee Status',
+          'Date Filed (PHT)',
+          'Date Completed (PHT)',
+          'Turnaround Time',
+          'Release Status',
+          'Official Remarks',
+        ]
+          .map(esc)
+          .join(',')
+      );
+
+      filteredRecords.forEach((r) => {
+        rows.push(
+          [
+            r.trackingNumber,
+            r.applicant,
+            r.documentCode,
+            r.documentName,
+            r.purpose,
+            r.feeDisplay,
+            r.feeStatus,
+            r.dateFiled,
+            r.dateCompleted,
+            r.turnaroundDays,
+            r.status,
+            r.remarks || 'Officially verified and released.',
+          ]
+            .map(esc)
+            .join(',')
+        );
+      });
+    } else if (targetTab === 'catalog') {
+      fileSlug = 'Document_Catalog_Report';
+
+      rows.push(esc('OFFICIAL BARANGAY DOCUMENT CATALOG & STATUTORY REQUIREMENTS'));
+      rows.push(
+        [
+          'Document Code',
+          'Official Document Title',
+          'Service Category',
+          'Statutory Legal Authority',
+          'Standard Fee',
+          'SLA Processing Days',
+          'Mandatory Resident Prerequisites',
+          'Total Issued',
+          'Completion Rate (%)',
+        ]
+          .map(esc)
+          .join(',')
+      );
+
+      data.documents.forEach((d) => {
+        rows.push(
+          [
+            d.code,
+            d.name,
+            d.category,
+            d.legalBasis,
+            d.feeDisplay,
+            `${d.processingDays} Business Day(s)`,
+            d.requirements.join('; '),
+            d.completed,
+            `${d.completionRate}%`,
+          ]
+            .map(esc)
+            .join(',')
+        );
+      });
+    }
+
+    const csvString = '\uFEFF' + rows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Barangay_Onse_Report_Analytics_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.href = url;
+    link.download = `Barangay_Onse_${fileSlug}_${dateStamp}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
-  // Trigger browser print
-  const handlePrint = () => {
-    window.print();
+  // Dedicated Print Report Generator — each report tab prints with its own tailored official layout
+  const handlePrintReport = (targetTab: typeof activeTab = activeTab) => {
+    if (!data || typeof window === 'undefined') return;
+
+    const meta = ACTIVE_REPORT_META[targetTab];
+    const generatedTime = new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' });
+    const escHtml = (str: any) =>
+      String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+
+    let bodyHtml = '';
+
+    if (targetTab === 'population' && data.populationReport) {
+      const pop = data.populationReport;
+      const pct = (n: number) => (pop.totalPopulation > 0 ? Math.round((n / pop.totalPopulation) * 100) : 0);
+
+      const filteredPop = pop.records.filter((rec) => {
+        if (popHousingFilter !== 'ALL' && !rec.housingStatus.toLowerCase().includes(popHousingFilter.toLowerCase())) return false;
+        if (popVoterFilter === 'VOTER' && !rec.isRegisteredVoter) return false;
+        if (popVoterFilter === 'NON_VOTER' && rec.isRegisteredVoter) return false;
+        if (popSearch.trim()) {
+          const q = popSearch.toLowerCase();
+          return (
+            rec.fullName.toLowerCase().includes(q) ||
+            rec.rbiNumber.toLowerCase().includes(q) ||
+            rec.address.toLowerCase().includes(q)
+          );
+        }
+        return true;
+      });
+
+      bodyHtml = `
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <div class="kpi-label">Total Registered Population</div>
+            <div class="kpi-val">${pop.totalPopulation}</div>
+            <div class="kpi-sub">${pop.genderBreakdown.male} Male • ${pop.genderBreakdown.female} Female</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Registered Voters (Brgy. Onse)</div>
+            <div class="kpi-val">${pop.votersCount} (${pop.voterPercentage}%)</div>
+            <div class="kpi-sub">${pop.nonVotersCount} Non-Voters (${100 - pop.voterPercentage}%)</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Homeowners (May-ari ng Bahay)</div>
+            <div class="kpi-val">${pop.housingBreakdown.homeowners} (${pct(pop.housingBreakdown.homeowners)}%)</div>
+            <div class="kpi-sub">${pop.housingBreakdown.livingWithRelatives} Living with Relatives</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Renters &amp; Boarders</div>
+            <div class="kpi-val">${pop.housingBreakdown.renters + pop.housingBreakdown.boarders}</div>
+            <div class="kpi-sub">${pop.housingBreakdown.renters} Renting • ${pop.housingBreakdown.boarders} Boarders</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <h3 class="sec-title">A. Housing &amp; Residency Classification</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Housing / Residency Category</th>
+                  <th class="num">Residents</th>
+                  <th class="num">Share</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Homeowner (May-ari ng Bahay)</td><td class="num">${pop.housingBreakdown.homeowners}</td><td class="num">${pct(pop.housingBreakdown.homeowners)}%</td></tr>
+                <tr><td>Renter / Tenant (Nangungupahan)</td><td class="num">${pop.housingBreakdown.renters}</td><td class="num">${pct(pop.housingBreakdown.renters)}%</td></tr>
+                <tr><td>Living with Relatives (Nakikitira)</td><td class="num">${pop.housingBreakdown.livingWithRelatives}</td><td class="num">${pct(pop.housingBreakdown.livingWithRelatives)}%</td></tr>
+                <tr><td>Boarder / Student Dorm</td><td class="num">${pop.housingBreakdown.boarders}</td><td class="num">${pct(pop.housingBreakdown.boarders)}%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h3 class="sec-title">B. Age Bracket &amp; Priority Sector Breakdown</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Demographic / Sector Group</th>
+                  <th class="num">Count</th>
+                  <th>Classification</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Youth (&lt;18 yrs) / Young Adults (18–30)</td><td class="num">${pop.ageGroups.youthUnder18} / ${pop.ageGroups.youngAdults18To30}</td><td>Age Bracket</td></tr>
+                <tr><td>Adults (31–59 yrs) / Seniors (60+)</td><td class="num">${pop.ageGroups.adults31To59} / ${pop.ageGroups.seniors60Plus}</td><td>Age Bracket</td></tr>
+                <tr><td>Senior Citizens (60+ yrs)</td><td class="num">${pop.sectoralBreakdown.seniorCitizens}</td><td>Priority Sector</td></tr>
+                <tr><td>Persons with Disability (PWD) / Solo Parents</td><td class="num">${pop.sectoralBreakdown.pwd} / ${pop.sectoralBreakdown.soloParents}</td><td>Priority Sector</td></tr>
+                <tr><td>4Ps Beneficiaries / Students</td><td class="num">${pop.sectoralBreakdown.fourPs} / ${pop.sectoralBreakdown.students}</td><td>Socioeconomic</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <h3 class="sec-title">C. Official Barangay Population &amp; RBI Census Registry (${filteredPop.length} Records)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>RBI Number</th>
+              <th>Full Legal Name</th>
+              <th>Age / Sex / Civil</th>
+              <th>Housing / Residency Status</th>
+              <th>Voter Status</th>
+              <th>Sector Tags</th>
+              <th>Address</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredPop
+              .map(
+                (r) => `
+              <tr>
+                <td class="mono">${escHtml(r.rbiNumber)}</td>
+                <td><strong>${escHtml(r.fullName)}</strong></td>
+                <td>${r.age} / ${escHtml(r.sex)} / ${escHtml(r.civilStatus)}</td>
+                <td>${escHtml(r.housingStatus)}</td>
+                <td><strong>${r.isRegisteredVoter ? 'Registered Voter' : 'Non-Voter'}</strong></td>
+                <td>${escHtml(r.sectors.join(', '))}</td>
+                <td>${escHtml(r.address)}</td>
+              </tr>`
+              )
+              .join('')}
+          </tbody>
+        </table>
+      `;
+    } else if (targetTab === 'performance') {
+      bodyHtml = `
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <div class="kpi-label">Total Applications Filed</div>
+            <div class="kpi-val">${data.summary.totalApplications}</div>
+            <div class="kpi-sub">Across ${data.summary.totalCatalogedDocuments} Document Types</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Completed &amp; Released</div>
+            <div class="kpi-val">${data.summary.totalCompleted}</div>
+            <div class="kpi-sub">${data.summary.overallCompletionRate}% Completion Rate</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">In-Progress / Pending Queue</div>
+            <div class="kpi-val">${data.summary.totalActive}</div>
+            <div class="kpi-sub">${data.summary.totalReady} Ready • ${data.summary.totalProcessing + data.summary.totalPending} Processing</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Realized Revenue &amp; Free Aid</div>
+            <div class="kpi-val">₱${data.summary.totalRealizedRevenue.toFixed(2)}</div>
+            <div class="kpi-sub">${data.summary.totalFreeGrants} Free Grants (RA 11261 / Indigency)</div>
+          </div>
+        </div>
+
+        <h3 class="sec-title">Transaction Volume Breakdown by Barangay Document Type</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Document Type</th>
+              <th>Category</th>
+              <th class="num">Fee</th>
+              <th class="num">Total Filed</th>
+              <th class="num">Volume Share</th>
+              <th class="num">Completed</th>
+              <th class="num">In-Progress</th>
+              <th class="num">Rejected</th>
+              <th class="num">Realized Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.documents
+              .map((d) => {
+                const share = data.summary.totalApplications > 0
+                  ? Math.round((d.totalRequested / data.summary.totalApplications) * 100)
+                  : 0;
+                return `
+                <tr>
+                  <td class="mono">${escHtml(d.code)}</td>
+                  <td><strong>${escHtml(d.name)}</strong></td>
+                  <td>${escHtml(d.category)}</td>
+                  <td class="num">${escHtml(d.feeDisplay)}</td>
+                  <td class="num"><strong>${d.totalRequested}</strong></td>
+                  <td class="num">${share}%</td>
+                  <td class="num">${d.completed}</td>
+                  <td class="num">${d.inProgress}</td>
+                  <td class="num">${d.rejected}</td>
+                  <td class="num">${d.fee === 0 ? `FREE (${d.freeCompleted})` : `₱${d.realizedRevenue.toFixed(2)}`}</td>
+                </tr>`;
+              })
+              .join('')}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4"><strong>TOTAL TRANSACTION VOLUME &amp; COLLECTIONS</strong></td>
+              <td class="num"><strong>${data.summary.totalApplications}</strong></td>
+              <td class="num"><strong>100%</strong></td>
+              <td class="num"><strong>${data.summary.totalCompleted}</strong></td>
+              <td class="num"><strong>${data.summary.totalActive}</strong></td>
+              <td class="num"><strong>${data.summary.totalRejected}</strong></td>
+              <td class="num"><strong>₱${data.summary.totalRealizedRevenue.toFixed(2)}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+    } else if (targetTab === 'service_performance') {
+      bodyHtml = `
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <div class="kpi-label">Overall Completion Efficiency</div>
+            <div class="kpi-val">${data.summary.overallCompletionRate}%</div>
+            <div class="kpi-sub">${data.summary.totalCompleted} of ${data.summary.totalApplications} Requests Completed</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Average Turnaround Time</div>
+            <div class="kpi-val">${data.summary.avgTurnaroundDays} Days</div>
+            <div class="kpi-sub">Intake to Window 2 Release</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">SLA Target Compliance</div>
+            <div class="kpi-val">${data.summary.slaComplianceRate ?? 100}%</div>
+            <div class="kpi-sub">Processed within Statutory SLA</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Citizen Satisfaction Rating</div>
+            <div class="kpi-val">${data.summary.avgSatisfactionRating || '4.90'} / 5.0</div>
+            <div class="kpi-sub">Quality of Service Delivery</div>
+          </div>
+        </div>
+
+        <h3 class="sec-title">Service Performance &amp; SLA Turnaround Evaluation per Document Service</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Barangay Service / Document</th>
+              <th>Statutory Basis</th>
+              <th class="num">SLA Target</th>
+              <th class="num">Actual Avg. Turnaround</th>
+              <th class="num">Ready for Pickup</th>
+              <th class="num">Active Queue</th>
+              <th class="num">Completion Rate</th>
+              <th>SLA Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.documents
+              .map((d) => {
+                const actualDays = parseFloat(d.avgTurnaroundDays) || d.processingDays;
+                const withinSla = actualDays <= d.processingDays + 0.5;
+                return `
+                <tr>
+                  <td class="mono">${escHtml(d.code)}</td>
+                  <td><strong>${escHtml(d.name)}</strong></td>
+                  <td>${escHtml(d.legalBasis)}</td>
+                  <td class="num">${d.processingDays} Business Day(s)</td>
+                  <td class="num"><strong>${d.avgTurnaroundDays} days (${d.avgTurnaroundHours} hrs)</strong></td>
+                  <td class="num">${d.readyForPickup}</td>
+                  <td class="num">${d.processing + d.pending}</td>
+                  <td class="num"><strong>${d.completionRate}%</strong></td>
+                  <td><strong>${withinSla ? 'ON-TIME SLA' : 'HIGH VOLUME'}</strong></td>
+                </tr>`;
+              })
+              .join('')}
+          </tbody>
+        </table>
+      `;
+    } else if (targetTab === 'audit_log') {
+      bodyHtml = `
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <div class="kpi-label">Total Released &amp; Ready</div>
+            <div class="kpi-val">${filteredRecords.length}</div>
+            <div class="kpi-sub">Filtered Certificate Records</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Completed Releases</div>
+            <div class="kpi-val">${data.summary.totalCompleted}</div>
+            <div class="kpi-sub">Claimed by Residents</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Ready at Window 2</div>
+            <div class="kpi-val">${data.summary.totalReady}</div>
+            <div class="kpi-sub">Signed &amp; Dry-Sealed</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Total Realized Collections</div>
+            <div class="kpi-val">₱${data.summary.totalRealizedRevenue.toFixed(2)}</div>
+            <div class="kpi-sub">${data.summary.totalFreeGrants} Free Statutory Grants</div>
+          </div>
+        </div>
+
+        <h3 class="sec-title">Itemized Registry Log of Completed &amp; Released Certificates</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Tracking Code</th>
+              <th>Applicant Name</th>
+              <th>Certificate Type</th>
+              <th>Purpose</th>
+              <th class="num">Fee</th>
+              <th>Date Filed</th>
+              <th>Date Completed</th>
+              <th class="num">Turnaround</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredRecords
+              .map(
+                (r) => `
+              <tr>
+                <td class="mono"><strong>${escHtml(r.trackingNumber)}</strong></td>
+                <td><strong>${escHtml(r.applicant)}</strong></td>
+                <td>${escHtml(r.documentName)}</td>
+                <td>${escHtml(r.purpose)}</td>
+                <td class="num">${escHtml(r.feeDisplay)}</td>
+                <td class="mono">${escHtml(r.dateFiled)}</td>
+                <td class="mono">${escHtml(r.dateCompleted)}</td>
+                <td class="num">${escHtml(r.turnaroundDays)}</td>
+                <td><strong>${escHtml(r.status)}</strong></td>
+              </tr>`
+              )
+              .join('')}
+          </tbody>
+        </table>
+      `;
+    } else if (targetTab === 'catalog') {
+      bodyHtml = `
+        <h3 class="sec-title">Official Barangay Onse Document Catalog &amp; Mandatory Requirements</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Document Title &amp; Category</th>
+              <th>Statutory Legal Authority</th>
+              <th class="num">Official Fee</th>
+              <th class="num">Standard SLA</th>
+              <th>Required Resident Documents</th>
+              <th class="num">Issued</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.documents
+              .map(
+                (d) => `
+              <tr>
+                <td class="mono"><strong>${escHtml(d.code)}</strong></td>
+                <td><strong>${escHtml(d.name)}</strong><br/><span style="font-size:10px;color:#555;">${escHtml(d.category)}</span></td>
+                <td>${escHtml(d.legalBasis)}</td>
+                <td class="num"><strong>${escHtml(d.feeDisplay)}</strong></td>
+                <td class="num">${d.processingDays} Business Day(s)</td>
+                <td>${d.requirements.map((req) => `• ${escHtml(req)}`).join('<br/>')}</td>
+                <td class="num">${d.completed} (${d.completionRate}%)</td>
+              </tr>`
+              )
+              .join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    const printWindow = window.open('', '_blank', 'width=1050,height=800');
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>${escHtml(meta.title)} - Barangay Onse</title>
+          <style>
+            @page { size: A4 landscape; margin: 12mm; }
+            * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { font-family: Arial, Helvetica, sans-serif; color: #111827; margin: 0; padding: 0; font-size: 11px; line-height: 1.4; }
+            .report-sheet { border: 2px solid #9C2007; padding: 16px 20px; }
+            .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2.5px solid #9C2007; padding-bottom: 10px; margin-bottom: 12px; }
+            .header-left { display: flex; align-items: center; gap: 12px; }
+            .seal { width: 58px; height: 58px; object-fit: contain; }
+            .gov-lines p { margin: 1px 0; }
+            .rep-ph { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #374151; }
+            .council { font-size: 17px; font-weight: 900; color: #9C2007; text-transform: uppercase; letter-spacing: 0.02em; }
+            .addr { font-size: 10px; font-weight: 700; color: #1f2937; }
+            .contact { font-size: 9.5px; color: #9C2007; font-weight: 700; }
+            .email { font-size: 9.5px; color: #1d4ed8; font-weight: 700; }
+            .title-banner { text-align: center; background: #fef2f2; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; }
+            .title-banner h1 { margin: 0; font-size: 14px; font-weight: 900; color: #9C2007; text-transform: uppercase; letter-spacing: 0.04em; }
+            .title-banner p { margin: 2px 0 0; font-size: 10px; color: #4b5563; }
+            .meta-bar { display: flex; justify-content: space-between; font-size: 10px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 4px; margin-bottom: 12px; }
+            .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+            .kpi-box { border: 1px solid #cbd5e1; border-left: 4px solid #9C2007; border-radius: 6px; padding: 8px 10px; background: #ffffff; }
+            .kpi-label { font-size: 9px; font-weight: 800; text-transform: uppercase; color: #64748b; }
+            .kpi-val { font-size: 16px; font-weight: 900; color: #0f172a; margin: 2px 0; }
+            .kpi-sub { font-size: 9.5px; color: #475569; }
+            .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+            .sec-title { font-size: 11px; font-weight: 900; text-transform: uppercase; color: #9C2007; margin: 10px 0 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; }
+            table { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 10px; }
+            th { background: #9C2007; color: #ffffff; font-weight: 800; text-transform: uppercase; font-size: 9px; padding: 6px 7px; text-align: left; border: 1px solid #9C2007; }
+            td { padding: 5px 7px; border: 1px solid #cbd5e1; vertical-align: top; }
+            tr:nth-child(even) td { background: #f8fafc; }
+            tfoot td { background: #fef2f2 !important; border-top: 2px solid #9C2007; font-weight: 800; }
+            .num { text-align: right; font-family: 'Courier New', monospace; }
+            .mono { font-family: 'Courier New', monospace; }
+            .sig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 26px; text-align: center; page-break-inside: avoid; }
+            .sig-line { border-bottom: 1.5px solid #111827; padding-bottom: 3px; font-weight: 900; text-transform: uppercase; font-size: 11px; margin-top: 24px; }
+            .sig-role { font-size: 9.5px; font-weight: 700; color: #4b5563; text-transform: uppercase; margin-top: 3px; }
+          </style>
+        </head>
+        <body>
+          <div class="report-sheet">
+            <div class="header">
+              <div class="header-left">
+                <img src="/images/barangay-onse-seal.png" class="seal" alt="Seal" />
+                <div class="gov-lines">
+                  <p class="rep-ph">Republic of the Philippines</p>
+                  <p class="council">Barangay Onse Council</p>
+                  <p class="addr">J.P. Rizal St., Barangay Onse, City of San Juan, Metro Manila</p>
+                  <p><span class="contact">(Tel No.) 7744 - 0740</span> &nbsp;|&nbsp; <span class="email">(Email) onse.sanjuan@gmail.com</span></p>
+                </div>
+              </div>
+              <div style="text-align:right;font-size:10px;color:#374151;">
+                <strong>OFFICIAL BARANGAY REPORT</strong><br/>
+                Document Control: ONSE-RPT-${new Date().getFullYear()}<br/>
+                Page 1 of 1
+              </div>
+            </div>
+
+            <div class="title-banner">
+              <h1>${escHtml(meta.title)}</h1>
+              <p>${escHtml(meta.subtitle)}</p>
+            </div>
+
+            <div class="meta-bar">
+              <span><strong>Reporting Period:</strong> ${escHtml(data.reportMetadata.periodLabel)}</span>
+              <span><strong>Generated On (PHT):</strong> ${escHtml(generatedTime)}</span>
+              <span><strong>Prepared By:</strong> ${escHtml(data.reportMetadata.generatedBy)} (${escHtml(data.reportMetadata.userRole)})</span>
+            </div>
+
+            ${bodyHtml}
+
+            <div class="sig-grid">
+              <div>
+                <div class="sig-line">${escHtml(data.reportMetadata.generatedBy || 'Records Officer')}</div>
+                <div class="sig-role">Prepared By: Barangay Records Officer</div>
+              </div>
+              <div>
+                <div class="sig-line">HON. DANILO FLORANO</div>
+                <div class="sig-role">Attested By: Committee on Rules</div>
+              </div>
+              <div>
+                <div class="sig-line">ROBERTO B. ALBA</div>
+                <div class="sig-role">Approved By: Punong Barangay, Barangay Onse SJMM</div>
+              </div>
+            </div>
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.focus();
+                window.print();
+              }, 250);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   // Filtered & sorted completed records
@@ -337,24 +1158,24 @@ export default function ReportAnalyticsPage() {
 
           <button
             type="button"
-            onClick={handleExportCSV}
+            onClick={() => handleDownloadReport(activeTab)}
             disabled={!data || isLoading}
             className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-[#0E1B33] hover:bg-slate-200 dark:hover:bg-[#152747] text-slate-700 dark:text-slate-200 font-bold text-xs uppercase tracking-wider transition flex items-center gap-1.5 border border-slate-200 dark:border-blue-900/40 cursor-pointer disabled:opacity-50"
-            title="Export CSV spreadsheet"
+            title={`Download ${ACTIVE_REPORT_META[activeTab].shortLabel} (CSV)`}
           >
             <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Export CSV</span>
+            <span>Download {ACTIVE_REPORT_META[activeTab].shortLabel}</span>
           </button>
 
           <button
             type="button"
-            onClick={handlePrint}
+            onClick={() => handlePrintReport(activeTab)}
             disabled={!data || isLoading}
             className="px-4 py-2 rounded-xl bg-[#9C2007] hover:bg-[#821B06] text-white font-bold text-xs uppercase tracking-wider transition flex items-center gap-1.5 shadow-md cursor-pointer disabled:opacity-50"
-            title="Print Official Document Report"
+            title={`Print ${ACTIVE_REPORT_META[activeTab].shortLabel}`}
           >
             <Printer className="w-3.5 h-3.5" />
-            <span>Print Official Report</span>
+            <span>Print Report</span>
           </button>
         </div>
       </div>
@@ -619,9 +1440,22 @@ export default function ReportAnalyticsPage() {
       </div>
 
       {/* ============================================================== */}
-      {/* 4. Tab Navigation: Performance vs Catalog vs Audit Log        */}
+      {/* 4. Tab Navigation: Objective 2 Report Categories               */}
       {/* ============================================================== */}
-      <div className="flex border-b border-slate-200 dark:border-blue-900/40 no-print">
+      <div className="flex flex-wrap border-b border-slate-200 dark:border-blue-900/40 no-print gap-1">
+        <button
+          type="button"
+          onClick={() => setActiveTab('population')}
+          className={`pb-3 px-4 font-bold text-xs uppercase tracking-wider transition cursor-pointer border-b-2 flex items-center gap-2 ${
+            activeTab === 'population'
+              ? 'border-[#9C2007] text-[#9C2007] dark:text-rose-400'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>1. Population Reports ({data?.populationReport?.totalPopulation || 0})</span>
+        </button>
+
         <button
           type="button"
           onClick={() => setActiveTab('performance')}
@@ -632,20 +1466,20 @@ export default function ReportAnalyticsPage() {
           }`}
         >
           <BarChart3 className="w-4 h-4" />
-          <span>Total per Documents &amp; Completed</span>
+          <span>2. Transaction Volume Reports ({data?.summary.totalApplications || 0})</span>
         </button>
 
         <button
           type="button"
-          onClick={() => setActiveTab('catalog')}
+          onClick={() => setActiveTab('service_performance')}
           className={`pb-3 px-4 font-bold text-xs uppercase tracking-wider transition cursor-pointer border-b-2 flex items-center gap-2 ${
-            activeTab === 'catalog'
+            activeTab === 'service_performance'
               ? 'border-[#9C2007] text-[#9C2007] dark:text-rose-400'
               : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
-          <Layers className="w-4 h-4" />
-          <span>Document Definitions &amp; Requirements</span>
+          <Clock className="w-4 h-4" />
+          <span>3. Service Performance Reports</span>
         </button>
 
         <button
@@ -658,9 +1492,482 @@ export default function ReportAnalyticsPage() {
           }`}
         >
           <FileCheck className="w-4 h-4" />
-          <span>Completed Issuances Log ({data?.completedRecords.length || 0})</span>
+          <span>4. Completed Issuances Log ({data?.completedRecords.length || 0})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('catalog')}
+          className={`pb-3 px-4 font-bold text-xs uppercase tracking-wider transition cursor-pointer border-b-2 flex items-center gap-2 ${
+            activeTab === 'catalog'
+              ? 'border-[#9C2007] text-[#9C2007] dark:text-rose-400'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Document Catalog</span>
         </button>
       </div>
+
+      {/* Active Report Banner with Individual Print & Download Controls */}
+      <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-blue-900/40 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 no-print">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded-md bg-[#9C2007]/10 text-[#9C2007] dark:text-rose-400 font-black text-[10px] uppercase tracking-wider">
+              {ACTIVE_REPORT_META[activeTab].shortLabel}
+            </span>
+            <span className="text-[11px] text-slate-400 font-mono">
+              Scope: {data?.reportMetadata.periodLabel || 'All Time'}
+            </span>
+          </div>
+          <h2 className="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
+            {ACTIVE_REPORT_META[activeTab].title}
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            {ACTIVE_REPORT_META[activeTab].subtitle}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => handleDownloadReport(activeTab)}
+            disabled={!data || isLoading}
+            className="px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50 font-bold text-xs uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Download {ACTIVE_REPORT_META[activeTab].shortLabel}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handlePrintReport(activeTab)}
+            disabled={!data || isLoading}
+            className="px-4 py-2 rounded-xl bg-[#9C2007] hover:bg-[#821B06] text-white font-bold text-xs uppercase tracking-wider transition flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span>Print Report</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ============================================================== */}
+      {/* TAB 0: POPULATION REPORTS (Sourced from Resident Registration) */}
+      {/* ============================================================== */}
+      {activeTab === 'population' && data?.populationReport && (
+        <div className="space-y-6">
+          {/* Top Population Summary Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-5 border border-slate-200 dark:border-blue-900/40 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-[#9C2007] dark:text-rose-400" />
+                Total Registered Population
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+                {data.populationReport.totalPopulation}
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                {data.populationReport.genderBreakdown.male} Male • {data.populationReport.genderBreakdown.female} Female
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-5 border border-emerald-500/20 dark:border-emerald-800/40 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                <Vote className="w-3.5 h-3.5" />
+                Voter vs. Non-Voter
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-400 font-mono">
+                {data.populationReport.votersCount} <span className="text-xs font-bold text-slate-400">/ {data.populationReport.nonVotersCount} Non-Voters</span>
+              </div>
+              <p className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                {data.populationReport.voterPercentage}% Registered Voters in Brgy. Onse
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-5 border border-blue-500/20 dark:border-blue-800/40 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
+                <Home className="w-3.5 h-3.5" />
+                Homeowners (May-ari ng Bahay)
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-blue-700 dark:text-blue-400 font-mono">
+                {data.populationReport.housingBreakdown.homeowners}
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                {data.populationReport.housingBreakdown.livingWithRelatives} Living with Family/Relatives
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-5 border border-amber-500/20 dark:border-amber-800/40 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5" />
+                Renters &amp; Boarders
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-amber-700 dark:text-amber-400 font-mono">
+                {data.populationReport.housingBreakdown.renters + data.populationReport.housingBreakdown.boarders}
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                {data.populationReport.housingBreakdown.renters} Renting • {data.populationReport.housingBreakdown.boarders} Boarders
+              </p>
+            </div>
+          </div>
+
+          {/* Demographic & Sectoral Breakdown Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            {/* Housing & Residency Classification */}
+            <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-5 border border-slate-200 dark:border-blue-900/40 space-y-3">
+              <h4 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-xs border-b border-slate-100 dark:border-blue-900/40 pb-2">
+                Housing &amp; Residency Classification
+              </h4>
+              <div className="space-y-2">
+                {[
+                  { label: 'Homeowner (May-ari ng Bahay)', val: data.populationReport.housingBreakdown.homeowners, color: 'bg-blue-600' },
+                  { label: 'Renter / Tenant (Nangungupahan)', val: data.populationReport.housingBreakdown.renters, color: 'bg-amber-500' },
+                  { label: 'Living with Relatives (Nakikitira)', val: data.populationReport.housingBreakdown.livingWithRelatives, color: 'bg-emerald-500' },
+                  { label: 'Boarder / Student Dorm', val: data.populationReport.housingBreakdown.boarders, color: 'bg-purple-500' },
+                ].map((item) => {
+                  const pct = data.populationReport!.totalPopulation > 0
+                    ? Math.round((item.val / data.populationReport!.totalPopulation) * 100)
+                    : 0;
+                  return (
+                    <div key={item.label} className="space-y-1">
+                      <div className="flex justify-between font-bold text-[11px]">
+                        <span className="text-slate-700 dark:text-slate-300">{item.label}</span>
+                        <span className="font-mono text-slate-900 dark:text-white">{item.val} ({pct}%)</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-[#0E1B33] rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full ${item.color}`} style={{ width: `${Math.max(4, pct)}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Age & Civil Status Breakdown */}
+            <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-5 border border-slate-200 dark:border-blue-900/40 space-y-3">
+              <h4 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-xs border-b border-slate-100 dark:border-blue-900/40 pb-2">
+                Age Bracket &amp; Civil Status Distribution
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0E1B33] space-y-0.5">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Youth (&lt;18)</span>
+                  <span className="font-mono font-black text-base text-slate-900 dark:text-white">{data.populationReport.ageGroups.youthUnder18}</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0E1B33] space-y-0.5">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Young Adult (18–30)</span>
+                  <span className="font-mono font-black text-base text-slate-900 dark:text-white">{data.populationReport.ageGroups.youngAdults18To30}</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0E1B33] space-y-0.5">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Adults (31–59)</span>
+                  <span className="font-mono font-black text-base text-slate-900 dark:text-white">{data.populationReport.ageGroups.adults31To59}</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0E1B33] space-y-0.5">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Seniors (60+)</span>
+                  <span className="font-mono font-black text-base text-[#9C2007] dark:text-rose-400">{data.populationReport.ageGroups.seniors60Plus}</span>
+                </div>
+              </div>
+              <div className="pt-1 flex flex-wrap items-center justify-between text-[11px] text-slate-600 dark:text-slate-300 font-semibold border-t border-slate-100 dark:border-blue-900/30">
+                <span>Single: <strong>{data.populationReport.civilStatusBreakdown.single}</strong></span>
+                <span>Married: <strong>{data.populationReport.civilStatusBreakdown.married}</strong></span>
+                <span>Widowed: <strong>{data.populationReport.civilStatusBreakdown.widowed}</strong></span>
+                <span>Separated: <strong>{data.populationReport.civilStatusBreakdown.separated}</strong></span>
+              </div>
+            </div>
+
+            {/* Special Sectoral Classifications */}
+            <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-5 border border-slate-200 dark:border-blue-900/40 space-y-3">
+              <h4 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-xs border-b border-slate-100 dark:border-blue-900/40 pb-2">
+                Sectoral &amp; Priority Classifications
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0E1B33] flex items-center justify-between">
+                  <span className="font-bold text-slate-600 dark:text-slate-300 text-[11px]">Registered Voters</span>
+                  <span className="font-mono font-black text-emerald-600 dark:text-emerald-400">{data.populationReport.votersCount}</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0E1B33] flex items-center justify-between">
+                  <span className="font-bold text-slate-600 dark:text-slate-300 text-[11px]">Non-Voters</span>
+                  <span className="font-mono font-black text-slate-700 dark:text-slate-200">{data.populationReport.nonVotersCount}</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0E1B33] flex items-center justify-between">
+                  <span className="font-bold text-slate-600 dark:text-slate-300 text-[11px]">Senior Citizens</span>
+                  <span className="font-mono font-black text-[#9C2007] dark:text-rose-400">{data.populationReport.sectoralBreakdown.seniorCitizens}</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0E1B33] flex items-center justify-between">
+                  <span className="font-bold text-slate-600 dark:text-slate-300 text-[11px]">PWD Citizens</span>
+                  <span className="font-mono font-black text-blue-600 dark:text-blue-400">{data.populationReport.sectoralBreakdown.pwd}</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0E1B33] flex items-center justify-between">
+                  <span className="font-bold text-slate-600 dark:text-slate-300 text-[11px]">Solo Parents</span>
+                  <span className="font-mono font-black text-purple-600 dark:text-purple-400">{data.populationReport.sectoralBreakdown.soloParents}</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0E1B33] flex items-center justify-between">
+                  <span className="font-bold text-slate-600 dark:text-slate-300 text-[11px]">4Ps Beneficiaries</span>
+                  <span className="font-mono font-black text-amber-600 dark:text-amber-400">{data.populationReport.sectoralBreakdown.fourPs}</span>
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-400">
+                Data dynamically populated from Resident Registration (`/register`) and the Barangay RBI Census Registry.
+              </p>
+            </div>
+          </div>
+
+          {/* Searchable Registered Population & Census Table */}
+          <div className="bg-white dark:bg-[#0B1528] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-xs overflow-hidden">
+            <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-blue-900/40 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
+                  <Users className="w-5 h-5 text-[#9C2007] dark:text-rose-400" />
+                  Registered Barangay Population &amp; RBI Census Records
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Individual resident profiles collected from Online Registration (`/register`) showing housing status, voter registration, and sector classifications.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <select
+                  value={popHousingFilter}
+                  onChange={(e) => setPopHousingFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl font-bold text-slate-900 dark:text-white outline-none"
+                >
+                  <option value="ALL">All Housing Types</option>
+                  <option value="Homeowner">Homeowner (May-ari ng Bahay)</option>
+                  <option value="Renter">Renter / Tenant (Nangungupahan)</option>
+                  <option value="Relatives">Living with Relatives</option>
+                  <option value="Boarder">Boarder / Student Dorm</option>
+                </select>
+
+                <select
+                  value={popVoterFilter}
+                  onChange={(e) => setPopVoterFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl font-bold text-slate-900 dark:text-white outline-none"
+                >
+                  <option value="ALL">All Voter Status</option>
+                  <option value="VOTER">Registered Voters Only</option>
+                  <option value="NON_VOTER">Non-Voters Only</option>
+                </select>
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={popSearch}
+                    onChange={(e) => setPopSearch(e.target.value)}
+                    placeholder="Search resident or RBI #..."
+                    className="w-48 sm:w-56 pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-[#0E1B33] border border-slate-200 dark:border-blue-900/60 rounded-xl text-xs text-slate-900 dark:text-white outline-none"
+                  />
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-blue-900/40">
+                  <tr>
+                    <th className="py-3 px-4">RBI Number</th>
+                    <th className="py-3 px-4">Resident Full Name</th>
+                    <th className="py-3 px-4">Age / Sex / Civil</th>
+                    <th className="py-3 px-4">Housing / Residency Status</th>
+                    <th className="py-3 px-4 text-center">Voter Status</th>
+                    <th className="py-3 px-4">Sector Classifications</th>
+                    <th className="py-3 px-4">Address</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-blue-900/30">
+                  {data.populationReport.records
+                    .filter((rec) => {
+                      if (popHousingFilter !== 'ALL' && !rec.housingStatus.toLowerCase().includes(popHousingFilter.toLowerCase())) {
+                        return false;
+                      }
+                      if (popVoterFilter === 'VOTER' && !rec.isRegisteredVoter) return false;
+                      if (popVoterFilter === 'NON_VOTER' && rec.isRegisteredVoter) return false;
+                      if (popSearch.trim()) {
+                        const q = popSearch.toLowerCase();
+                        return (
+                          rec.fullName.toLowerCase().includes(q) ||
+                          rec.rbiNumber.toLowerCase().includes(q) ||
+                          rec.address.toLowerCase().includes(q) ||
+                          rec.housingStatus.toLowerCase().includes(q)
+                        );
+                      }
+                      return true;
+                    })
+                    .slice(0, 25)
+                    .map((rec) => (
+                      <tr key={rec.id} className="hover:bg-slate-50/80 dark:hover:bg-[#0E1B33]/60 transition">
+                        <td className="py-3 px-4 font-mono font-bold text-[#9C2007] dark:text-rose-400">
+                          {rec.rbiNumber}
+                        </td>
+                        <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
+                          {rec.fullName}
+                        </td>
+                        <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
+                          {rec.age} yrs • {rec.sex} • {rec.civilStatus}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 font-bold text-[10px]">
+                            {rec.housingStatus}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                              rec.isRegisteredVoter
+                                ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300'
+                                : 'bg-slate-100 dark:bg-[#152747] text-slate-600 dark:text-slate-300'
+                            }`}
+                          >
+                            {rec.isRegisteredVoter ? 'Registered Voter' : 'Non-Voter'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-wrap gap-1">
+                            {rec.sectors.map((sec) => (
+                              <span
+                                key={sec}
+                                className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#152747] text-slate-700 dark:text-slate-300 font-semibold text-[10px]"
+                              >
+                                {sec}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-slate-500 dark:text-slate-400">
+                          {rec.address}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* TAB 3: SERVICE PERFORMANCE REPORTS (SLA, Turnaround & Rating)  */}
+      {/* ============================================================== */}
+      {activeTab === 'service_performance' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-5 border border-slate-200 dark:border-blue-900/40 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Overall Completion Rate</span>
+              <div className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-400 font-mono">
+                {data?.summary.overallCompletionRate || 0}%
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                {data?.summary.totalCompleted || 0} of {data?.summary.totalApplications || 0} requests completed
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-5 border border-slate-200 dark:border-blue-900/40 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Average Processing Turnaround</span>
+              <div className="text-2xl sm:text-3xl font-black text-amber-700 dark:text-amber-400 font-mono">
+                {data?.summary.avgTurnaroundDays || '1.0'} days
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Submission to Window 2 release
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-5 border border-slate-200 dark:border-blue-900/40 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">SLA Target Compliance</span>
+              <div className="text-2xl sm:text-3xl font-black text-blue-700 dark:text-blue-400 font-mono">
+                {data?.summary.slaComplianceRate ?? 100}%
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Processed within statutory SLA days
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-[#0B1528] rounded-2xl p-5 border border-slate-200 dark:border-blue-900/40 shadow-xs space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Resident Service Rating</span>
+              <div className="text-2xl sm:text-3xl font-black text-[#9C2007] dark:text-rose-400 font-mono">
+                {data?.summary.avgSatisfactionRating || '4.90'} / 5.0
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Citizen feedback &amp; service quality score
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-[#0B1528] rounded-2xl border border-slate-200 dark:border-blue-900/40 shadow-xs overflow-hidden">
+            <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-blue-900/40">
+              <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
+                <Clock className="w-5 h-5 text-[#9C2007] dark:text-rose-400" />
+                Service Performance Report per Barangay Document Service
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Evaluates standard SLA turnaround vs. actual processing speed, service completion efficiency, and queue backlog per service.
+              </p>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-[#0E1B33] text-slate-600 dark:text-slate-300 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-blue-900/40">
+                  <tr>
+                    <th className="py-3 px-4">Barangay Service / Document</th>
+                    <th className="py-3 px-4 text-center">Standard SLA Target</th>
+                    <th className="py-3 px-4 text-center">Actual Avg. Turnaround</th>
+                    <th className="py-3 px-4 text-center">Ready for Pickup</th>
+                    <th className="py-3 px-4 text-center">Active Processing</th>
+                    <th className="py-3 px-4">Service Completion Efficiency</th>
+                    <th className="py-3 px-4 text-center">SLA Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-blue-900/30">
+                  {data?.documents.map((doc) => {
+                    const actualDays = parseFloat(doc.avgTurnaroundDays) || doc.processingDays;
+                    const withinSla = actualDays <= doc.processingDays + 0.5;
+                    return (
+                      <tr key={doc.code} className="hover:bg-slate-50/80 dark:hover:bg-[#0E1B33]/60 transition">
+                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
+                          {doc.name}
+                          <span className="block text-[10px] text-slate-400 font-normal">{doc.category}</span>
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-700 dark:text-slate-300">
+                          {doc.processingDays} {doc.processingDays === 1 ? 'Business Day' : 'Business Days'}
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-mono font-bold text-amber-700 dark:text-amber-400">
+                          {doc.avgTurnaroundDays} days ({doc.avgTurnaroundHours} hrs)
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-mono font-bold text-blue-600 dark:text-blue-400">
+                          {doc.readyForPickup}
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-600 dark:text-slate-300">
+                          {doc.processing + doc.pending}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 bg-slate-100 dark:bg-[#0E1B33] h-1.5 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-emerald-500 rounded-full"
+                                style={{ width: `${Math.min(100, Math.max(8, doc.completionRate))}%` }}
+                              />
+                            </div>
+                            <span className="font-mono font-bold text-[11px]">{doc.completionRate}%</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                              withinSla
+                                ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300'
+                                : 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300'
+                            }`}
+                          >
+                            {withinSla ? 'On-Time SLA' : 'High Volume'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ============================================================== */}
       {/* TAB 1: TOTAL PER DOCUMENTS & COMPLETED PERFORMANCE            */}

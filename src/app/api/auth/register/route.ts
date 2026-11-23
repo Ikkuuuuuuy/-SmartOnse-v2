@@ -14,6 +14,15 @@ export async function POST(req: Request) {
       password,
       birthDate,
       gender,
+      civilStatus,
+      residencyType,
+      yearsOfResidency,
+      employmentStatus,
+      isRegisteredVoter,
+      isSeniorCitizen,
+      isPwd,
+      isSoloParent,
+      is4psBeneficiary,
       idType,
       idCardImage,
     } = body;
@@ -144,6 +153,27 @@ export async function POST(req: Request) {
       }
     }
 
+    // Parse demographic & census fields for Population Reports
+    const parsedDob = birthDate ? new Date(birthDate) : new Date('1998-01-01');
+    const safeDob = isNaN(parsedDob.getTime()) ? new Date('1998-01-01') : parsedDob;
+    const computedAge = Math.max(1, Math.floor((Date.now() - safeDob.getTime()) / (365.25 * 24 * 60 * 60 * 1000)));
+    const safeSex = gender === 'Female' ? 'Female' : 'Male';
+    const safeCivilStatus = typeof civilStatus === 'string' && civilStatus.trim() ? civilStatus.trim() : 'Single';
+    const safeResidencyType = typeof residencyType === 'string' && residencyType.trim()
+      ? residencyType.trim()
+      : 'Homeowner (May-ari ng Bahay)';
+    const safeYears = typeof yearsOfResidency === 'number' && yearsOfResidency >= 0
+      ? Math.round(yearsOfResidency)
+      : 1;
+    const safeEmployment = typeof employmentStatus === 'string' && employmentStatus.trim()
+      ? employmentStatus.trim()
+      : 'Employed';
+    const safeVoter = typeof isRegisteredVoter === 'boolean' ? isRegisteredVoter : true;
+    const safeSenior = Boolean(isSeniorCitizen) || computedAge >= 60;
+    const safePwd = Boolean(isPwd);
+    const safeSoloParent = Boolean(isSoloParent);
+    const safe4ps = Boolean(is4psBeneficiary);
+
     // Step 2: Auto-Approval Decision
     if (matchedInhabitant) {
       // Inhabitant is confirmed in Barangay Census -> Auto-Approve immediately!
@@ -160,10 +190,22 @@ export async function POST(req: Request) {
         },
       });
 
-      // Link User to the RBI record
+      // Link User to the RBI record and sync latest census classifications
       await prisma.barangayInhabitant.update({
         where: { id: matchedInhabitant.id },
-        data: { userId: user.id },
+        data: {
+          userId: user.id,
+          sex: safeSex,
+          civilStatus: safeCivilStatus,
+          householdRole: safeResidencyType,
+          yearsOfResidency: safeYears,
+          employmentStatus: safeEmployment,
+          isRegisteredVoter: safeVoter,
+          isSeniorCitizen: safeSenior,
+          isPwd: safePwd,
+          isSoloParent: safeSoloParent,
+          is4psBeneficiary: safe4ps,
+        },
       });
 
       console.log(`[SmartOnse Register] Resident "${name}" AUTO-APPROVED against RBI: ${matchedInhabitant.rbiNumber}`);
@@ -177,8 +219,8 @@ export async function POST(req: Request) {
     }
 
     // Step 3: Not yet in pre-existing RBI (Transferee / New Renter / Unlisted)
-    // Save as pending verification so Desk Staff can review and enroll in Census
-    await prisma.user.create({
+    // Save user and immediately enroll census profile so Population Reports reflect the registration
+    const newUser = await prisma.user.create({
       data: {
         name: name.trim(),
         email: cleanEmail,
@@ -188,6 +230,38 @@ export async function POST(req: Request) {
         role: 'resident',
         isVerified: false, // Pending desk officer verification
         avatarUrl: idCardImage || null,
+      },
+    });
+
+    // Generate next RBI number and record census profile for Population Reports
+    const rbiCount = await prisma.barangayInhabitant.count();
+    const rbiYear = new Date().getFullYear();
+    const generatedRbi = `RBI-${rbiYear}-${String(rbiCount + 10001).slice(-5)}`;
+    const nameTokens = name.trim().split(/\s+/);
+    const firstName = nameTokens[0] || 'Resident';
+    const lastName = nameTokens.length > 1 ? nameTokens.slice(1).join(' ') : 'Citizen';
+
+    await prisma.barangayInhabitant.create({
+      data: {
+        rbiNumber: generatedRbi,
+        firstName,
+        lastName,
+        birthDate: safeDob,
+        age: computedAge,
+        sex: safeSex,
+        civilStatus: safeCivilStatus,
+        street: (address && address.trim()) || 'Barangay Onse, San Juan City',
+        precinct: safeVoter ? 'PRECINCT-0042A' : 'NON-VOTER',
+        yearsOfResidency: safeYears,
+        householdRole: safeResidencyType,
+        employmentStatus: safeEmployment,
+        isRegisteredVoter: safeVoter,
+        isSeniorCitizen: safeSenior,
+        isPwd: safePwd,
+        isSoloParent: safeSoloParent,
+        is4psBeneficiary: safe4ps,
+        status: 'ACTIVE',
+        userId: newUser.id,
       },
     });
 

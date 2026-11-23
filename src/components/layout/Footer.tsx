@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { ShieldCheck, Scale, FileText, Lock, Building2, Phone, Mail, MapPin } from 'lucide-react';
+import { ShieldCheck, Scale, FileText, Lock, Building2, Phone, Mail, MapPin, Smartphone, Download } from 'lucide-react';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -93,6 +93,16 @@ export default function Footer() {
             <li>
               <Link href="/events" className="hover:text-white hover:underline transition">
                 {t('footer.link_events')}
+              </Link>
+            </li>
+            <li className="pt-2">
+              <Link
+                href="/download"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#9C2007] hover:bg-[#b52508] text-white font-black text-[11px] uppercase tracking-wider shadow-md transition"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-amber-300" />
+                <span>{isFil ? 'I-download ang Android App' : 'Download Mobile App (APK)'}</span>
+                <Download className="w-3.5 h-3.5" />
               </Link>
             </li>
           </ul>

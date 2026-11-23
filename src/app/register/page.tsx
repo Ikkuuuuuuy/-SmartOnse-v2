@@ -38,6 +38,15 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [gender, setGender] = useState('Male');
   const [birthDate, setBirthDate] = useState('');
+  const [civilStatus, setCivilStatus] = useState('Single');
+  const [residencyType, setResidencyType] = useState('Homeowner (May-ari ng Bahay)');
+  const [yearsOfResidency, setYearsOfResidency] = useState('1');
+  const [employmentStatus, setEmploymentStatus] = useState('Employed');
+  const [isRegisteredVoter, setIsRegisteredVoter] = useState(true);
+  const [isSeniorCitizen, setIsSeniorCitizen] = useState(false);
+  const [isPwd, setIsPwd] = useState(false);
+  const [isSoloParent, setIsSoloParent] = useState(false);
+  const [is4psBeneficiary, setIs4psBeneficiary] = useState(false);
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -430,6 +439,15 @@ export default function RegisterPage() {
           name,
           gender,
           birthDate,
+          civilStatus,
+          residencyType,
+          yearsOfResidency: Number(yearsOfResidency) || 1,
+          employmentStatus,
+          isRegisteredVoter,
+          isSeniorCitizen,
+          isPwd,
+          isSoloParent,
+          is4psBeneficiary,
           address,
           phone,
           email,
@@ -757,7 +775,15 @@ export default function RegisterPage() {
                     type="date"
                     required
                     value={birthDate}
-                    onChange={(e) => setBirthDate(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setBirthDate(val);
+                      if (val) {
+                        const dob = new Date(val);
+                        const age = Math.floor((Date.now() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+                        if (age >= 60) setIsSeniorCitizen(true);
+                      }
+                    }}
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none"
                   />
                 </div>
@@ -780,8 +806,175 @@ export default function RegisterPage() {
                 />
               </div>
               <p className="text-[10px] text-slate-400">
-                Renters, students, and boarders are welcome! Include your room or unit number.
+                Homeowners, renters, students, and boarders are welcome! Include your house, room, or unit number.
               </p>
+            </div>
+
+            {/* Population & Census Profile (Feeds Barangay Population Reports) */}
+            <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-[#11203D] border border-slate-200 dark:border-blue-900/50 space-y-3.5">
+              <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-blue-900/40 pb-2">
+                <span className="font-black text-slate-800 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#9C2007] dark:text-rose-400" />
+                  Barangay Census &amp; Population Profile *
+                </span>
+                <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-[#9C2007]/10 text-[#9C2007] dark:text-rose-300">
+                  RBI Census Data
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Housing / Residency Type */}
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                    Housing / Residency Status *
+                  </label>
+                  <select
+                    value={residencyType}
+                    onChange={(e) => setResidencyType(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none cursor-pointer text-xs font-semibold"
+                  >
+                    <option value="Homeowner (May-ari ng Bahay)">Homeowner (May-ari ng Bahay)</option>
+                    <option value="Renter / Tenant (Nangungupahan)">Renter / Tenant (Nangungupahan)</option>
+                    <option value="Living with Relatives (Nakikitira)">Living with Relatives (Nakikitira)</option>
+                    <option value="Boarder / Student Dorm">Boarder / Student Dorm</option>
+                  </select>
+                </div>
+
+                {/* Voter Status Dropdown */}
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                    Voter Registration Status *
+                  </label>
+                  <select
+                    value={isRegisteredVoter ? 'VOTER' : 'NON_VOTER'}
+                    onChange={(e) => setIsRegisteredVoter(e.target.value === 'VOTER')}
+                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none cursor-pointer text-xs font-semibold"
+                  >
+                    <option value="VOTER">Registered Voter (Brgy. Onse)</option>
+                    <option value="NON_VOTER">Non-Voter / Registered Elsewhere</option>
+                  </select>
+                </div>
+
+                {/* Civil Status */}
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                    Civil Status *
+                  </label>
+                  <select
+                    value={civilStatus}
+                    onChange={(e) => setCivilStatus(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none cursor-pointer text-xs"
+                  >
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Widowed">Widowed</option>
+                    <option value="Separated">Separated</option>
+                  </select>
+                </div>
+
+                {/* Employment / Occupation Status */}
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                    Employment / Sector *
+                  </label>
+                  <select
+                    value={employmentStatus}
+                    onChange={(e) => setEmploymentStatus(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none cursor-pointer text-xs"
+                  >
+                    <option value="Employed">Employed</option>
+                    <option value="Self-Employed">Self-Employed / Business</option>
+                    <option value="Student">Student</option>
+                    <option value="Unemployed">Unemployed / Jobseeker</option>
+                    <option value="Retired">Retired</option>
+                    <option value="OFW">Overseas Filipino Worker (OFW)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Years of Residency */}
+              <div className="space-y-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                  Years Residing in Barangay Onse *
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={yearsOfResidency}
+                  onChange={(e) => setYearsOfResidency(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none text-xs"
+                  placeholder="e.g. 5"
+                />
+              </div>
+
+              {/* Sectoral Classifications Checkboxes */}
+              <div className="space-y-1.5 pt-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                  Resident Classifications (Check all that apply):
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <label className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 cursor-pointer hover:border-[#9C2007]/50 transition">
+                    <input
+                      type="checkbox"
+                      checked={isRegisteredVoter}
+                      onChange={(e) => setIsRegisteredVoter(e.target.checked)}
+                      className="rounded text-[#9C2007] focus:ring-[#9C2007] cursor-pointer"
+                    />
+                    <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                      Registered Voter (Brgy. Onse)
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 cursor-pointer hover:border-[#9C2007]/50 transition">
+                    <input
+                      type="checkbox"
+                      checked={isSeniorCitizen}
+                      onChange={(e) => setIsSeniorCitizen(e.target.checked)}
+                      className="rounded text-[#9C2007] focus:ring-[#9C2007] cursor-pointer"
+                    />
+                    <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                      Senior Citizen (60+ yrs)
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 cursor-pointer hover:border-[#9C2007]/50 transition">
+                    <input
+                      type="checkbox"
+                      checked={isPwd}
+                      onChange={(e) => setIsPwd(e.target.checked)}
+                      className="rounded text-[#9C2007] focus:ring-[#9C2007] cursor-pointer"
+                    />
+                    <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                      Person with Disability (PWD)
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 cursor-pointer hover:border-[#9C2007]/50 transition">
+                    <input
+                      type="checkbox"
+                      checked={isSoloParent}
+                      onChange={(e) => setIsSoloParent(e.target.checked)}
+                      className="rounded text-[#9C2007] focus:ring-[#9C2007] cursor-pointer"
+                    />
+                    <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                      Solo Parent
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 cursor-pointer hover:border-[#9C2007]/50 transition sm:col-span-2">
+                    <input
+                      type="checkbox"
+                      checked={is4psBeneficiary}
+                      onChange={(e) => setIs4psBeneficiary(e.target.checked)}
+                      className="rounded text-[#9C2007] focus:ring-[#9C2007] cursor-pointer"
+                    />
+                    <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                      4Ps / DSWD Social Assistance Beneficiary
+                    </span>
+                  </label>
+                </div>
+              </div>
             </div>
 
             <button

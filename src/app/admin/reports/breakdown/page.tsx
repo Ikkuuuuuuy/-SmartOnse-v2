@@ -8,6 +8,7 @@ import {
   Database,
   Search,
   Download,
+  Printer,
   RefreshCw,
   FileText,
   CheckCircle2,
@@ -247,6 +248,97 @@ function BreakdownContent() {
     URL.revokeObjectURL(url);
   };
 
+  const handlePrintBreakdown = () => {
+    if (!data || typeof window === 'undefined') return;
+    const escHtml = (s: any) =>
+      String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    const win = window.open('', '_blank', 'width=1050,height=800');
+    if (!win) {
+      window.print();
+      return;
+    }
+
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>${escHtml(meta.title)} - Barangay Onse Report</title>
+          <style>
+            @page { size: A4 landscape; margin: 12mm; }
+            * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { font-family: Arial, Helvetica, sans-serif; color: #111827; font-size: 11px; margin: 0; }
+            .sheet { border: 2px solid #9C2007; padding: 16px 20px; }
+            .hdr { border-bottom: 2.5px solid #9C2007; padding-bottom: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+            .council { font-size: 17px; font-weight: 900; color: #9C2007; text-transform: uppercase; }
+            table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 10px; }
+            th { background: #9C2007; color: #fff; padding: 6px; text-align: left; text-transform: uppercase; font-size: 9px; border: 1px solid #9C2007; }
+            td { padding: 5px 6px; border: 1px solid #cbd5e1; }
+            tr:nth-child(even) td { background: #f8fafc; }
+          </style>
+        </head>
+        <body>
+          <div class="sheet">
+            <div class="hdr">
+              <div>
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;">Republic of the Philippines • City of San Juan</div>
+                <div class="council">Barangay Onse Council</div>
+                <div style="font-size:10px;">J.P. Rizal St., Barangay Onse, City of San Juan, Metro Manila • Tel: 7744-0740</div>
+              </div>
+              <div style="text-align:right;font-size:10px;">
+                <strong>${escHtml(meta.title.toUpperCase())}</strong><br/>
+                Period: ${escHtml(data.reportMetadata.periodLabel)}<br/>
+                Total Matching Records: <strong>${filteredRecords.length}</strong>
+              </div>
+            </div>
+            <p style="font-size:10px;color:#374151;margin:0 0 8px;">${escHtml(meta.subtitle)} (${escHtml(meta.sourceRule)})</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Tracking Code</th>
+                  <th>Applicant</th>
+                  <th>Document Type</th>
+                  <th>Purpose</th>
+                  <th>Fee</th>
+                  <th>Status</th>
+                  <th>Filed (PHT)</th>
+                  <th>Updated (PHT)</th>
+                  <th>Turnaround</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredRecords
+                  .map(
+                    (r) => `
+                  <tr>
+                    <td><strong>${escHtml(r.trackingNumber)}</strong></td>
+                    <td><strong>${escHtml(r.applicant)}</strong></td>
+                    <td>${escHtml(r.documentName)}</td>
+                    <td>${escHtml(r.purpose)}</td>
+                    <td>${escHtml(r.feeDisplay)}</td>
+                    <td>${escHtml(r.status)}</td>
+                    <td>${escHtml(r.dateFiled)}</td>
+                    <td>${escHtml(r.dateCompleted)}</td>
+                    <td>${escHtml(r.turnaroundDays)}</td>
+                  </tr>`
+                  )
+                  .join('')}
+              </tbody>
+            </table>
+          </div>
+          <script>
+            window.onload = function() { setTimeout(function() { window.focus(); window.print(); }, 250); };
+          </script>
+        </body>
+      </html>
+    `);
+    win.document.close();
+  };
+
   const headlineValue = useMemo(() => {
     if (!data) return '...';
     switch (metric) {
@@ -294,15 +386,27 @@ function BreakdownContent() {
           <p className="text-xs text-slate-500 dark:text-slate-400">{meta.subtitle}</p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleExportCsv}
-          disabled={!filteredRecords.length}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#9C2007] hover:bg-[#821a05] disabled:opacity-50 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer shrink-0"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Export Source CSV
-        </button>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            disabled={!filteredRecords.length}
+            className="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-100 dark:bg-[#0E1B33] hover:bg-slate-200 dark:hover:bg-[#152747] disabled:opacity-50 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-blue-900/40 rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            Download Report (CSV)
+          </button>
+
+          <button
+            type="button"
+            onClick={handlePrintBreakdown}
+            disabled={!filteredRecords.length}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#9C2007] hover:bg-[#821a05] disabled:opacity-50 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer shadow-sm"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            Print Report
+          </button>
+        </div>
       </div>
 
       {/* Metric Switcher Tabs */}

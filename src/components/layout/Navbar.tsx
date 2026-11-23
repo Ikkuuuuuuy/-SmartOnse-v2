@@ -23,7 +23,8 @@ import {
   Eye,
   Check,
   RotateCcw,
-  Volume2
+  Volume2,
+  Smartphone
 } from 'lucide-react';
 
 function AccessibilityPanel() {
@@ -310,6 +311,20 @@ export default function Navbar() {
         })}
 
         <div className="flex gap-2 items-center shrink-0 ml-2">
+          {/* Download Android Mobile App Pill */}
+          <Link
+            href="/download"
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[10.5px] font-black uppercase tracking-wider transition-all whitespace-nowrap border ${
+              pathname === '/download'
+                ? 'bg-amber-300 text-[#800000] border-amber-200 shadow-md'
+                : 'bg-white/10 hover:bg-white/20 text-amber-200 border-white/20'
+            }`}
+            title="Download SmartOnse Android Mobile App (APK)"
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            <span className="hidden xl:inline">Get App</span>
+          </Link>
+
           {/* Quick Direct Light/Dark Mode Switcher */}
           <button
             type="button"
@@ -391,6 +406,15 @@ export default function Navbar() {
           ))}
 
           {/* Mobile Theme Toggle Button */}
+          <Link
+            href="/download"
+            onClick={() => setIsMenuOpen(false)}
+            className="flex items-center justify-center gap-2 w-full max-w-xs py-3 px-4 rounded-full bg-amber-300 text-[#800000] font-black text-xs uppercase tracking-wider shadow-lg transition"
+          >
+            <Smartphone className="w-4 h-4" />
+            <span>Download Android App (APK)</span>
+          </Link>
+
           <button
             type="button"
             onClick={toggleTheme}
