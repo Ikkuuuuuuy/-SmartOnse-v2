@@ -40,9 +40,6 @@ export async function GET(req: Request) {
       available: Boolean(apk),
       fileName: 'SmartOnse-BarangayOnse-v2.0.apk',
       version: '2.0.0',
-      packageId: 'ph.gov.barangayonse.smartonse',
-      language: 'Kotlin 2.1 (Android SDK 36 / minSdk 24)',
-      database: 'PostgreSQL + Prisma ORM (Live Real-Time Sync)',
       sizeMB: apk ? (apk.sizeBytes / (1024 * 1024)).toFixed(2) : null,
       updatedAt: apk?.updatedAt || null,
     });
