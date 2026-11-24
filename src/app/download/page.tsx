@@ -174,7 +174,7 @@ export default function DownloadMobileAppPage() {
                   </p>
                   <div className="pt-2 border-t border-slate-200/80">
                     <p className="text-[10.5px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-2.5 py-1.5 leading-snug">
-                      🍎 iOS / Apple (iPhone &amp; iPad) version is currently under development.
+                      iOS / Apple (iPhone &amp; iPad) version is currently under development.
                     </p>
                   </div>
                 </div>
