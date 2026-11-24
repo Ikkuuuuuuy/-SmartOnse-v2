@@ -122,20 +122,28 @@ export default function DownloadMobileAppPage() {
               </div>
 
               {/* Status Line */}
-              <div className="text-xs text-rose-200/90 flex items-center gap-2 pt-1">
-                {loading ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Checking official installer...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
-                    <span>
-                      Official Barangay Onse Release • Free for all Residents • Supports Android 7.0 and newer
-                    </span>
-                  </>
-                )}
+              <div className="space-y-1.5 pt-1">
+                <div className="text-xs text-rose-200/90 flex items-center gap-2">
+                  {loading ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Checking official installer...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
+                      <span>
+                        Available Now for Android Devices (Android 7.0+) • Free for all Barangay Onse Residents
+                      </span>
+                    </>
+                  )}
+                </div>
+                <div className="text-xs text-amber-200/90 flex items-center gap-2 font-semibold">
+                  <Clock className="w-4 h-4 text-amber-300 shrink-0" />
+                  <span>
+                    Apple iOS (iPhone &amp; iPad) version is currently in development — coming soon!
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -144,22 +152,31 @@ export default function DownloadMobileAppPage() {
               <div className="bg-white text-slate-900 rounded-3xl p-6 shadow-2xl max-w-xs w-full text-center space-y-4 border-4 border-amber-300/80">
                 <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-[#800000]">
                   <QrCode className="w-4 h-4" />
-                  <span>Scan to Install on Your Phone</span>
+                  <span>Scan to Install on Android</span>
                 </div>
 
                 <div className="w-48 h-48 mx-auto bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-center p-2">
                   {qrDataUrl ? (
-                    <img src={qrDataUrl} alt="SmartOnse Mobile App Download QR Code" className="w-full h-full object-contain" />
+                    <img src={qrDataUrl} alt="SmartOnse Android Mobile App Download QR Code" className="w-full h-full object-contain" />
                   ) : (
                     <QrCode className="w-20 h-20 text-[#800000]/40" />
                   )}
                 </div>
 
-                <div className="space-y-1">
-                  <div className="text-sm font-black text-slate-900">SmartOnse Mobile App</div>
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>For Android Phones Only</span>
+                  </div>
+                  <div className="text-sm font-black text-slate-900">SmartOnse for Android</div>
                   <p className="text-[11px] text-slate-500 leading-snug">
-                    Open your phone camera and scan this QR code, or tap the download button to install the official Barangay Onse app.
+                    Scan this QR code with your <strong>Android phone</strong> camera to download and install the official app.
                   </p>
+                  <div className="pt-2 border-t border-slate-200/80">
+                    <p className="text-[10.5px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-2.5 py-1.5 leading-snug">
+                      🍎 iOS / Apple (iPhone &amp; iPad) version is currently under development.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
