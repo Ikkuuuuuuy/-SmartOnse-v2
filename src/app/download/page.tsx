@@ -149,7 +149,21 @@ export default function DownloadMobileAppPage() {
 
             {/* Right Column: QR Code & Phone Preview Card */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="bg-white text-slate-900 rounded-3xl p-6 shadow-2xl max-w-xs w-full text-center space-y-4 border-4 border-amber-300/80">
+              <div className="bg-white text-slate-900 rounded-3xl p-6 shadow-2xl max-w-xs w-full text-center space-y-3.5 border-4 border-amber-300/80">
+                <div className="flex items-center justify-center gap-2.5 pb-1">
+                  <div className="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm p-1 flex items-center justify-center shrink-0">
+                    <img
+                      src="/images/barangay-onse-seal.png"
+                      alt="SmartOnse App Icon"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs font-black uppercase tracking-wider text-[#800000]">SmartOnse App</div>
+                    <div className="text-[10px] font-bold text-slate-500">Barangay Onse, San Juan City</div>
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-[#800000]">
                   <QrCode className="w-4 h-4" />
                   <span>Scan to Install on Android</span>
