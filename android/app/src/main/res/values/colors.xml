@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#800000</color>
+    <color name="colorPrimaryDark">#600000</color>
+    <color name="colorAccent">#F59E0B</color>
+    <color name="maroon_primary">#800000</color>
+    <color name="maroon_dark">#5C0000</color>
+    <color name="maroon_soft">#9C2007</color>
+    <color name="gold_accent">#F59E0B</color>
+    <color name="bg_light">#F8FAFC</color>
+    <color name="card_white">#FFFFFF</color>
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#475569</color>
+    <color name="emerald_badge">#059669</color>
+</resources>

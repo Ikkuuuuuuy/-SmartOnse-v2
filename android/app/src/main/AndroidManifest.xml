@@ -14,7 +14,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleTask"
             android:exported="true">
 
@@ -24,6 +24,42 @@
             </intent-filter>
 
         </activity>
+
+        <activity
+            android:name=".ServicesActivity"
+            android:label="Barangay E-Services"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="false" />
+
+        <activity
+            android:name=".ServiceDetailActivity"
+            android:label="Service Details"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="false" />
+
+        <activity
+            android:name=".RequestFormActivity"
+            android:label="Request Certificate"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="false" />
+
+        <activity
+            android:name=".ConfirmationActivity"
+            android:label="Request Confirmation"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="false" />
+
+        <activity
+            android:name=".TrackDocumentActivity"
+            android:label="Track Document"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="false" />
+
+        <activity
+            android:name=".AboutOfficialsActivity"
+            android:label="About &amp; Barangay Officials"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
