@@ -61,6 +61,18 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="false" />
 
+        <activity
+            android:name=".TransparencySkActivity"
+            android:label="Transparency, SK &amp; Events"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="false" />
+
+        <activity
+            android:name=".LoginActivity"
+            android:label="Resident &amp; Staff Login"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

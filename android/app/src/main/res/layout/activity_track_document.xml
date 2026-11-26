@@ -95,8 +95,8 @@
                             android:layout_height="48dp"
                             android:layout_marginEnd="8dp"
                             android:layout_weight="1"
-                            android:background="@android:drawable/edit_text"
-                            android:hint="e.g., ONSE-2026-0001"
+                            android:background="@drawable/bg_input_box"
+                            android:hint="e.g., ONSE-2026-8891"
                             android:inputType="textCapCharacters"
                             android:paddingHorizontal="12dp"
                             android:textColor="#0F172A"
@@ -272,6 +272,26 @@
                         android:text="Local Employment Requirement"
                         android:textColor="#334155"
                         android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="4-STEP CLEARANCE VERIFICATION PROGRESS"
+                        android:textColor="#800000"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:background="#F8FAFC"
+                        android:padding="10dp"
+                        android:text="✓ Step 1: Online Application Received\n✓ Step 2: Desk Officer Precinct Verification\n✓ Step 3: Official Signing by Punong Barangay\n● Step 4: Express Pickup at Window 2"
+                        android:textColor="#065F46"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
