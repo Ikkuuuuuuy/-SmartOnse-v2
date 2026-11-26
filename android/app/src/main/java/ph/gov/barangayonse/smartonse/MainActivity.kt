@@ -154,11 +154,11 @@ class MainActivity : AppCompatActivity() {
     private fun refreshUserSessionUI() {
         if (SampleDataRepository.isLoggedIn) {
             val firstName = SampleDataRepository.currentUserName.split(" ").firstOrNull() ?: "Resident"
-            tvNavUserBtn.text = "👤 $firstName"
-            tvHeroAccountBtn.text = "${SampleDataRepository.currentUserRole} Portal →"
+            tvNavUserBtn.text = firstName
+            tvHeroAccountBtn.text = "${SampleDataRepository.currentUserRole} Portal"
         } else {
             tvNavUserBtn.text = "Sign In"
-            tvHeroAccountBtn.text = "Resident / Staff Login →"
+            tvHeroAccountBtn.text = "Resident / Staff Login"
         }
     }
 
