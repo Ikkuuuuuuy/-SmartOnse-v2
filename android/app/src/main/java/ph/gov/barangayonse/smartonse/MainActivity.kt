@@ -49,6 +49,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, LoginActivity::class.java))
         }
 
+        // Launch the exact 1:1 SmartOnse Website System UI (with Kotlin Sample Data API Interceptor!)
+        findViewById<Button>(R.id.btnOpenFullWebUI).setOnClickListener {
+            startActivity(Intent(this, WebMirrorActivity::class.java))
+        }
+
         // Hero Section CTAs (Exact match with website Hero buttons)
         findViewById<Button>(R.id.btnHeroRequest).setOnClickListener {
             val intent = Intent(this, RequestFormActivity::class.java).apply {
