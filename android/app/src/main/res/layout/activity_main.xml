@@ -1,1185 +1,1244 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FDF8F6"
-    android:orientation="vertical">
+    android:background="#FDF8F6">
 
-    <!-- 1. STICKY WEBSITE NAVBAR (#800000 Maroon Header) -->
+    <!-- MAIN VERTICAL LAYOUT (Navbar + ScrollView + Bottom Navigation) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#800000"
-        android:elevation="6dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="14dp"
-        android:paddingVertical="10dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/ivBarangaySeal"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_circle_seal"
-            android:contentDescription="Barangay Onse Seal"
-            android:padding="3dp"
-            android:src="@drawable/barangay_seal" />
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:letterSpacing="0.04"
-                android:text="SMARTONSE"
-                android:textColor="#FFFFFF"
-                android:textSize="17sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="BARANGAY ONSE • SAN JUAN CITY"
-                android:textColor="#FECDD3"
-                android:textSize="9sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/btnNavbarAccount"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:backgroundTint="#FFFFFF"
-            android:paddingHorizontal="12dp"
-            android:text="👤 Juan"
-            android:textAllCaps="false"
-            android:textColor="#9C2007"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <!-- 2. MAIN SCROLLABLE WEBSITE CONTENT -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
-
+        <!-- 1. STICKY WEBSITE NAVBAR (#800000 Maroon Header) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="24dp">
+            android:background="#800000"
+            android:elevation="6dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="10dp">
 
-            <!-- A. CENTERED HERO SECTION (Matches Website Hero Section) -->
+            <ImageView
+                android:id="@+id/ivBarangaySeal"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="@drawable/bg_circle_seal"
+                android:contentDescription="Barangay Onse Seal"
+                android:padding="2dp"
+                android:src="@drawable/barangay_seal" />
+
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_hero_gradient"
-                android:gravity="center_horizontal"
-                android:orientation="vertical"
-                android:paddingHorizontal="18dp"
-                android:paddingTop="24dp"
-                android:paddingBottom="26dp">
-
-                <ImageView
-                    android:layout_width="78dp"
-                    android:layout_height="78dp"
-                    android:background="@drawable/bg_circle_seal"
-                    android:contentDescription="Barangay Onse Official Seal"
-                    android:padding="6dp"
-                    android:src="@drawable/barangay_seal" />
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_pill_amber"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="5dp"
-                    android:text="● OFFICIAL DIGITAL E-GOVERNANCE PORTAL"
-                    android:textColor="#800000"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center"
-                    android:text="BARANGAY ONSE"
+                    android:letterSpacing="0.04"
+                    android:text="SMARTONSE"
                     android:textColor="#FFFFFF"
-                    android:textSize="28sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="SMART E-GOVERNANCE"
-                    android:textColor="#FCD34D"
-                    android:textSize="22sp"
+                    android:text="BARANGAY ONSE • SAN JUAN CITY"
+                    android:textColor="#FECDD3"
+                    android:textSize="9sp"
                     android:textStyle="bold" />
+            </LinearLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:lineSpacingExtra="3dp"
-                    android:text="Fast, transparent, and paperless public service for Barangay Onse citizens. Request clearances online, track documents in real time, and stay connected with your council."
-                    android:textColor="#FFE4E6"
-                    android:textSize="12.5sp" />
+            <Button
+                android:id="@+id/btnNavbarAccount"
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_btn_white"
+                android:paddingHorizontal="12dp"
+                android:text="👤 Juan"
+                android:textAllCaps="false"
+                android:textColor="#9C2007"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
-                <!-- Hero CTA Buttons -->
+        <!-- 2. MAIN SCROLLABLE WEBSITE CONTENT -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="90dp">
+
+                <!-- A. CENTERED HERO SECTION (Matches Website Hero Section) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="horizontal">
+                    android:background="@drawable/bg_hero_gradient"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="18dp"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="22dp">
 
-                    <Button
-                        android:id="@+id/btnHeroRequest"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="#F59E0B"
-                        android:text="Request Document →"
-                        android:textAllCaps="false"
-                        android:textColor="#0F172A"
-                        android:textSize="12.5sp"
-                        android:textStyle="bold" />
+                    <ImageView
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:background="@drawable/bg_circle_seal"
+                        android:contentDescription="Barangay Onse Official Seal"
+                        android:padding="5dp"
+                        android:src="@drawable/barangay_seal" />
 
-                    <Button
-                        android:id="@+id/btnHeroTrack"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="#FFFFFF"
-                        android:text="🔍 Track Status"
-                        android:textAllCaps="false"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_pill_amber"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="4dp"
+                        android:text="● OFFICIAL DIGITAL E-GOVERNANCE PORTAL"
                         android:textColor="#800000"
-                        android:textSize="12.5sp"
+                        android:textSize="9.5sp"
                         android:textStyle="bold" />
-                </LinearLayout>
 
-                <Button
-                    android:id="@+id/btnHeroLoginPortal"
-                    android:layout_width="match_parent"
-                    android:layout_height="42dp"
-                    android:layout_marginTop="6dp"
-                    android:backgroundTint="#0F172A"
-                    android:text="Verified Resident Portal →"
-                    android:textAllCaps="false"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:gravity="center"
+                        android:text="BARANGAY ONSE"
+                        android:textColor="#FFFFFF"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
 
-                <!-- Inline Hero Tracking Search Bar (Exact match with website Hero Search) -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="6dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="SMART E-GOVERNANCE"
+                        android:textColor="#FCD34D"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
 
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center"
+                        android:lineSpacingExtra="2dp"
+                        android:text="Fast, transparent, and paperless public service for Barangay Onse citizens. Request clearances online, track documents in real time, and chat with OnseBot AI."
+                        android:textColor="#FFE4E6"
+                        android:textSize="12sp" />
+
+                    <!-- Hero CTA Buttons (Modern Rounded Pill Buttons) -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:padding="6dp">
+                        android:layout_marginTop="14dp"
+                        android:orientation="horizontal">
 
-                        <EditText
-                            android:id="@+id/etHeroTrackingSearch"
+                        <Button
+                            android:id="@+id/btnHeroRequest"
                             android:layout_width="0dp"
-                            android:layout_height="42dp"
+                            android:layout_height="44dp"
+                            android:layout_marginEnd="6dp"
                             android:layout_weight="1"
-                            android:background="@android:color/transparent"
-                            android:hint="🔍 Enter Tracking ID (e.g. ONSE-2026-8891)"
-                            android:inputType="textCapCharacters"
-                            android:paddingHorizontal="10dp"
+                            android:background="@drawable/bg_btn_gold"
+                            android:text="Request Document →"
+                            android:textAllCaps="false"
                             android:textColor="#0F172A"
-                            android:textColorHint="#64748B"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
                         <Button
-                            android:id="@+id/btnHeroTrackingSubmit"
-                            android:layout_width="wrap_content"
-                            android:layout_height="42dp"
-                            android:backgroundTint="#9C2007"
-                            android:text="Track"
+                            android:id="@+id/btnHeroTrack"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_marginStart="6dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_btn_white"
+                            android:text="🔍 Track Status"
                             android:textAllCaps="false"
-                            android:textColor="#FFFFFF"
+                            android:textColor="#800000"
                             android:textSize="12sp"
                             android:textStyle="bold" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
-            </LinearLayout>
 
-            <!-- B. CENSUS & BARANGAY STATS STRIP -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp">
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp">
-
-                    <LinearLayout
+                    <Button
+                        android:id="@+id/btnHeroLoginPortal"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="14dp">
+                        android:layout_height="40dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Verified Resident Portal →"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="👥 4,850+"
-                            android:textColor="#9C2007"
-                            android:textSize="19sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="Registered Constituents"
-                            android:textColor="#0F172A"
-                            android:textSize="11.5sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Census &amp; RBI Verified"
-                            android:textColor="#64748B"
-                            android:textSize="10sp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="14dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="🎓 180+"
-                            android:textColor="#9C2007"
-                            android:textSize="19sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="Youth Scholars Supported"
-                            android:textColor="#0F172A"
-                            android:textSize="11.5sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="SK Onse Academic Program"
-                            android:textColor="#64748B"
-                            android:textSize="10sp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-            </LinearLayout>
-
-            <!-- C. QUICK PORTAL NAVIGATION GRID (6 Website Sections) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="18dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="SMARTONSE DIGITAL PORTAL MODULES"
-                    android:textColor="#9C2007"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <!-- Row 1 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
-
+                    <!-- Inline Hero Tracking Search Bar -->
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/cardNavServices"
-                        android:layout_width="0dp"
-                        android:layout_height="118dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:clickable="true"
-                        android:focusable="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
                         app:cardBackgroundColor="#FFFFFF"
                         app:cardCornerRadius="16dp"
-                        app:cardElevation="3dp">
+                        app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:gravity="center_vertical"
-                            android:orientation="vertical"
-                            android:padding="14dp">
+                            android:orientation="horizontal"
+                            android:padding="6dp">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="📄 SERVICES"
-                                android:textColor="#9C2007"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="Certificates &amp; Clearances"
+                            <EditText
+                                android:id="@+id/etHeroTrackingSearch"
+                                android:layout_width="0dp"
+                                android:layout_height="40dp"
+                                android:layout_weight="1"
+                                android:background="@android:color/transparent"
+                                android:hint="🔍 Enter Tracking ID (e.g. ONSE-2026-8891)"
+                                android:inputType="textCapCharacters"
+                                android:paddingHorizontal="10dp"
                                 android:textColor="#0F172A"
-                                android:textSize="14.5sp"
+                                android:textColorHint="#64748B"
+                                android:textSize="11.5sp"
                                 android:textStyle="bold" />
 
-                            <TextView
+                            <Button
+                                android:id="@+id/btnHeroTrackingSubmit"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="3dp"
-                                android:text="Fees, requirements &amp; search"
-                                android:textColor="#64748B"
-                                android:textSize="11sp" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardNavRequest"
-                        android:layout_width="0dp"
-                        android:layout_height="118dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:clickable="true"
-                        android:focusable="true"
-                        app:cardBackgroundColor="#FFFFFF"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="3dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center_vertical"
-                            android:orientation="vertical"
-                            android:padding="14dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="✍️ APPLY ONLINE"
-                                android:textColor="#059669"
-                                android:textSize="11sp"
+                                android:layout_height="38dp"
+                                android:background="@drawable/bg_btn_maroon"
+                                android:paddingHorizontal="16dp"
+                                android:text="Track"
+                                android:textAllCaps="false"
+                                android:textColor="#FFFFFF"
+                                android:textSize="11.5sp"
                                 android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="Request Portal"
-                                android:textColor="#0F172A"
-                                android:textSize="14.5sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="3dp"
-                                android:text="Multi-copy calculator &amp; receipt"
-                                android:textColor="#64748B"
-                                android:textSize="11sp" />
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
-                <!-- Row 2 -->
+                <!-- B. CENSUS & BARANGAY STATS STRIP -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
 
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/cardNavTrack"
                         android:layout_width="0dp"
-                        android:layout_height="118dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
-                        android:clickable="true"
-                        android:focusable="true"
                         app:cardBackgroundColor="#FFFFFF"
                         app:cardCornerRadius="16dp"
-                        app:cardElevation="3dp">
+                        app:cardElevation="2dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center_vertical"
+                            android:layout_height="wrap_content"
                             android:orientation="vertical"
                             android:padding="14dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="🔍 TRACKER"
-                                android:textColor="#2563EB"
-                                android:textSize="11sp"
+                                android:text="👥 4,850+"
+                                android:textColor="#9C2007"
+                                android:textSize="18sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="Track Document"
+                                android:layout_marginTop="2dp"
+                                android:text="Registered Constituents"
                                 android:textColor="#0F172A"
-                                android:textSize="14.5sp"
+                                android:textSize="11.5sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="3dp"
-                                android:text="4-step progress &amp; pickup status"
+                                android:text="Census &amp; RBI Verified"
                                 android:textColor="#64748B"
-                                android:textSize="11sp" />
+                                android:textSize="10sp" />
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/cardNavTransparencySk"
                         android:layout_width="0dp"
-                        android:layout_height="118dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
-                        android:clickable="true"
-                        android:focusable="true"
                         app:cardBackgroundColor="#FFFFFF"
                         app:cardCornerRadius="16dp"
-                        app:cardElevation="3dp">
+                        app:cardElevation="2dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center_vertical"
+                            android:layout_height="wrap_content"
                             android:orientation="vertical"
                             android:padding="14dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="📊 DISCLOSURE &amp; SK"
-                                android:textColor="#D97706"
-                                android:textSize="11sp"
+                                android:text="🎓 180+"
+                                android:textColor="#9C2007"
+                                android:textSize="18sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="Transparency &amp; SK"
+                                android:layout_marginTop="2dp"
+                                android:text="Youth Scholars Supported"
                                 android:textColor="#0F172A"
-                                android:textSize="14.5sp"
+                                android:textSize="11.5sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="3dp"
-                                android:text="COA budgets, SK Youth &amp; Events"
+                                android:text="SK Onse Academic Program"
                                 android:textColor="#64748B"
-                                android:textSize="11sp" />
+                                android:textSize="10sp" />
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
-                <!-- Row 3 -->
+                <!-- C. QUICK PORTAL NAVIGATION GRID (6 Website Sections — wrap_content so text never clips!) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="18dp">
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardNavOfficials"
-                        android:layout_width="0dp"
-                        android:layout_height="118dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:clickable="true"
-                        android:focusable="true"
-                        app:cardBackgroundColor="#FFFFFF"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="3dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SMARTONSE DIGITAL PORTAL MODULES"
+                        android:textColor="#9C2007"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center_vertical"
-                            android:orientation="vertical"
-                            android:padding="14dp">
+                    <!-- Row 1 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cardNavServices"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="6dp"
+                            android:layout_weight="1"
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:cardBackgroundColor="#FFFFFF"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="🏛️ COUNCIL"
-                                android:textColor="#7C3AED"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
+                                android:minHeight="110dp"
+                                android:gravity="center_vertical"
+                                android:orientation="vertical"
+                                android:padding="14dp">
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="📄 SERVICES"
+                                    android:textColor="#9C2007"
+                                    android:textSize="10.5sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Certificates &amp; Clearances"
+                                    android:textColor="#0F172A"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="3dp"
+                                    android:text="Fees, requirements &amp; search"
+                                    android:textColor="#64748B"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cardNavRequest"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:layout_weight="1"
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:cardBackgroundColor="#FFFFFF"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="About &amp; Officials"
-                                android:textColor="#0F172A"
-                                android:textSize="14.5sp"
-                                android:textStyle="bold" />
+                                android:minHeight="110dp"
+                                android:gravity="center_vertical"
+                                android:orientation="vertical"
+                                android:padding="14dp">
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="✍️ APPLY ONLINE"
+                                    android:textColor="#059669"
+                                    android:textSize="10.5sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Request Portal"
+                                    android:textColor="#0F172A"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="3dp"
+                                    android:text="Multi-copy calculator &amp; receipt"
+                                    android:textColor="#64748B"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+
+                    <!-- Row 2 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cardNavTrack"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="6dp"
+                            android:layout_weight="1"
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:cardBackgroundColor="#FFFFFF"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="3dp"
-                                android:text="20 Barangay &amp; SK Officials"
-                                android:textColor="#64748B"
-                                android:textSize="11sp" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
+                                android:minHeight="110dp"
+                                android:gravity="center_vertical"
+                                android:orientation="vertical"
+                                android:padding="14dp">
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardNavLogin"
-                        android:layout_width="0dp"
-                        android:layout_height="118dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:clickable="true"
-                        android:focusable="true"
-                        app:cardBackgroundColor="#FFFFFF"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="3dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="🔍 TRACKER"
+                                    android:textColor="#2563EB"
+                                    android:textSize="10.5sp"
+                                    android:textStyle="bold" />
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center_vertical"
-                            android:orientation="vertical"
-                            android:padding="14dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Track Document"
+                                    android:textColor="#0F172A"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="3dp"
+                                    android:text="4-step progress &amp; pickup status"
+                                    android:textColor="#64748B"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cardNavTransparencySk"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:layout_weight="1"
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:cardBackgroundColor="#FFFFFF"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="🔐 RBAC LOGIN"
-                                android:textColor="#9C2007"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
+                                android:minHeight="110dp"
+                                android:gravity="center_vertical"
+                                android:orientation="vertical"
+                                android:padding="14dp">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="Account &amp; Roles"
-                                android:textColor="#0F172A"
-                                android:textSize="14.5sp"
-                                android:textStyle="bold" />
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="📊 DISCLOSURE &amp; SK"
+                                    android:textColor="#D97706"
+                                    android:textSize="10.5sp"
+                                    android:textStyle="bold" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Transparency &amp; SK"
+                                    android:textColor="#0F172A"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="3dp"
+                                    android:text="COA budgets, SK Youth &amp; Events"
+                                    android:textColor="#64748B"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+
+                    <!-- Row 3 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cardNavOfficials"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="6dp"
+                            android:layout_weight="1"
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:cardBackgroundColor="#FFFFFF"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="3dp"
-                                android:text="1-Click Demo Role Switcher"
-                                android:textColor="#64748B"
-                                android:textSize="11sp" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
+                                android:minHeight="110dp"
+                                android:gravity="center_vertical"
+                                android:orientation="vertical"
+                                android:padding="14dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="🏛️ COUNCIL"
+                                    android:textColor="#7C3AED"
+                                    android:textSize="10.5sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="About &amp; Officials"
+                                    android:textColor="#0F172A"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="3dp"
+                                    android:text="20 Barangay &amp; SK Officials"
+                                    android:textColor="#64748B"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cardNavLogin"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:layout_weight="1"
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:cardBackgroundColor="#FFFFFF"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="2dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:minHeight="110dp"
+                                android:gravity="center_vertical"
+                                android:orientation="vertical"
+                                android:padding="14dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="🤖 ONSEBOT &amp; ROLES"
+                                    android:textColor="#9C2007"
+                                    android:textSize="10.5sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Account &amp; Switcher"
+                                    android:textColor="#0F172A"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="3dp"
+                                    android:text="1-Click Demo Role Switcher"
+                                    android:textColor="#64748B"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
 
-            <!-- D. FEATURED BARANGAY CERTIFICATES (Matches Website Featured Cards) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="22dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="MOST REQUESTED CERTIFICATES"
-                    android:textColor="#9C2007"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Official Barangay Clearances &amp; Issuances"
-                    android:textColor="#0F172A"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <!-- Featured 1: Barangay Clearance -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardFeaturedClearance"
+                <!-- D. FEATURED BARANGAY CERTIFICATES -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp">
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="20dp">
 
-                    <LinearLayout
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="MOST REQUESTED CERTIFICATES"
+                        android:textColor="#9C2007"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Official Barangay Clearances &amp; Issuances"
+                        android:textColor="#0F172A"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <!-- Featured 1: Barangay Clearance -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardFeaturedClearance"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:layout_marginTop="10dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                            android:orientation="vertical"
+                            android:padding="16dp">
 
-                            <TextView
-                                android:layout_width="0dp"
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="📄 MOST REQUESTED"
-                                android:textColor="#9C2007"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="📄 MOST REQUESTED"
+                                    android:textColor="#9C2007"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/bg_pill_amber"
+                                    android:paddingHorizontal="10dp"
+                                    android:paddingVertical="3dp"
+                                    android:text="₱50.00 • 24 Hours"
+                                    android:textColor="#92400E"
+                                    android:textSize="10.5sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/bg_pill_amber"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="3dp"
-                                android:text="₱50.00 • 24 Hours"
-                                android:textColor="#92400E"
-                                android:textSize="10.5sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:text="Barangay Clearance"
-                            android:textColor="#0F172A"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="Official clearance certifying residency and good moral standing for employment, legal needs, or bank requirements."
-                            android:textColor="#475569"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- Featured 2: Certificate of Indigency -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardFeaturedIndigency"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="🤝 SOCIAL WELFARE"
-                                android:textColor="#059669"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/bg_pill_emerald"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="3dp"
-                                android:text="FREE • Same Day"
-                                android:textColor="#065F46"
-                                android:textSize="10.5sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:text="Certificate of Indigency"
-                            android:textColor="#0F172A"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="Issued free of charge for medical, hospital, educational scholarship, DSWD, or financial assistance."
-                            android:textColor="#475569"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- Featured 3: First-Time Jobseeker -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardFeaturedJobseeker"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="🎓 YOUTH &amp; JOB AID"
-                                android:textColor="#D97706"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/bg_pill_emerald"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="3dp"
-                                android:text="FREE (R.A. 11261)"
-                                android:textColor="#065F46"
-                                android:textSize="10.5sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:text="First-Time Jobseeker Certificate"
-                            android:textColor="#0F172A"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="Waives government pre-employment document fees (NBI, Police Clearance, PSA) under Republic Act No. 11261."
-                            android:textColor="#475569"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <Button
-                    android:id="@+id/btnViewAllServices"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
-                    android:backgroundTint="#800000"
-                    android:text="View All 6 Barangay Certificates &amp; Fees →"
-                    android:textAllCaps="false"
-                    android:textColor="#FFFFFF"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- E. HOW IT WORKS (4-STEP WORKFLOW FROM WEBSITE) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="22dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="HOW SMARTONSE WORKS"
-                    android:textColor="#9C2007"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="4 Simple Steps to Claim Your Clearance"
-                    android:textColor="#0F172A"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="01 • Fill Application Online\nSelect your certificate, enter your resident details, and choose copy count.\n\n02 • Desk Officer Verification\nBarangay records officers verify your Barangay Onse residency &amp; precinct.\n\n03 • Official Signing &amp; QR Code\nSigned by Punong Barangay Roberto B. Alba with a unique tracking code.\n\n04 • Express Pickup at Window 2\nPresent 1 valid ID at Barangay Onse Hall for fast release."
-                            android:textColor="#334155"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-            </LinearLayout>
-
-            <!-- F. LIVE SAMPLE TRACKING PREVIEW CARD -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="FEATURED VERIFIED TRACKING RECORD (TAP TO VIEW)"
-                    android:textColor="#9C2007"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardSampleTracking"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="3dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="ONSE-2026-8891"
-                                android:textColor="#800000"
+                                android:layout_marginTop="6dp"
+                                android:text="Barangay Clearance"
+                                android:textColor="#0F172A"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/bg_pill_emerald"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="4dp"
-                                android:text="READY FOR PICKUP"
-                                android:textColor="#065F46"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
+                                android:layout_marginTop="4dp"
+                                android:text="Official clearance certifying residency and good moral standing for employment, legal needs, or bank requirements."
+                                android:textColor="#475569"
+                                android:textSize="12sp" />
                         </LinearLayout>
+                    </androidx.cardview.widget.CardView>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:text="Barangay Clearance • Ma. Teresa Santos (2 Copies)"
-                            android:textColor="#0F172A"
-                            android:textSize="13.5sp"
-                            android:textStyle="bold" />
+                    <!-- Featured 2: Certificate of Indigency -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardFeaturedIndigency"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp">
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="Signed by Captain Roberto Alba • Tap to view 4-step tracker timeline →"
-                            android:textColor="#64748B"
-                            android:textSize="11.5sp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="🤝 SOCIAL WELFARE"
+                                    android:textColor="#059669"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/bg_pill_emerald"
+                                    android:paddingHorizontal="10dp"
+                                    android:paddingVertical="3dp"
+                                    android:text="FREE • Same Day"
+                                    android:textColor="#065F46"
+                                    android:textSize="10.5sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="Certificate of Indigency"
+                                android:textColor="#0F172A"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Issued free of charge for medical, hospital, educational scholarship, DSWD, or financial assistance."
+                                android:textColor="#475569"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Featured 3: First-Time Jobseeker -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardFeaturedJobseeker"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="🎓 YOUTH &amp; JOB AID"
+                                    android:textColor="#D97706"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/bg_pill_emerald"
+                                    android:paddingHorizontal="10dp"
+                                    android:paddingVertical="3dp"
+                                    android:text="FREE (R.A. 11261)"
+                                    android:textColor="#065F46"
+                                    android:textSize="10.5sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="First-Time Jobseeker Certificate"
+                                android:textColor="#0F172A"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Waives government pre-employment document fees (NBI, Police Clearance, PSA) under Republic Act No. 11261."
+                                android:textColor="#475569"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <Button
+                        android:id="@+id/btnViewAllServices"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_btn_maroon"
+                        android:text="View All 6 Barangay Certificates &amp; Fees →"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- E. HOW IT WORKS (4-STEP WORKFLOW FROM WEBSITE) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="HOW SMARTONSE WORKS"
+                        android:textColor="#9C2007"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="4 Simple Steps to Claim Your Clearance"
+                        android:textColor="#0F172A"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="01 • Fill Application Online\nSelect your certificate, enter your resident details, and choose copy count.\n\n02 • Desk Officer Verification\nBarangay records officers verify your Barangay Onse residency &amp; precinct.\n\n03 • Official Signing &amp; QR Code\nSigned by Punong Barangay Roberto B. Alba with a unique tracking code.\n\n04 • Express Pickup at Window 2\nPresent 1 valid ID at Barangay Onse Hall for fast release."
+                                android:textColor="#334155"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+
+                <!-- F. LIVE SAMPLE TRACKING PREVIEW CARD -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="FEATURED VERIFIED TRACKING RECORD (TAP TO VIEW)"
+                        android:textColor="#9C2007"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardSampleTracking"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="3dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="ONSE-2026-8891"
+                                    android:textColor="#800000"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/bg_pill_emerald"
+                                    android:paddingHorizontal="10dp"
+                                    android:paddingVertical="4dp"
+                                    android:text="READY FOR PICKUP"
+                                    android:textColor="#065F46"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="Barangay Clearance • Ma. Teresa Santos (2 Copies)"
+                                android:textColor="#0F172A"
+                                android:textSize="13.5sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Signed by Captain Roberto Alba • Tap to view 4-step tracker timeline →"
+                                android:textColor="#64748B"
+                                android:textSize="11.5sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+
+                <!-- G. SAN JUAN CITY & BARANGAY ONSE EMERGENCY HOTLINES -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="24/7 SAN JUAN &amp; BARANGAY ONSE EMERGENCY HOTLINES"
+                        android:textColor="#9C2007"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:cardBackgroundColor="#0F172A"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="3dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="🚨 San Juan CDRRMO Rescue: (02) 8722-9837\n🏛️ Barangay Onse Duty Officer: (02) 8123-4567\n🚓 San Juan PNP Police Station: (02) 8724-2509\n🚒 San Juan BFP Fire Station: (02) 8723-9371"
+                                android:textColor="#F8FAFC"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="Compliant with R.A. 10173 (Data Privacy Act), R.A. 11032 (Anti-Red Tape Act) &amp; E.O. No. 2 (Full Public Disclosure)."
+                                android:textColor="#94A3B8"
+                                android:textSize="10.5sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+
             </LinearLayout>
+        </ScrollView>
 
-            <!-- G. SAN JUAN CITY & BARANGAY ONSE EMERGENCY HOTLINES (From Website) -->
+        <!-- 3. PERSISTENT MOBILE APP BOTTOM NAVIGATION BAR -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#FFFFFF"
+            android:elevation="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="4dp">
+
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="20dp">
+                android:id="@+id/navTabHome"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="24/7 SAN JUAN &amp; BARANGAY ONSE EMERGENCY HOTLINES"
-                    android:textColor="#9C2007"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:text="🏠"
+                    android:textSize="16sp" />
 
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:cardBackgroundColor="#0F172A"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="3dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="🚨 San Juan CDRRMO Rescue: (02) 8722-9837\n🏛️ Barangay Onse Duty Officer: (02) 8123-4567\n🚓 San Juan PNP Police Station: (02) 8724-2509\n🚒 San Juan BFP Fire Station: (02) 8723-9371"
-                            android:textColor="#F8FAFC"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="Compliant with R.A. 10173 (Data Privacy Act), R.A. 11032 (Anti-Red Tape Act) &amp; E.O. No. 2 (Full Public Disclosure)."
-                            android:textColor="#94A3B8"
-                            android:textSize="10.5sp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                    android:text="Home"
+                    android:textColor="#800000"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
-        </LinearLayout>
-    </ScrollView>
+            <LinearLayout
+                android:id="@+id/navTabServices"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
 
-    <!-- 3. PERSISTENT MOBILE APP BOTTOM NAVIGATION BAR -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📄"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Services"
+                    android:textColor="#475569"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/navTabRequest"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="✍️"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Request"
+                    android:textColor="#475569"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/navTabTrack"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔍"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Track"
+                    android:textColor="#475569"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/navTabMore"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📊"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SK &amp; COA"
+                    android:textColor="#475569"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 4. FLOATING ONSEBOT AI ASSISTANT BUTTON (Exact match with website bottom-right chatbot!) -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="#FFFFFF"
-        android:elevation="12dp"
+        android:id="@+id/fabOnseBotChatbot"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="74dp"
+        android:background="@drawable/bg_btn_maroon"
+        android:clickable="true"
+        android:elevation="14dp"
+        android:focusable="true"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="4dp">
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🤖"
+            android:textSize="17sp" />
 
         <LinearLayout
-            android:id="@+id/navTabHome"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🏠"
-                android:textSize="16sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Home"
-                android:textColor="#800000"
-                android:textSize="10sp"
+                android:text="Ask OnseBot AI"
+                android:textColor="#FFFFFF"
+                android:textSize="11.5sp"
                 android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navTabServices"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📄"
-                android:textSize="16sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Services"
-                android:textColor="#475569"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navTabRequest"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="✍️"
-                android:textSize="16sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Request"
-                android:textColor="#475569"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navTabTrack"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🔍"
-                android:textSize="16sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Track"
-                android:textColor="#475569"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navTabMore"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📊"
-                android:textSize="16sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="SK &amp; COA"
-                android:textColor="#475569"
-                android:textSize="10sp"
+                android:text="● 24/7 Virtual Desk"
+                android:textColor="#A7F3D0"
+                android:textSize="8.5sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>

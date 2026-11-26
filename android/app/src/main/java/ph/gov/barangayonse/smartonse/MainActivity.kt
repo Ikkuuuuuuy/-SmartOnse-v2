@@ -138,6 +138,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, TransparencySkActivity::class.java))
         }
 
+        // Floating OnseBot AI Assistant Button (Explicit Intent to ChatbotActivity)
+        findViewById<LinearLayout>(R.id.fabOnseBotChatbot).setOnClickListener {
+            startActivity(Intent(this, ChatbotActivity::class.java))
+        }
+
         refreshUserSessionUI()
     }
 
