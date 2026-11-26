@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Base application theme using MaterialComponents for modern rounded Android UI/UX -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <!-- Use Theme.AppCompat.Light.NoActionBar so custom Button drawables render their true colors (White, Gold, Maroon, Dark) without MaterialComponents tint override! -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">#800000</item>
+        <item name="colorPrimaryDark">#800000</item>
+        <item name="colorAccent">#9C2007</item>
         <item name="android:statusBarColor">#800000</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:fitsSystemWindows">true</item>
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="colorPrimary">#800000</item>
-        <item name="colorPrimaryVariant">#600000</item>
-        <item name="colorSecondary">#F59E0B</item>
+        <item name="colorPrimaryDark">#800000</item>
+        <item name="colorAccent">#9C2007</item>
         <item name="android:statusBarColor">#800000</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
         <item name="android:windowLightStatusBar">false</item>
