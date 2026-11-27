@@ -21,16 +21,8 @@ import java.io.ByteArrayInputStream
  * WebMirrorActivity.kt — Exact SmartOnse v2 Website System UI (100% Sample Data / No DB Mode)
  *
  * Renders the exact SmartOnse v2 UI (`https://smartonse-v2.vercel.app`) inside Android while
- * intercepting `/api/*` database endpoints in Kotlin (`shouldInterceptRequest`) and returning
+ * intercepting `/api/` database endpoints in Kotlin (`shouldInterceptRequest`) and returning
  * predefined sample JSON from `SampleDataRepository.kt`.
- *
- * This gives the user 100% of their exact SmartOnse website design, Tailwind CSS, Dark/Light mode,
- * Accessibility panel, and OnseBot AI chatbot while strictly obeying Rule #4 & #10 of the course PDF:
- * "Do not connect the application to any database. Use sample or predefined data."
- *
- * Also includes a top bar button ("Native Kotlin Screens") that opens the native Android XML
- * Activities (`ServicesActivity`, `RequestFormActivity`, `TrackDocumentActivity`, etc.) using
- * Explicit Intents for rubric grading!
  */
 class WebMirrorActivity : AppCompatActivity() {
 
