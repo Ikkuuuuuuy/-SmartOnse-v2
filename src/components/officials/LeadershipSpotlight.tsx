@@ -164,17 +164,11 @@ export default function LeadershipSpotlight({ officials }: { officials: Official
                   )}
                 </div>
 
-                {official.contact && (
-                  <div className="pt-3 border-t border-slate-100 dark:border-blue-900/40 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                    <span className="inline-flex items-center gap-1 font-mono text-[11px]">
-                      <Phone className="w-3 h-3 text-slate-400" />
-                      {official.contact}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      Active Term
-                    </span>
-                  </div>
-                )}
+                <div className="pt-3 border-t border-slate-100 dark:border-blue-900/40 flex items-center justify-end text-xs text-slate-500 dark:text-slate-400">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    2023–2026 Term
+                  </span>
+                </div>
               </div>
             );
           })}
@@ -231,10 +225,10 @@ export default function LeadershipSpotlight({ officials }: { officials: Official
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-slate-50 dark:bg-[#070D18] rounded-3xl border border-slate-200/80 dark:border-blue-900/40">
         <div>
           <h4 className="font-black text-sm uppercase text-slate-900 dark:text-white">
-            Want to contact an official or check committee schedules?
+            Want to view full council profiles or committee assignments?
           </h4>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            View full contact numbers, public hearing calendars, and council profiles on the dedicated page.
+            View committee assignments, public hearing calendars, and council profiles on the dedicated page.
           </p>
         </div>
         <Link

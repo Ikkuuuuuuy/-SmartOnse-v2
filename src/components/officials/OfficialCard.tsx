@@ -115,17 +115,6 @@ export default function OfficialCard({
           {official.committee}
         </p>
       )}
-
-      {/* Contact Hotline */}
-      {official.contact && (
-        <a
-          href={`tel:${official.contact}`}
-          className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:text-[#9C2007] dark:hover:text-rose-400 bg-slate-50 dark:bg-[#070E1C] px-3 py-1 rounded-xl border border-slate-100 dark:border-blue-900/40 transition-colors"
-        >
-          <Phone className="w-3 h-3 text-slate-400" />
-          <span>{official.contact}</span>
-        </a>
-      )}
     </div>
   );
 }

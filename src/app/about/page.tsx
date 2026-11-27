@@ -11,7 +11,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Roberto B. Alba',
     position: 'Barangay Chairman',
     committee: 'Executive & Peace and Order',
-    contact: '0917-888-0011',
     avatarUrl: '/images/Chairman.webp',
   },
   {
@@ -19,7 +18,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Elena V. Gutierrez',
     position: 'Barangay Treasurer',
     committee: 'Finance, Budget & Appropriations',
-    contact: '0917-888-0029',
     avatarUrl: '/images/barangay-onse-seal.png',
   },
   {
@@ -27,7 +25,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Maria Elena C. Gomez',
     position: 'Barangay Secretary',
     committee: 'Secretariat & Administrative Records',
-    contact: '0917-888-0030',
     avatarUrl: '/images/barangay-onse-seal.png',
   },
   {
@@ -35,7 +32,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Danilo A. Florano',
     position: 'Barangay Kagawad',
     committee: 'Committee on Public Works & Infrastructure',
-    contact: '0917-888-0012',
     avatarUrl: '/images/Dan.webp',
   },
   {
@@ -43,7 +39,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Zenaida C. Casao',
     position: 'Barangay Kagawad',
     committee: 'Committee on Health & Sanitation',
-    contact: '0917-888-0013',
     avatarUrl: '/images/Zenaida.webp',
   },
   {
@@ -51,7 +46,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Ryan Lopez Lorbes',
     position: 'Barangay Kagawad',
     committee: 'Committee on Cleanliness & Environment',
-    contact: '0917-888-0014',
     avatarUrl: '/images/Ryan.webp',
   },
   {
@@ -59,7 +53,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. John Mark Cortez Daradal',
     position: 'Barangay Kagawad',
     committee: 'Committee on Ways and Means',
-    contact: '0917-888-0015',
     avatarUrl: '/images/JM.webp',
   },
   {
@@ -67,7 +60,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Federico Soller Deniega',
     position: 'Barangay Kagawad',
     committee: 'Committee on Peace and Order',
-    contact: '0917-888-0016',
     avatarUrl: '/images/Federico.webp',
   },
   {
@@ -75,7 +67,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Miguel Arguelles Zamora Jr.',
     position: 'Barangay Kagawad',
     committee: 'Committee on Education & Culture',
-    contact: '0917-888-0017',
     avatarUrl: '/images/Miguel.webp',
   },
   {
@@ -83,7 +74,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Rafael Lasin Borjal Jr.',
     position: 'Barangay Kagawad',
     committee: 'Committee on Transportation & Traffic',
-    contact: '0917-888-0018',
     avatarUrl: '/images/RAF.webp',
   },
 
@@ -93,7 +83,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. John Michael D. Permato',
     position: 'SK Chairperson',
     committee: 'Youth Leadership & Sports Development',
-    contact: '0917-888-0019',
     avatarUrl: '/images/Permato.webp',
   },
   {
@@ -101,7 +90,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Michaelito Bongalos',
     position: 'SK Treasurer',
     committee: 'Youth Budget & Appropriations',
-    contact: '0917-888-0020',
     avatarUrl: '/images/Bongalos.webp',
   },
   {
@@ -109,7 +97,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Jonathan D. Sorio',
     position: 'SK Secretary',
     committee: 'Youth Records & Secretariat',
-    contact: '0917-888-0021',
     avatarUrl: '/images/Sorio.webp',
   },
   {
@@ -117,7 +104,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Abigail A. Reyes',
     position: 'SK Kagawad',
     committee: 'Committee on Health & Nutrition',
-    contact: '0917-888-0022',
     avatarUrl: '/images/Mybaby.webp',
   },
   {
@@ -125,7 +111,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Ethan Jetter D.G. Garcia',
     position: 'SK Kagawad',
     committee: 'Committee on Education & Culture',
-    contact: '0917-888-0023',
     avatarUrl: '/images/Garcia.webp',
   },
   {
@@ -133,7 +118,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Alexis Adrianne R. Luciano',
     position: 'SK Kagawad',
     committee: 'Committee on Digital Arts & Innovation',
-    contact: '0917-888-0024',
     avatarUrl: '/images/Luciano.webp',
   },
   {
@@ -141,7 +125,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Sherric Q. Pantaleon',
     position: 'SK Kagawad',
     committee: 'Committee on Anti-Drug Abuse (YADAS)',
-    contact: '0917-888-0025',
     avatarUrl: '/images/Sherric.webp',
   },
   {
@@ -149,7 +132,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Sherwin Reyes',
     position: 'SK Kagawad',
     committee: 'Committee on Environmental Protection',
-    contact: '0917-888-0026',
     avatarUrl: '/images/Reyes.webp',
   },
   {
@@ -157,7 +139,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Ian Jeffrey L. Cadiang',
     position: 'SK Kagawad',
     committee: 'Committee on Youth Livelihood & Skills',
-    contact: '0917-888-0027',
     avatarUrl: '/images/Cadiang.webp',
   },
   {
@@ -165,7 +146,6 @@ const FALLBACK_OFFICIALS = [
     name: 'Hon. Joshua D. Munsayac',
     position: 'SK Kagawad',
     committee: 'Committee on Disaster Preparedness',
-    contact: '0917-888-0028',
     avatarUrl: '/images/Munsayac.webp',
   },
 ];

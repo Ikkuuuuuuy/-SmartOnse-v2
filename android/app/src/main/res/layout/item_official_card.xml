@@ -98,20 +98,5 @@
             android:textColor="#64748B"
             android:textSize="12sp" />
 
-        <!-- Contact Hotline Pill -->
-        <TextView
-            android:id="@+id/tvOfficialContact"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_input_box"
-            android:fontFamily="monospace"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="6dp"
-            android:text="📞 0917-888-0011"
-            android:textColor="#334155"
-            android:textSize="11.5sp"
-            android:textStyle="bold" />
-
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -174,7 +174,6 @@ class AboutOfficialsActivity : AppCompatActivity() {
         val tvName = view.findViewById<TextView>(R.id.tvOfficialName)
         val tvPosition = view.findViewById<TextView>(R.id.tvOfficialPosition)
         val tvCommittee = view.findViewById<TextView>(R.id.tvOfficialCommittee)
-        val tvContact = view.findViewById<TextView>(R.id.tvOfficialContact)
 
         // Load real portrait drawable from res/drawable/
         val resId = resources.getIdentifier(official.avatarResName, "drawable", packageName)
@@ -233,7 +232,6 @@ class AboutOfficialsActivity : AppCompatActivity() {
         tvPosition.text = official.position
         tvPosition.setTextColor(if (isSk) 0xFF2563EB.toInt() else 0xFF9C2007.toInt())
         tvCommittee.text = official.committee
-        tvContact.text = "📞 ${official.contact}"
 
         view.setOnClickListener {
             Toast.makeText(
