@@ -1,158 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC"
-    android:orientation="vertical">
+    android:background="#FDF8F6">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#800000"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btnOfficialsBack"
-            android:layout_width="wrap_content"
-            android:layout_height="38dp"
-            android:backgroundTint="#600000"
-            android:text="← Back"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp" />
+        <!-- Persistent Top Website Navbar + Links Strip -->
+        <include layout="@layout/layout_top_navbar" />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="About &amp; Barangay Officials"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Barangay Onse Council &amp; Sangguniang Kabataan"
-                android:textColor="#FECDD3"
-                android:textSize="11sp" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
-
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
 
-            <!-- About Barangay Onse Card -->
-            <androidx.cardview.widget.CardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="2dp">
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="90dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="ABOUT BARANGAY ONSE, SAN JUAN CITY"
-                        android:textColor="#800000"
-                        android:textSize="11sp"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-black"
+                        android:text="ABOUT, OFFICIALS &amp; CONTACT"
+                        android:textColor="#0F172A"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:lineSpacingExtra="3dp"
-                        android:text="SmartOnse is the Digital E-Governance and Resident Services Portal of Barangay Onse, San Juan City. Compliant with R.A. 11032 (Ease of Doing Business) and R.A. 10173 (Data Privacy Act of 2012)."
-                        android:textColor="#334155"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="📍 Barangay Hall: Ibuna corner P. Guevarra St., Barangay Onse, San Juan City\n📞 Emergency Hotline: (02) 8724-0011 • Mon–Fri 8:00 AM – 5:00 PM"
-                        android:textColor="#0F172A"
+                    <Button
+                        android:id="@+id/btnOfficialsBack"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:background="@drawable/bg_btn_white"
+                        android:paddingHorizontal="10dp"
+                        android:text="← Home"
+                        android:textAllCaps="false"
+                        android:textColor="#9C2007"
                         android:textSize="11sp"
                         android:textStyle="bold" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
 
-            <!-- Council Filter Buttons -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:orientation="horizontal">
+                <!-- About Barangay Onse & Emergency Contact Card -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="2dp">
 
-                <Button
-                    android:id="@+id/btnFilterAllOfficials"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="4dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="#800000"
-                    android:text="All (14)"
-                    android:textAllCaps="false"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
-                <Button
-                    android:id="@+id/btnFilterBrgyCouncil"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_marginHorizontal="4dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="#334155"
-                    android:text="Brgy Council"
-                    android:textAllCaps="false"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="BARANGAY ONSE, SAN JUAN CITY"
+                            android:textColor="#9C2007"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
 
-                <Button
-                    android:id="@+id/btnFilterSkCouncil"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_marginStart="4dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="#334155"
-                    android:text="SK Council"
-                    android:textAllCaps="false"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:lineSpacingExtra="3dp"
+                            android:text="SmartOnse is the Digital E-Governance and Resident Services Portal of Barangay Onse, San Juan City. Compliant with R.A. 11032 (Ease of Doing Business) and R.A. 10173 (Data Privacy Act of 2012)."
+                            android:textColor="#334155"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="📍 Barangay Hall: Ibuna corner P. Guevarra St., Barangay Onse, San Juan City\n📞 Barangay Hotline: (02) 8723-0011 / 0917-888-0011\n🚨 San Juan CDRRMO Rescue: (02) 8722-9837 | PNP: (02) 8724-2509 | BFP: 160"
+                            android:textColor="#0F172A"
+                            android:textSize="11.5sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Council Filter Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnFilterAllOfficials"
+                        android:layout_width="0dp"
+                        android:layout_height="38dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_maroon"
+                        android:text="All (20)"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btnFilterBrgyCouncil"
+                        android:layout_width="0dp"
+                        android:layout_height="38dp"
+                        android:layout_marginHorizontal="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Brgy Council"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btnFilterSkCouncil"
+                        android:layout_width="0dp"
+                        android:layout_height="38dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="SK Council"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/containerOfficialsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="vertical" />
             </LinearLayout>
+        </ScrollView>
 
-            <LinearLayout
-                android:id="@+id/containerOfficialsList"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="vertical" />
-        </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+        <!-- Persistent 5-Tab Bottom Navigation Bar -->
+        <include layout="@layout/layout_bottom_nav" />
+    </LinearLayout>
+
+    <!-- Floating OnseBot AI Button -->
+    <include layout="@layout/layout_fab_onsebot" />
+</FrameLayout>

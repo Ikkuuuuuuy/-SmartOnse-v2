@@ -23,6 +23,11 @@ class ServiceDetailActivity : AppCompatActivity() {
         val service = SampleDataRepository.findServiceById(serviceId)
 
         val btnBack = findViewById<Button>(R.id.btnDetailBack)
+        NavigationShellHelper.setupPersistentShell(
+            activity = this,
+            activeBottomTab = "SERVICES",
+            activeTopLink = "SERVICES"
+        )
         val tvCategory = findViewById<TextView>(R.id.tvDetailCategory)
         val tvTitle = findViewById<TextView>(R.id.tvDetailTitle)
         val tvCode = findViewById<TextView>(R.id.tvDetailCode)

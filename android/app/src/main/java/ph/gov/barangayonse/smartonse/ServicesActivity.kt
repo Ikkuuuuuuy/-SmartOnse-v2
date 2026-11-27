@@ -33,6 +33,12 @@ class ServicesActivity : AppCompatActivity() {
         val btnBackHome = findViewById<Button>(R.id.btnBackHome)
         btnBackHome.setOnClickListener { finish() }
 
+        NavigationShellHelper.setupPersistentShell(
+            activity = this,
+            activeBottomTab = "SERVICES",
+            activeTopLink = "SERVICES"
+        )
+
         containerServices = findViewById(R.id.containerServicesList)
         etSearchServices = findViewById(R.id.etSearchServices)
         tvResultsCount = findViewById(R.id.tvServicesCount)

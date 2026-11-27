@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="62dp"
+    android:background="#FFFFFF"
+    android:elevation="14dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="6dp">
+
+    <LinearLayout
+        android:id="@+id/navTabHome"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/ivBottomHome"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="Home"
+            android:src="@drawable/ic_vec_home"
+            app:tint="#9C2007" />
+
+        <TextView
+            android:id="@+id/tvBottomHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Home"
+            android:textColor="#9C2007"
+            android:textSize="10.5sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navTabServices"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/ivBottomServices"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="Services"
+            android:src="@drawable/ic_vec_doc"
+            app:tint="#64748B" />
+
+        <TextView
+            android:id="@+id/tvBottomServices"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Services"
+            android:textColor="#64748B"
+            android:textSize="10.5sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navTabRequest"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/ivBottomRequest"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="Request"
+            android:src="@drawable/ic_vec_add_box"
+            app:tint="#64748B" />
+
+        <TextView
+            android:id="@+id/tvBottomRequest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Request"
+            android:textColor="#64748B"
+            android:textSize="10.5sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navTabTrack"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/ivBottomTrack"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="Track"
+            android:src="@drawable/ic_vec_search"
+            app:tint="#64748B" />
+
+        <TextView
+            android:id="@+id/tvBottomTrack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Track"
+            android:textColor="#64748B"
+            android:textSize="10.5sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navTabMore"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/ivBottomMore"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="Disclosure"
+            android:src="@drawable/ic_vec_shield"
+            app:tint="#64748B" />
+
+        <TextView
+            android:id="@+id/tvBottomMore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Disclosure"
+            android:textColor="#64748B"
+            android:textSize="10.5sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -26,6 +26,13 @@ class AboutOfficialsActivity : AppCompatActivity() {
         val btnBack = findViewById<Button>(R.id.btnOfficialsBack)
         btnBack.setOnClickListener { finish() }
 
+        val section = intent.getStringExtra("EXTRA_SECTION") ?: "OFFICIALS"
+        NavigationShellHelper.setupPersistentShell(
+            activity = this,
+            activeBottomTab = "HOME",
+            activeTopLink = section
+        )
+
         containerOfficials = findViewById(R.id.containerOfficialsList)
 
         val btnFilterAll = findViewById<Button>(R.id.btnFilterAllOfficials)

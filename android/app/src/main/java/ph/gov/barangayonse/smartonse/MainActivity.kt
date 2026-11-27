@@ -29,19 +29,25 @@ class MainActivity : AppCompatActivity() {
 
         tvHeroAccountBtn = findViewById(R.id.btnHeroLoginPortal)
 
-        // Top Navbar Seal & Mobile Hamburger Menu (`☰`)
-        findViewById<ImageView>(R.id.ivBarangaySeal).setOnClickListener {
-            Toast.makeText(
-                this,
-                "SmartOnse v2.0 • Barangay Onse Digital E-Governance Portal (San Juan City)",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        // Setup Persistent Top Website Nav Strip + Persistent Bottom Bar (Highlights HOME) + Hamburger Account Drawer
+        NavigationShellHelper.setupPersistentShell(
+            activity = this,
+            activeBottomTab = "HOME",
+            activeTopLink = "HOME"
+        )
 
-        // Hamburger Menu (`☰`) opens a native mobile navigation menu matching Navbar.tsx
-        findViewById<ImageView>(R.id.btnNavbarAccount).setOnClickListener {
-            showMobileNavigationMenu()
-        }
+        refreshUserSessionUI()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        NavigationShellHelper.setupPersistentShell(
+            activity = this,
+            activeBottomTab = "HOME",
+            activeTopLink = "HOME"
+        )
+        refreshUserSessionUI()
+    }
 
         // Hero Section CTAs (Exact match with website Hero buttons)
         findViewById<Button>(R.id.btnHeroRequest).setOnClickListener {
@@ -114,35 +120,6 @@ class MainActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
-
-        // Persistent Bottom Navigation Bar (5 Mobile App Tabs)
-        findViewById<LinearLayout>(R.id.navTabHome).setOnClickListener {
-            Toast.makeText(this, "Home Dashboard", Toast.LENGTH_SHORT).show()
-        }
-        findViewById<LinearLayout>(R.id.navTabServices).setOnClickListener {
-            startActivity(Intent(this, ServicesActivity::class.java))
-        }
-        findViewById<LinearLayout>(R.id.navTabRequest).setOnClickListener {
-            startActivity(Intent(this, RequestFormActivity::class.java))
-        }
-        findViewById<LinearLayout>(R.id.navTabTrack).setOnClickListener {
-            startActivity(Intent(this, TrackDocumentActivity::class.java))
-        }
-        findViewById<LinearLayout>(R.id.navTabMore).setOnClickListener {
-            startActivity(Intent(this, TransparencySkActivity::class.java))
-        }
-
-        // Floating OnseBot AI Assistant Button (Explicit Intent to ChatbotActivity)
-        findViewById<FrameLayout>(R.id.fabOnseBotChatbot).setOnClickListener {
-            startActivity(Intent(this, ChatbotActivity::class.java))
-        }
-
-        refreshUserSessionUI()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        refreshUserSessionUI()
     }
 
     private fun refreshUserSessionUI() {

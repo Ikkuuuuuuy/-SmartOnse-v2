@@ -41,6 +41,12 @@ class TrackDocumentActivity : AppCompatActivity() {
         val btnBack = findViewById<Button>(R.id.btnTrackBack)
         btnBack.setOnClickListener { finish() }
 
+        NavigationShellHelper.setupPersistentShell(
+            activity = this,
+            activeBottomTab = "TRACK",
+            activeTopLink = "SERVICES"
+        )
+
         etTrackingCode = findViewById(R.id.etTrackingInput)
         val btnSearch = findViewById<Button>(R.id.btnSearchTracking)
         cardResult = findViewById(R.id.cardTrackingResult)

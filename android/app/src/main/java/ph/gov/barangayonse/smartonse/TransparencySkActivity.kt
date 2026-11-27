@@ -29,6 +29,8 @@ class TransparencySkActivity : AppCompatActivity() {
         containerContent = findViewById(R.id.containerHubList)
         tvSectionSubheader = findViewById(R.id.tvHubSectionInfo)
 
+        activeTab = intent.getStringExtra("EXTRA_TAB") ?: "TRANSPARENCY"
+
         val btnTabTransparency = findViewById<Button>(R.id.btnTabTransparency)
         val btnTabSkPrograms = findViewById<Button>(R.id.btnTabSkPrograms)
         val btnTabEvents = findViewById<Button>(R.id.btnTabEvents)
@@ -49,7 +51,19 @@ class TransparencySkActivity : AppCompatActivity() {
         renderActiveTab()
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        activeTab = intent.getStringExtra("EXTRA_TAB") ?: activeTab
+        renderActiveTab()
+    }
+
     private fun renderActiveTab() {
+        NavigationShellHelper.setupPersistentShell(
+            activity = this,
+            activeBottomTab = "DISCLOSURE",
+            activeTopLink = activeTab
+        )
         containerContent.removeAllViews()
         val inflater = LayoutInflater.from(this)
 

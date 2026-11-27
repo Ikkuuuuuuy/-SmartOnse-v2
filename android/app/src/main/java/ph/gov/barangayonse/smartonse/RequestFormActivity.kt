@@ -37,6 +37,12 @@ class RequestFormActivity : AppCompatActivity() {
         val btnBack = findViewById<Button>(R.id.btnFormBack)
         btnBack.setOnClickListener { finish() }
 
+        NavigationShellHelper.setupPersistentShell(
+            activity = this,
+            activeBottomTab = "REQUEST",
+            activeTopLink = "SERVICES"
+        )
+
         val spinnerDocType = findViewById<Spinner>(R.id.spinnerDocumentType)
         val spinnerCivilStatus = findViewById<Spinner>(R.id.spinnerCivilStatus)
         val etFullName = findViewById<EditText>(R.id.etFullName)
