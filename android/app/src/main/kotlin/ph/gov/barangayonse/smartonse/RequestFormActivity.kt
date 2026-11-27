@@ -174,7 +174,7 @@ class RequestFormActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Compute Fee & Save to In-Memory Sample Repository
+            // Compute Fee & Submit Live to SmartOnse PostgreSQL Database
             val selectedService = SampleDataRepository.servicesList[spinnerDocType.selectedItemPosition]
             val civilStatus = spinnerCivilStatus.selectedItem.toString()
             val unitFeeNumber = when {
@@ -184,38 +184,64 @@ class RequestFormActivity : AppCompatActivity() {
                 else -> 0
             }
             val totalFeeDisplay = if (unitFeeNumber == 0) "FREE" else "₱${unitFeeNumber * copies}.00"
-            val newTrackingNumber = SampleDataRepository.generateNextTrackingCode()
-            val timestamp = SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.US).format(Date())
+            val fullPurpose = "$purpose ($civilStatus • $years yrs residency)"
 
-            val newRecord = TrackingRecord(
-                trackingNumber = newTrackingNumber,
-                applicantName = fullName,
+            btnSubmit.isEnabled = false
+            btnSubmit.text = "Saving to SmartOnse Database..."
+
+            SmartOnseApiClient.submitRequestToDatabase(
+                fullName = fullName,
                 contactNumber = cleanDigits,
                 address = address,
-                documentType = selectedService.title,
-                purpose = "$purpose ($civilStatus • $years yrs residency)",
+                documentType = selectedService.code,
+                purpose = fullPurpose,
                 copies = copies,
-                fee = totalFeeDisplay,
-                status = "PENDING",
-                filedDate = timestamp,
-                remarks = "Submitted via SmartOnse Android App. Pending Barangay Secretariat review."
-            )
-            SampleDataRepository.trackingRecords.add(0, newRecord)
+                email = SampleDataRepository.currentUserEmail
+            ) { success, dbRecord, _ ->
+                btnSubmit.isEnabled = true
+                btnSubmit.text = "Submit Certificate Request →"
 
-            // Navigate to ConfirmationActivity using Explicit Intent with all details
-            val confirmIntent = Intent(this@RequestFormActivity, ConfirmationActivity::class.java).apply {
-                putExtra("EXTRA_TRACKING_NUMBER", newTrackingNumber)
-                putExtra("EXTRA_APPLICANT_NAME", fullName)
-                putExtra("EXTRA_CONTACT", cleanDigits)
-                putExtra("EXTRA_ADDRESS", address)
-                putExtra("EXTRA_DOC_TYPE", selectedService.title)
-                putExtra("EXTRA_PURPOSE", purpose)
-                putExtra("EXTRA_COPIES", copies)
-                putExtra("EXTRA_FEE", totalFeeDisplay)
-                putExtra("EXTRA_FILED_DATE", timestamp)
+                val finalRecord = dbRecord ?: run {
+                    val fallbackCode = SampleDataRepository.generateNextTrackingCode()
+                    val timestamp = SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.US).format(Date())
+                    TrackingRecord(
+                        trackingNumber = fallbackCode,
+                        applicantName = fullName,
+                        contactNumber = cleanDigits,
+                        address = address,
+                        documentType = selectedService.title,
+                        purpose = fullPurpose,
+                        copies = copies,
+                        fee = totalFeeDisplay,
+                        status = "PENDING",
+                        filedDate = timestamp,
+                        remarks = "Submitted via SmartOnse Android App. Pending Barangay Secretariat review."
+                    ).also { SampleDataRepository.trackingRecords.add(0, it) }
+                }
+
+                if (success) {
+                    Toast.makeText(
+                        this@RequestFormActivity,
+                        "Saved to PostgreSQL Database! Tracking #: ${finalRecord.trackingNumber}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                // Navigate to ConfirmationActivity using Explicit Intent with all details
+                val confirmIntent = Intent(this@RequestFormActivity, ConfirmationActivity::class.java).apply {
+                    putExtra("EXTRA_TRACKING_NUMBER", finalRecord.trackingNumber)
+                    putExtra("EXTRA_APPLICANT_NAME", finalRecord.applicantName)
+                    putExtra("EXTRA_CONTACT", finalRecord.contactNumber)
+                    putExtra("EXTRA_ADDRESS", finalRecord.address)
+                    putExtra("EXTRA_DOC_TYPE", finalRecord.documentType)
+                    putExtra("EXTRA_PURPOSE", purpose)
+                    putExtra("EXTRA_COPIES", copies)
+                    putExtra("EXTRA_FEE", finalRecord.fee)
+                    putExtra("EXTRA_FILED_DATE", finalRecord.filedDate)
+                }
+                startActivity(confirmIntent)
+                finish()
             }
-            startActivity(confirmIntent)
-            finish()
         }
     }
 

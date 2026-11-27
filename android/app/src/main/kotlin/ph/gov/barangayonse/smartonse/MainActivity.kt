@@ -38,8 +38,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         tvHeroAccountBtn.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
+            if (SampleDataRepository.isLoggedIn) {
+                startActivity(Intent(this, SystemDashboardActivity::class.java))
+            } else {
+                startActivity(Intent(this, LoginActivity::class.java))
+            }
         }
+
+        // Sync live data from SmartOnse PostgreSQL Database on launch
+        SmartOnseApiClient.syncFromDatabase()
 
         // Hero Inline Quick Tracking Search Bar (Exact match with website Hero Search Bar)
         val etHeroTrackInput = findViewById<EditText>(R.id.etHeroTrackingSearch)
@@ -70,7 +77,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, TransparencySkActivity::class.java))
         }
         findViewById<CardView>(R.id.cardNavLogin).setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
+            startActivity(Intent(this, SystemDashboardActivity::class.java))
         }
 
         // Featured Popular Certificates on Home Screen

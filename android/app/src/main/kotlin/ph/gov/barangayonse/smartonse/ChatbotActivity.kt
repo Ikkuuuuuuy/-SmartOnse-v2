@@ -94,8 +94,10 @@ class ChatbotActivity : AppCompatActivity() {
 
     private fun handleUserQuestion(question: String) {
         appendChatBubble(isBot = false, text = question)
-        val reply = generatePredefinedReply(question)
-        appendChatBubble(isBot = true, text = reply)
+        SmartOnseApiClient.askOnseBotBackend(question) { liveReply ->
+            val reply = liveReply ?: generatePredefinedReply(question)
+            appendChatBubble(isBot = true, text = reply)
+        }
     }
 
     private fun generatePredefinedReply(q: String): String {

@@ -81,6 +81,13 @@ class TrackDocumentActivity : AppCompatActivity() {
 
         renderSampleCodesList()
 
+        // Sync latest tracking records from PostgreSQL database in background
+        SmartOnseApiClient.syncFromDatabase { synced ->
+            if (synced) {
+                renderSampleCodesList()
+            }
+        }
+
         // If launched with an EXTRA_TRACKING_CODE, automatically display it
         val initialCode = intent.getStringExtra("EXTRA_TRACKING_CODE")
         if (!initialCode.isNullOrEmpty()) {
@@ -95,15 +102,26 @@ class TrackDocumentActivity : AppCompatActivity() {
     }
 
     private fun lookupTrackingCode(code: String) {
-        val record = SampleDataRepository.findTrackingByCode(code)
-        if (record == null) {
-            cardResult.visibility = View.GONE
-            tvErrorBanner.text = "No record found for \"${code.uppercase()}\". Tap any sample tracking number below to test."
-            tvErrorBanner.visibility = View.VISIBLE
-            Toast.makeText(this, "Tracking number not found", Toast.LENGTH_SHORT).show()
-            return
+        // First show immediate local match if present, then query live PostgreSQL database
+        val localMatch = SampleDataRepository.findTrackingByCode(code)
+        if (localMatch != null) {
+            displayTrackingRecord(localMatch)
         }
 
+        SmartOnseApiClient.trackDocumentFromDatabase(code) { record ->
+            if (record == null) {
+                cardResult.visibility = View.GONE
+                tvErrorBanner.text = "No record found in SmartOnse Database for \"${code.uppercase()}\". Tap any tracking number below to test."
+                tvErrorBanner.visibility = View.VISIBLE
+                Toast.makeText(this, "Tracking number not found", Toast.LENGTH_SHORT).show()
+                return@trackDocumentFromDatabase
+            }
+            displayTrackingRecord(record)
+            renderSampleCodesList()
+        }
+    }
+
+    private fun displayTrackingRecord(record: TrackingRecord) {
         tvErrorBanner.visibility = View.GONE
         cardResult.visibility = View.VISIBLE
 

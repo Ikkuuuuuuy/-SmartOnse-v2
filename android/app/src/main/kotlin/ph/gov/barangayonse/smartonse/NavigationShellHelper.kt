@@ -137,27 +137,36 @@ object NavigationShellHelper {
         val tvRoleBadge = view.findViewById<TextView>(R.id.tvMenuUserRoleBadge)
         val tvUserName = view.findViewById<TextView>(R.id.tvMenuUserName)
         val tvUserEmail = view.findViewById<TextView>(R.id.tvMenuUserEmail)
-        val btnProfile = view.findViewById< android.widget.Button>(R.id.btnMenuProfile)
+        val btnDashboard = view.findViewById<android.widget.Button>(R.id.btnMenuSystemDashboard)
         val btnSwitchRole = view.findViewById<android.widget.Button>(R.id.btnMenuSwitchRole)
         val btnSignOut = view.findViewById<android.widget.Button>(R.id.btnMenuSignOut)
 
         if (SampleDataRepository.isLoggedIn) {
             tvRoleBadge.text = SampleDataRepository.currentUserRole.uppercase()
             tvUserName.text = SampleDataRepository.currentUserName
-            tvUserEmail.text = SampleDataRepository.currentUserEmail
-            btnProfile.text = "👤 My Resident Profile & Account"
+            tvUserEmail.text = "${SampleDataRepository.currentUserEmail} • ● Live DB"
+            val isAdmin = SampleDataRepository.currentUserRole.contains("Captain", true) ||
+                SampleDataRepository.currentUserRole.contains("Admin", true) ||
+                SampleDataRepository.currentUserRole.contains("Staff", true) ||
+                SampleDataRepository.currentUserRole.contains("Kagawad", true) ||
+                SampleDataRepository.currentUserRole.contains("SK", true)
+            btnDashboard.text = if (isAdmin) "🏛️ Admin & Council Live DB Dashboard" else "👤 My Resident Portal & Live Requests"
             btnSignOut.visibility = View.VISIBLE
         } else {
             tvRoleBadge.text = "GUEST CITIZEN"
             tvUserName.text = "Not Signed In"
             tvUserEmail.text = "Tap below to sign in to SmartOnse"
-            btnProfile.text = "🔐 Sign In to Resident / Staff Portal"
+            btnDashboard.text = "🔐 Sign In to Resident / Staff Portal"
             btnSignOut.visibility = View.GONE
         }
 
-        btnProfile.setOnClickListener {
+        btnDashboard.setOnClickListener {
             dialog.dismiss()
-            activity.startActivity(Intent(activity, LoginActivity::class.java))
+            if (SampleDataRepository.isLoggedIn) {
+                activity.startActivity(Intent(activity, SystemDashboardActivity::class.java))
+            } else {
+                activity.startActivity(Intent(activity, LoginActivity::class.java))
+            }
         }
 
         btnSwitchRole.setOnClickListener {

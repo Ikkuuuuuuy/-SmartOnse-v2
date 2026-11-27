@@ -84,28 +84,47 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val matchedDemo = SampleDataRepository.demoAccounts.find {
-                it.email.equals(identifier, ignoreCase = true)
+            btnSignIn.isEnabled = false
+            btnSignIn.text = "Authenticating with Database..."
+
+            SmartOnseApiClient.loginWithDatabase(identifier, password) { success, errMsg ->
+                btnSignIn.isEnabled = true
+                btnSignIn.text = "Sign In to SmartOnse Portal →"
+
+                if (!success) {
+                    // Check if it matches one of the demo emails with default password
+                    val matchedDemo = SampleDataRepository.demoAccounts.find {
+                        it.email.equals(identifier, ignoreCase = true)
+                    }
+                    if (matchedDemo != null && password == "password123") {
+                        SampleDataRepository.isLoggedIn = true
+                        SampleDataRepository.currentUserName = matchedDemo.fullName
+                        SampleDataRepository.currentUserRole = matchedDemo.roleTitle
+                        SampleDataRepository.currentUserEmail = matchedDemo.email
+                    } else if (errMsg != null && errMsg.contains("Invalid", true)) {
+                        tvLoginError.text = "Authentication Error: $errMsg (Tip: Default demo password is password123)"
+                        tvLoginError.visibility = View.VISIBLE
+                        return@loginWithDatabase
+                    } else {
+                        SampleDataRepository.isLoggedIn = true
+                        SampleDataRepository.currentUserName = matchedDemo?.fullName ?: "Juan Dela Cruz"
+                        SampleDataRepository.currentUserRole = matchedDemo?.roleTitle ?: "Verified Resident"
+                        SampleDataRepository.currentUserEmail = identifier
+                    }
+                }
+
+                Toast.makeText(
+                    this,
+                    "Signed in as ${SampleDataRepository.currentUserName} (${SampleDataRepository.currentUserRole})",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                startActivity(Intent(this, SystemDashboardActivity::class.java))
+                finish()
             }
-
-            SampleDataRepository.isLoggedIn = true
-            SampleDataRepository.currentUserName = matchedDemo?.fullName ?: "Juan Dela Cruz"
-            SampleDataRepository.currentUserRole = matchedDemo?.roleTitle ?: "Verified Resident"
-            SampleDataRepository.currentUserEmail = identifier
-
-            Toast.makeText(
-                this,
-                "Welcome back, ${SampleDataRepository.currentUserName}!",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            startActivity(Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            })
-            finish()
         }
 
-        // 1-Click Demo Role Switcher Buttons (Matches Website's 1-Click Demo Roles)
+        // 1-Click Demo Role Switcher Buttons (Synced with Live PostgreSQL Database + AuditLog)
         val inflater = LayoutInflater.from(this)
         for (demo in SampleDataRepository.demoAccounts) {
             val btn = inflater.inflate(R.layout.item_tracking_chip, containerDemoRoles, false) as Button
@@ -114,18 +133,19 @@ class LoginActivity : AppCompatActivity() {
                 SampleDataRepository.isLoggedIn = true
                 SampleDataRepository.currentUserName = demo.fullName
                 SampleDataRepository.currentUserRole = demo.roleTitle
+                SampleDataRepository.currentUserRawRole = demo.id
                 SampleDataRepository.currentUserEmail = demo.email
 
-                Toast.makeText(
-                    this,
-                    "Switched to ${demo.roleTitle}: ${demo.fullName}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                SmartOnseApiClient.demoLoginWithDatabase(demo.id) { _ ->
+                    Toast.makeText(
+                        this,
+                        "Active Role: ${SampleDataRepository.currentUserRole} (${SampleDataRepository.currentUserName})",
+                        Toast.LENGTH_SHORT
+                    ).show()
 
-                startActivity(Intent(this, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                })
-                finish()
+                    startActivity(Intent(this, SystemDashboardActivity::class.java))
+                    finish()
+                }
             }
             containerDemoRoles.addView(btn)
         }

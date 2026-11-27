@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--
-      SmartOnse v2 - Native Kotlin Android Application
-      100% Standalone Native Kotlin Activities + XML Layouts
-      Uses Predefined Static Sample Data (SampleDataRepository.kt) - No Database or Network Required
-    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
 
         <activity
@@ -80,6 +79,12 @@
         <activity
             android:name=".ChatbotActivity"
             android:label="OnseBot AI Assistant"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="false" />
+
+        <activity
+            android:name=".SystemDashboardActivity"
+            android:label="SmartOnse System Portal &amp; Dashboard"
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="false" />
 

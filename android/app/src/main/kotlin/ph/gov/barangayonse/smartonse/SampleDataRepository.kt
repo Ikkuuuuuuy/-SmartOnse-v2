@@ -82,11 +82,15 @@ data class DemoRoleAccount(
 
 object SampleDataRepository {
 
-    // Active simulated logged-in user (defaults to Resident Juan Dela Cruz or Guest)
+    // Active logged-in user (synced with SmartOnse PostgreSQL Database)
     var currentUserName: String = "Juan Dela Cruz"
     var currentUserRole: String = "Verified Resident"
+    var currentUserRawRole: String = "resident"
     var currentUserEmail: String = "juan@onse.ph"
+    var currentUserPhone: String = "09171234567"
+    var currentUserAddress: String = "145 Lt. Artiaga St., Barangay Onse, San Juan City"
     var isLoggedIn: Boolean = true
+    var isDatabaseConnected: Boolean = true
 
     val demoAccounts = listOf(
         DemoRoleAccount("resident", "Verified Resident", "Juan Dela Cruz", "juan@onse.ph", "👤 Resident Portal"),
