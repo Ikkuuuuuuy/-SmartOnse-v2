@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { calculateSimilarity } from '@/lib/idScanner';
-import { hashPassword } from '@/lib/auth';
+import { hashPassword, createSessionToken, SESSION_COOKIE_NAME } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
     const {
       name,
+      firstName: rawFirstName,
+      middleName: rawMiddleName,
+      lastName: rawLastName,
       email,
       phone,
       address,
@@ -16,6 +19,8 @@ export async function POST(req: Request) {
       gender,
       civilStatus,
       residencyType,
+      isHeadOfFamily,
+      familyMembersCount,
       yearsOfResidency,
       employmentStatus,
       isRegisteredVoter,
@@ -27,9 +32,19 @@ export async function POST(req: Request) {
       idCardImage,
     } = body;
 
-    if (!name || !phone || !password || typeof name !== 'string' || typeof phone !== 'string' || typeof password !== 'string') {
+    const cleanFirst = typeof rawFirstName === 'string' ? rawFirstName.trim() : '';
+    const cleanMiddle = typeof rawMiddleName === 'string' ? rawMiddleName.trim() : '';
+    const cleanLast = typeof rawLastName === 'string' ? rawLastName.trim() : '';
+    const combinedName =
+      cleanFirst && cleanLast
+        ? [cleanFirst, cleanMiddle, cleanLast].filter(Boolean).join(' ')
+        : typeof name === 'string'
+        ? name.trim()
+        : '';
+
+    if (!combinedName || !phone || !password || typeof phone !== 'string' || typeof password !== 'string') {
       return NextResponse.json(
-        { error: 'Full name, mobile phone number, and password are required.' },
+        { error: 'Last name, first name, mobile phone number, and password are required.' },
         { status: 400 }
       );
     }
@@ -41,7 +56,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (name.trim().length > 120) {
+    if (combinedName.length > 120) {
       return NextResponse.json(
         { error: 'Name exceeds maximum allowed length.' },
         { status: 400 }
@@ -118,15 +133,15 @@ export async function POST(req: Request) {
     let matchedInhabitant = null;
     let highestScore = 0;
 
-    const applicantCleanName = name.trim().toLowerCase();
+    const applicantCleanName = combinedName.toLowerCase();
 
     for (const inh of activeInhabitants) {
       const inhFullName = `${inh.firstName} ${inh.middleName ? inh.middleName + ' ' : ''}${inh.lastName}`.trim().toLowerCase();
       const directScore = calculateSimilarity(applicantCleanName, inhFullName);
 
       // Check first + last name separately
-      const firstScore = calculateSimilarity(applicantCleanName, inh.firstName.toLowerCase());
-      const lastScore = calculateSimilarity(applicantCleanName, inh.lastName.toLowerCase());
+      const firstScore = calculateSimilarity(cleanFirst ? cleanFirst.toLowerCase() : applicantCleanName, inh.firstName.toLowerCase());
+      const lastScore = calculateSimilarity(cleanLast ? cleanLast.toLowerCase() : applicantCleanName, inh.lastName.toLowerCase());
 
       // If birthdate is provided, check birthdate match
       let birthdateMatched = false;
@@ -161,7 +176,10 @@ export async function POST(req: Request) {
     const safeCivilStatus = typeof civilStatus === 'string' && civilStatus.trim() ? civilStatus.trim() : 'Single';
     const safeResidencyType = typeof residencyType === 'string' && residencyType.trim()
       ? residencyType.trim()
-      : 'Homeowner (May-ari ng Bahay)';
+      : 'Homeowner / Permanent Resident';
+    const safeIsHead = Boolean(isHeadOfFamily);
+    const safeFamilyCount = Math.min(30, Math.max(1, Number(familyMembersCount) || 1));
+    const encodedHouseholdRole = `${safeIsHead ? 'Head' : 'Member'} | ${safeResidencyType} | Family:${safeFamilyCount}`;
     const safeYears = typeof yearsOfResidency === 'number' && yearsOfResidency >= 0
       ? Math.round(yearsOfResidency)
       : 1;
@@ -179,7 +197,7 @@ export async function POST(req: Request) {
       // Inhabitant is confirmed in Barangay Census -> Auto-Approve immediately!
       const user = await prisma.user.create({
         data: {
-          name: name.trim(),
+          name: combinedName,
           email: cleanEmail,
           phone: cleanPhone,
           address: address || `${matchedInhabitant.houseNumber || ''} ${matchedInhabitant.street}, Barangay Onse`.trim(),
@@ -195,9 +213,12 @@ export async function POST(req: Request) {
         where: { id: matchedInhabitant.id },
         data: {
           userId: user.id,
+          firstName: cleanFirst || matchedInhabitant.firstName,
+          middleName: cleanMiddle || matchedInhabitant.middleName,
+          lastName: cleanLast || matchedInhabitant.lastName,
           sex: safeSex,
           civilStatus: safeCivilStatus,
-          householdRole: safeResidencyType,
+          householdRole: encodedHouseholdRole,
           yearsOfResidency: safeYears,
           employmentStatus: safeEmployment,
           isRegisteredVoter: safeVoter,
@@ -208,27 +229,49 @@ export async function POST(req: Request) {
         },
       });
 
-      console.log(`[SmartOnse Register] Resident "${name}" AUTO-APPROVED against RBI: ${matchedInhabitant.rbiNumber}`);
-
-      return NextResponse.json({
+      const sessionPayload = {
+        id: user.id,
+        name: user.name,
+        email: user.email || user.phone || 'Resident',
+        phone: user.phone || undefined,
+        role: 'resident',
+        roleTitle: 'Verified Resident',
+        destination: '/portal/request',
+        isVerified: true,
+      };
+      const token = await createSessionToken(sessionPayload);
+      const res = NextResponse.json({
         success: true,
         autoApproved: true,
         rbiNumber: matchedInhabitant.rbiNumber,
+        user: {
+          ...sessionPayload,
+          address: user.address,
+          residencyType: safeResidencyType,
+        },
         message: `Welcome to Barangay Onse! Your record was verified against the official Registry of Inhabitants (${matchedInhabitant.rbiNumber}). Your account is instantly active.`,
       });
+      res.cookies.set(SESSION_COOKIE_NAME, token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      return res;
     }
 
     // Step 3: Not yet in pre-existing RBI (Transferee / New Renter / Unlisted)
-    // Save user and immediately enroll census profile so Population Reports reflect the registration
+    // Save user and immediately issue browsing session (while document requests wait for admin verification)
     const newUser = await prisma.user.create({
       data: {
-        name: name.trim(),
+        name: combinedName,
         email: cleanEmail,
         phone: cleanPhone,
         address: address || null,
         password: hashedPassword,
         role: 'resident',
-        isVerified: false, // Pending desk officer verification
+        isVerified: false, // Pending desk officer verification for document requests
         avatarUrl: idCardImage || null,
       },
     });
@@ -237,14 +280,16 @@ export async function POST(req: Request) {
     const rbiCount = await prisma.barangayInhabitant.count();
     const rbiYear = new Date().getFullYear();
     const generatedRbi = `RBI-${rbiYear}-${String(rbiCount + 10001).slice(-5)}`;
-    const nameTokens = name.trim().split(/\s+/);
-    const firstName = nameTokens[0] || 'Resident';
-    const lastName = nameTokens.length > 1 ? nameTokens.slice(1).join(' ') : 'Citizen';
+    const nameTokens = combinedName.split(/\s+/);
+    const firstName = cleanFirst || nameTokens[0] || 'Resident';
+    const middleName = cleanMiddle || null;
+    const lastName = cleanLast || (nameTokens.length > 1 ? nameTokens.slice(1).join(' ') : 'Citizen');
 
     await prisma.barangayInhabitant.create({
       data: {
         rbiNumber: generatedRbi,
         firstName,
+        middleName,
         lastName,
         birthDate: safeDob,
         age: computedAge,
@@ -253,7 +298,7 @@ export async function POST(req: Request) {
         street: (address && address.trim()) || 'Barangay Onse, San Juan City',
         precinct: safeVoter ? 'PRECINCT-0042A' : 'NON-VOTER',
         yearsOfResidency: safeYears,
-        householdRole: safeResidencyType,
+        householdRole: encodedHouseholdRole,
         employmentStatus: safeEmployment,
         isRegisteredVoter: safeVoter,
         isSeniorCitizen: safeSenior,
@@ -265,14 +310,37 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log(`[SmartOnse Register] Resident "${name}" queued for Desk Officer verification & RBI Census enrollment.`);
-
-    return NextResponse.json({
+    const sessionPayload = {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email || newUser.phone || 'Resident',
+      phone: newUser.phone || undefined,
+      role: 'resident',
+      roleTitle: 'Resident (Pending Verification)',
+      destination: '/',
+      isVerified: false,
+    };
+    const token = await createSessionToken(sessionPayload);
+    const res = NextResponse.json({
       success: true,
       autoApproved: false,
+      rbiNumber: generatedRbi,
+      user: {
+        ...sessionPayload,
+        address: newUser.address,
+        residencyType: safeResidencyType,
+      },
       message:
-        'Registration submitted! Because your address or details are new to our digital census, your registration and ID have been routed to the Barangay Onse Desk Officer for fast verification and RBI Census enrollment.',
+        'Registration complete! You are now signed in and may browse the SmartOnse portal immediately. Document requests will unlock once the Barangay Admin verifies your uploaded ID.',
     });
+    res.cookies.set(SESSION_COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+    return res;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
     return NextResponse.json({ error: message }, { status: 500 });

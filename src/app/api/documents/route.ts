@@ -132,6 +132,23 @@ export async function POST(req: Request) {
     // Users cannot spoof another citizen's userId. If authenticated, force their actual session ID.
     const resolvedUserId = sessionUser ? sessionUser.id : (isAdminUser(sessionUser?.role) ? data.userId : null);
 
+    // Restrict document requests for unverified resident accounts (while allowing portal browsing)
+    if (resolvedUserId && (!sessionUser || !isAdminUser(sessionUser.role))) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: resolvedUserId },
+        select: { isVerified: true, role: true },
+      });
+      if (dbUser && dbUser.role === 'resident' && !dbUser.isVerified) {
+        return NextResponse.json(
+          {
+            error:
+              'Account Verification Pending: You can browse the SmartOnse portal immediately, but requesting official certificates requires Barangay Admin verification of your registered account.',
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     // ==============================================================
     // Anti-Troll & Anti-Spam Rate Limiting Guards
     // ==============================================================

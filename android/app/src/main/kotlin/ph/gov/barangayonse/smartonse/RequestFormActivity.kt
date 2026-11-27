@@ -44,8 +44,11 @@ class RequestFormActivity : AppCompatActivity() {
         )
 
         val spinnerDocType = findViewById<Spinner>(R.id.spinnerDocumentType)
+        val spinnerResidencyType = findViewById<Spinner>(R.id.spinnerResidencyType)
         val spinnerCivilStatus = findViewById<Spinner>(R.id.spinnerCivilStatus)
-        val etFullName = findViewById<EditText>(R.id.etFullName)
+        val etLastName = findViewById<EditText>(R.id.etLastName)
+        val etFirstName = findViewById<EditText>(R.id.etFirstName)
+        val etMiddleName = findViewById<EditText>(R.id.etMiddleName)
         val etContactNumber = findViewById<EditText>(R.id.etContactNumber)
         val etAddress = findViewById<EditText>(R.id.etAddress)
         val etYearsResidency = findViewById<EditText>(R.id.etYearsResidency)
@@ -61,6 +64,16 @@ class RequestFormActivity : AppCompatActivity() {
         val serviceTitles = SampleDataRepository.servicesList.map { "${it.title} (${it.fee})" }
         val docAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, serviceTitles)
         spinnerDocType.adapter = docAdapter
+
+        // Populate Residency Types Spinner (Homeowner, Tenant/Renter, Commercial Space)
+        val residencyTypes = listOf(
+            "Homeowner / Permanent Resident",
+            "Tenant / Renter",
+            "Commercial Space",
+            "Living with Relatives",
+            "Boarder / Student Dorm"
+        )
+        spinnerResidencyType.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, residencyTypes)
 
         // Preselect service if passed via Explicit Intent
         val preselectedTitle = intent.getStringExtra("EXTRA_SERVICE_TITLE")
@@ -80,7 +93,9 @@ class RequestFormActivity : AppCompatActivity() {
 
         // Quick Fill Sample Resident Button (Helpful for live classroom demonstration)
         btnFillSample.setOnClickListener {
-            etFullName.setText("Maria Angela D. Reyes")
+            etLastName.setText("Reyes")
+            etFirstName.setText("Maria Angela")
+            etMiddleName.setText("D.")
             etContactNumber.setText("09178529631")
             etAddress.setText("24 P. Guevarra St., Barangay Onse, San Juan City")
             etYearsResidency.setText("8")
@@ -93,7 +108,9 @@ class RequestFormActivity : AppCompatActivity() {
 
         // Clear Form Button
         btnClearForm.setOnClickListener {
-            etFullName.text.clear()
+            etLastName.text.clear()
+            etFirstName.text.clear()
+            etMiddleName.text.clear()
             etContactNumber.text.clear()
             etAddress.text.clear()
             etYearsResidency.setText("1")
@@ -107,18 +124,27 @@ class RequestFormActivity : AppCompatActivity() {
         btnSubmit.setOnClickListener {
             tvValidationError.visibility = View.GONE
 
-            val fullName = etFullName.text.toString().trim()
+            val lastName = etLastName.text.toString().trim()
+            val firstName = etFirstName.text.toString().trim()
+            val middleName = etMiddleName.text.toString().trim()
+            val fullName = listOf(firstName, middleName, lastName).filter { it.isNotEmpty() }.joinToString(" ")
             val contact = etContactNumber.text.toString().trim()
             val address = etAddress.text.toString().trim()
             val yearsStr = etYearsResidency.text.toString().trim()
             val purpose = etPurpose.text.toString().trim()
             val copiesStr = etCopies.text.toString().trim()
 
-            // 1. Validate Full Name
-            if (fullName.length < 4) {
-                etFullName.error = "Please enter your complete full name (at least 4 characters)."
-                etFullName.requestFocus()
-                showValidationBanner(tvValidationError, "Validation Error: Complete Full Name is required.")
+            // 1. Validate Split Name (Last Name & First Name)
+            if (lastName.length < 2) {
+                etLastName.error = "Please enter your Last Name."
+                etLastName.requestFocus()
+                showValidationBanner(tvValidationError, "Validation Error: Last Name is required.")
+                return@setOnClickListener
+            }
+            if (firstName.length < 2) {
+                etFirstName.error = "Please enter your First Name."
+                etFirstName.requestFocus()
+                showValidationBanner(tvValidationError, "Validation Error: First Name is required.")
                 return@setOnClickListener
             }
 
@@ -176,6 +202,7 @@ class RequestFormActivity : AppCompatActivity() {
 
             // Compute Fee & Submit Live to SmartOnse PostgreSQL Database
             val selectedService = SampleDataRepository.servicesList[spinnerDocType.selectedItemPosition]
+            val residencyType = spinnerResidencyType.selectedItem.toString()
             val civilStatus = spinnerCivilStatus.selectedItem.toString()
             val unitFeeNumber = when {
                 selectedService.fee.contains("50") -> 50
@@ -184,7 +211,7 @@ class RequestFormActivity : AppCompatActivity() {
                 else -> 0
             }
             val totalFeeDisplay = if (unitFeeNumber == 0) "FREE" else "₱${unitFeeNumber * copies}.00"
-            val fullPurpose = "$purpose ($civilStatus • $years yrs residency)"
+            val fullPurpose = "$purpose ($residencyType • $civilStatus • $years yrs residency)"
 
             btnSubmit.isEnabled = false
             btnSubmit.text = "Saving to SmartOnse Database..."

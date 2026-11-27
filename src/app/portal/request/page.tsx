@@ -473,26 +473,48 @@ function RequestContent() {
           </p>
         </div>
 
-        {/* Verified Resident Indicator */}
-        <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2.5">
-            <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <div>
-              <p className="font-bold text-emerald-900 dark:text-emerald-300">
-                Logged in as <strong className="text-slate-900 dark:text-white">{user.name}</strong> ({user.roleTitle || user.role.toUpperCase()})
-              </p>
-              <p className="text-[11px] text-emerald-700 dark:text-emerald-400">Verified Citizen Session &bull; Auto-filled details</p>
+        {/* Verified vs Pending Verification Resident Indicator */}
+        {user.isVerified === false ? (
+          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-black uppercase tracking-wider text-amber-900 dark:text-amber-300">
+                  Account Pending Barangay Admin Verification
+                </p>
+                <p className="text-[11px] text-amber-800 dark:text-amber-300/90 leading-relaxed">
+                  Welcome, <strong>{user.name}</strong>! You can browse all SmartOnse portal pages, announcements, and transparency records right away. Online certificate requests will automatically unlock as soon as the Barangay Desk Officer verifies your registration and ID.
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/80 dark:bg-[#0E1B33] border border-emerald-200 dark:border-emerald-800/60 font-mono text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
-              <Clock className="w-3 h-3" /> {phClock}
-            </span>
-            <Link href="/profile" className="text-[11px] font-black uppercase tracking-wider text-[#9C2007] dark:text-rose-400 hover:underline shrink-0">
-              Edit Info &rarr;
+            <Link
+              href="/"
+              className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] uppercase tracking-wider transition shrink-0 text-center"
+            >
+              Browse Portal &rarr;
             </Link>
           </div>
-        </div>
+        ) : (
+          <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <div>
+                <p className="font-bold text-emerald-900 dark:text-emerald-300">
+                  Logged in as <strong className="text-slate-900 dark:text-white">{user.name}</strong> ({user.roleTitle || user.role.toUpperCase()})
+                </p>
+                <p className="text-[11px] text-emerald-700 dark:text-emerald-400">Verified Citizen Session &bull; Auto-filled details</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/80 dark:bg-[#0E1B33] border border-emerald-200 dark:border-emerald-800/60 font-mono text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
+                <Clock className="w-3 h-3" /> {phClock}
+              </span>
+              <Link href="/profile" className="text-[11px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-400 hover:underline shrink-0">
+                Edit Info &rarr;
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Policy Notice */}
         <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 flex items-start gap-3 text-xs text-blue-900 dark:text-blue-300">
@@ -768,12 +790,14 @@ function RequestContent() {
 
           <button
             type="submit"
-            disabled={loading || computation.totalCopiesCount === 0}
+            disabled={loading || computation.totalCopiesCount === 0 || user.isVerified === false}
             className="w-full py-3.5 rounded-xl bg-[#9C2007] hover:bg-[#8B1A05] text-white font-black uppercase tracking-wider shadow-md shadow-[#9C2007]/20 transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
           >
             <FileText className="w-4 h-4" />
             <span>
-              {loading
+              {user.isVerified === false
+                ? 'Locked Until Admin Verifies Your Account'
+                : loading
                 ? 'Processing Applications...'
                 : `Submit Request (${computation.totalCopiesCount} ${computation.totalCopiesCount === 1 ? 'Copy' : 'Copies'} • ${computation.totalFeeDisplay})`}
             </span>

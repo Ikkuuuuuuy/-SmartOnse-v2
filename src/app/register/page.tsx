@@ -28,18 +28,25 @@ import {
 } from 'lucide-react';
 import { scanIdentityDocument, SUPPORTED_ID_TYPES, ScanResult } from '@/lib/idScanner';
 import RealCaptcha from '@/components/ui/RealCaptcha';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function RegisterPage() {
+  const { login } = useAuth();
   // Step State: 1 = Personal Info, 2 = Phone OTP, 3 = ID Upload & Live Scanner, 4 = Account & Submit
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
 
-  // Form Fields
-  const [name, setName] = useState('');
+  // Form Fields (Split Name: Last Name, First Name, Middle Name)
+  const [lastName, setLastName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
+  const name = [firstName.trim(), middleName.trim(), lastName.trim()].filter(Boolean).join(' ');
   const [gender, setGender] = useState('Male');
   const [birthDate, setBirthDate] = useState('');
   const [civilStatus, setCivilStatus] = useState('Single');
-  const [residencyType, setResidencyType] = useState('Homeowner (May-ari ng Bahay)');
+  const [residencyType, setResidencyType] = useState('Homeowner / Permanent Resident');
+  const [isHeadOfFamily, setIsHeadOfFamily] = useState(true);
+  const [familyMembersCount, setFamilyMembersCount] = useState('4');
   const [yearsOfResidency, setYearsOfResidency] = useState('1');
   const [employmentStatus, setEmploymentStatus] = useState('Employed');
   const [isRegisteredVoter, setIsRegisteredVoter] = useState(true);
@@ -405,8 +412,8 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    if (!name.trim()) {
-      setError('Please enter your full name.');
+    if (!lastName.trim() || !firstName.trim()) {
+      setError('Please enter both your Last Name and First Name.');
       return;
     }
     if (!phone.trim()) {
@@ -437,10 +444,15 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
+          firstName: firstName.trim(),
+          middleName: middleName.trim(),
+          lastName: lastName.trim(),
           gender,
           birthDate,
           civilStatus,
           residencyType,
+          isHeadOfFamily,
+          familyMembersCount: Number(familyMembersCount) || 1,
           yearsOfResidency: Number(yearsOfResidency) || 1,
           employmentStatus,
           isRegisteredVoter,
@@ -465,6 +477,10 @@ export default function RegisterPage() {
       if (!res.ok) {
         setError(data.error || 'Registration failed. Please try again.');
         return;
+      }
+
+      if (data.user) {
+        login(data.user);
       }
 
       setSubmissionResult({
@@ -535,20 +551,28 @@ export default function RegisterPage() {
               </div>
 
               <div className="p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 rounded-2xl text-left space-y-1.5">
-                <p className="text-[11px] font-black text-blue-900 dark:text-blue-300 uppercase tracking-wider">Next Step:</p>
+                <p className="text-[11px] font-black text-blue-900 dark:text-blue-300 uppercase tracking-wider">Immediate Portal Browsing Enabled:</p>
                 <p className="text-[11px] text-blue-700 dark:text-blue-400 leading-relaxed">
-                  The Barangay Desk Officer will review your ID and enroll your household into the official DILG Registry of Inhabitants (RBI) Census. Once approved, you will receive full access to online resident services.
+                  You are now signed in and can immediately browse all Barangay Onse portal pages, announcements, and transparency records. Document requests will automatically unlock as soon as the Barangay Admin verifies your uploaded ID.
                 </p>
               </div>
             </>
           )}
 
-          <Link
-            href="/login"
-            className="inline-block w-full py-3.5 bg-[#9C2007] hover:bg-[#8B1A05] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-[#9C2007]/25 transition cursor-pointer"
-          >
-            Proceed to Resident Login
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-2.5">
+            <Link
+              href="/"
+              className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/20 transition cursor-pointer"
+            >
+              Browse Portal Immediately &rarr;
+            </Link>
+            <Link
+              href="/portal/request"
+              className="flex-1 py-3.5 bg-slate-100 dark:bg-[#152747] hover:bg-slate-200 text-slate-800 dark:text-white rounded-xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer"
+            >
+              Open Document Portal
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -686,23 +710,50 @@ export default function RegisterPage() {
               </h2>
             </div>
 
-            {/* Full Name */}
-            <div className="space-y-1">
-              <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                Full Name (First, Middle, Last) *
-              </label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Juan Martinez Dela Cruz"
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none"
-              />
-              <p className="text-[10px] text-slate-400">
-                Please enter your name exactly as it appears on your official ID or school card.
-              </p>
+            {/* Split Full Name: Last Name, First Name, Middle Name */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                  Last Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="e.g. Dela Cruz"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-blue-600 outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                  First Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="e.g. Juan"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-blue-600 outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                  Middle Name
+                </label>
+                <input
+                  type="text"
+                  value={middleName}
+                  onChange={(e) => setMiddleName(e.target.value)}
+                  placeholder="e.g. Martinez"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-blue-600 outline-none"
+                />
+              </div>
             </div>
+            <p className="text-[10px] text-slate-400 -mt-2">
+              Please enter your Last Name, First Name, and Middle Name exactly as shown on your government or school ID.
+            </p>
 
             {/* Mobile Number - MANDATORY */}
             <div className="space-y-1">
@@ -717,11 +768,11 @@ export default function RegisterPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="0917-123-4567"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none font-mono"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-blue-600 outline-none font-mono"
                 />
               </div>
               <p className="text-[10px] text-slate-400">
-                <strong className="text-[#9C2007] dark:text-rose-400">Required:</strong> Used for SMS status updates, document pickup advisories, and resident sign-in.
+                <strong className="text-blue-700 dark:text-blue-400">Required:</strong> Used for SMS status updates, document pickup advisories, and resident sign-in.
               </p>
             </div>
 
@@ -814,30 +865,88 @@ export default function RegisterPage() {
             <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-[#11203D] border border-slate-200 dark:border-blue-900/50 space-y-3.5">
               <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-blue-900/40 pb-2">
                 <span className="font-black text-slate-800 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#9C2007] dark:text-rose-400" />
-                  Barangay Census &amp; Population Profile *
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  Barangay Census &amp; Household Demographics *
                 </span>
-                <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-[#9C2007]/10 text-[#9C2007] dark:text-rose-300">
+                <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300">
                   RBI Census Data
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Housing / Residency Type */}
-                <div className="space-y-1">
+                {/* Residency Type Dropdown */}
+                <div className="space-y-1 sm:col-span-2">
                   <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
-                    Housing / Residency Status *
+                    Residency Type *
                   </label>
                   <select
                     value={residencyType}
                     onChange={(e) => setResidencyType(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none cursor-pointer text-xs font-semibold"
+                    className="w-full px-3 py-2.5 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-blue-600 outline-none cursor-pointer text-xs font-semibold"
                   >
-                    <option value="Homeowner (May-ari ng Bahay)">Homeowner (May-ari ng Bahay)</option>
-                    <option value="Renter / Tenant (Nangungupahan)">Renter / Tenant (Nangungupahan)</option>
-                    <option value="Living with Relatives (Nakikitira)">Living with Relatives (Nakikitira)</option>
+                    <option value="Homeowner / Permanent Resident">Homeowner / Permanent Resident (May-ari ng Bahay)</option>
+                    <option value="Tenant / Renter">Tenant / Renter (Nangungupahan)</option>
+                    <option value="Commercial Space">Commercial Space (Business / Commercial Unit)</option>
+                    <option value="Living with Relatives (Nakikitira)">Living with Relatives / Family Member</option>
                     <option value="Boarder / Student Dorm">Boarder / Student Dorm</option>
                   </select>
+                </div>
+
+                {/* Informational Notice when Tenant/Renter or Commercial Space is chosen (Blue/Slate - NOT Red) */}
+                {(residencyType.includes('Tenant') || residencyType.includes('Renter') || residencyType.includes('Commercial')) && (
+                  <div className="sm:col-span-2 p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 text-blue-900 dark:text-blue-200 text-[11px] flex items-start gap-2">
+                    <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>ID Address Tolerance Enabled:</strong> Because you selected <strong>{residencyType}</strong>, the system and Barangay Admin automatically recognize that the address printed on your Government ID may legitimately differ from your current Barangay Onse residence or business unit.
+                    </span>
+                  </div>
+                )}
+
+                {/* Head of the Family Radio / Selector */}
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                    Head of the Family? *
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsHeadOfFamily(true)}
+                      className={`py-2 px-2.5 rounded-xl border font-bold text-[11px] transition cursor-pointer ${
+                        isHeadOfFamily
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                          : 'bg-white dark:bg-[#152747] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-blue-900/40'
+                      }`}
+                    >
+                      Yes (Family Head)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsHeadOfFamily(false)}
+                      className={`py-2 px-2.5 rounded-xl border font-bold text-[11px] transition cursor-pointer ${
+                        !isHeadOfFamily
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                          : 'bg-white dark:bg-[#152747] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-blue-900/40'
+                      }`}
+                    >
+                      No (Member)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Number of Family Members in Household */}
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                    No. of Family Members in Household *
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={familyMembersCount}
+                    onChange={(e) => setFamilyMembersCount(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-blue-600 outline-none text-xs font-bold"
+                    placeholder="e.g. 4"
+                  />
                 </div>
 
                 {/* Voter Status Dropdown */}
@@ -848,7 +957,7 @@ export default function RegisterPage() {
                   <select
                     value={isRegisteredVoter ? 'VOTER' : 'NON_VOTER'}
                     onChange={(e) => setIsRegisteredVoter(e.target.value === 'VOTER')}
-                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none cursor-pointer text-xs font-semibold"
+                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-blue-600 outline-none cursor-pointer text-xs font-semibold"
                   >
                     <option value="VOTER">Registered Voter (Brgy. Onse)</option>
                     <option value="NON_VOTER">Non-Voter / Registered Elsewhere</option>
@@ -863,7 +972,7 @@ export default function RegisterPage() {
                   <select
                     value={civilStatus}
                     onChange={(e) => setCivilStatus(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none cursor-pointer text-xs"
+                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-blue-600 outline-none cursor-pointer text-xs"
                   >
                     <option value="Single">Single</option>
                     <option value="Married">Married</option>
@@ -880,32 +989,32 @@ export default function RegisterPage() {
                   <select
                     value={employmentStatus}
                     onChange={(e) => setEmploymentStatus(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none cursor-pointer text-xs"
+                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-blue-600 outline-none cursor-pointer text-xs"
                   >
                     <option value="Employed">Employed</option>
                     <option value="Self-Employed">Self-Employed / Business</option>
-                    <option value="Student">Student</option>
                     <option value="Unemployed">Unemployed / Jobseeker</option>
+                    <option value="Student">Student</option>
                     <option value="Retired">Retired</option>
                     <option value="OFW">Overseas Filipino Worker (OFW)</option>
                   </select>
                 </div>
-              </div>
 
-              {/* Years of Residency */}
-              <div className="space-y-1">
-                <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
-                  Years Residing in Barangay Onse *
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={yearsOfResidency}
-                  onChange={(e) => setYearsOfResidency(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none text-xs"
-                  placeholder="e.g. 5"
-                />
+                {/* Years of Residency */}
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                    Years Residing in Barangay Onse *
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={yearsOfResidency}
+                    onChange={(e) => setYearsOfResidency(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-blue-600 outline-none text-xs"
+                    placeholder="e.g. 5"
+                  />
+                </div>
               </div>
 
               {/* Sectoral Classifications Checkboxes */}
@@ -980,8 +1089,8 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => {
-                if (!name.trim() || !phone.trim() || !birthDate || !address.trim()) {
-                  setError('Please fill out your full name, mobile number, birth date, and residence address.');
+                if (!lastName.trim() || !firstName.trim() || !phone.trim() || !birthDate || !address.trim()) {
+                  setError('Please fill out your Last Name, First Name, mobile number, birth date, and residence address.');
                   return;
                 }
                 const rawDigits = phone.replace(/\D/g, '');

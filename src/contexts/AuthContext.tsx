@@ -9,6 +9,8 @@ export interface AuthUser {
   role: string;
   roleTitle: string;
   destination: string;
+  isVerified?: boolean;
+  residencyType?: string;
   avatarUrl?: string;
   phone?: string;
   address?: string;

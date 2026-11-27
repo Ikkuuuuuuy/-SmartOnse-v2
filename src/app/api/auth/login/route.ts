@@ -127,16 +127,9 @@ export async function POST(req: Request) {
       });
     }
 
-    // Block unverified residents
-    if (!user.isVerified) {
-      return NextResponse.json(
-        {
-          error: 'Your account is pending barangay verification. Please wait for staff approval before logging in.',
-          code: 'UNVERIFIED',
-        },
-        { status: 403 }
-      );
-    }
+    // Allow unverified residents to log in and browse the portal immediately
+    // (Document requests remain restricted until admin verification)
+    const isUserVerified = Boolean(user.isVerified);
 
     // Adaptive Security (New Device Detection) & Two-Factor Authentication
     const cookieHeader = req.headers.get('cookie') || '';
@@ -207,7 +200,8 @@ export async function POST(req: Request) {
       phone: user.phone || undefined,
       role,
       roleTitle,
-      destination,
+      destination: isUserVerified ? destination : '/',
+      isVerified: isUserVerified,
     };
 
     const token = await createSessionToken(sessionPayload);
@@ -216,6 +210,7 @@ export async function POST(req: Request) {
       success: true,
       user: {
         ...sessionPayload,
+        isVerified: isUserVerified,
         avatarUrl: user.avatarUrl || null,
         phone: user.phone || null,
         address: user.address || null,

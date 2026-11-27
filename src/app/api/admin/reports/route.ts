@@ -78,6 +78,7 @@ export async function GET(req: Request) {
     const endDateParam = searchParams.get('endDate');
     const periodParam = searchParams.get('period') || '';
     const metricParam = (searchParams.get('metric') || '').toLowerCase();
+    const statusParam = (searchParams.get('status') || 'ALL').toUpperCase();
 
     const phNow = getPhNowParts();
 
@@ -175,13 +176,18 @@ export async function GET(req: Request) {
       }),
     ]);
 
-    // Filter requests based on time period if set
-    const filteredRequests = filterStart && filterEnd
+    // Filter requests based on time period and optional status filter
+    const timeFilteredRequests = filterStart && filterEnd
       ? allRequests.filter((r) => {
         const d = new Date(r.createdAt);
         return d >= filterStart! && d <= filterEnd!;
       })
       : allRequests;
+
+    const filteredRequests =
+      statusParam && statusParam !== 'ALL'
+        ? timeFilteredRequests.filter((r) => r.status.toUpperCase() === statusParam)
+        : timeFilteredRequests;
 
     // Aggregate statistics per document type
     const docTypeStats = documentTypes.map((dt) => {
@@ -378,12 +384,13 @@ export async function GET(req: Request) {
       });
     }
 
-    // Compile Population Report from BarangayInhabitant & Resident Registrations
+    // Compile Population Report from BarangayInhabitant & Resident Registrations (City Hall Sub-Categories)
     const totalPopulation = allInhabitants.length;
     let votersCount = 0;
     let nonVotersCount = 0;
     let homeownersCount = 0;
     let rentersCount = 0;
+    let commercialCount = 0;
     let relativesCount = 0;
     let boardersCount = 0;
     let maleCount = 0;
@@ -402,16 +409,46 @@ export async function GET(req: Request) {
     let fourPsCount = 0;
     let studentsCount = 0;
     let employedCount = 0;
+    let unemployedCount = 0;
+    let headsOfFamilyCount = 0;
+
+    // Count members per household address to compute Number of Families & Members per Household
+    const householdAddressCountMap = new Map<string, number>();
+    allInhabitants.forEach((inh) => {
+      const addrKey = `${inh.houseNumber || ''} ${inh.street}`.trim().toLowerCase() || inh.id;
+      householdAddressCountMap.set(addrKey, (householdAddressCountMap.get(addrKey) || 0) + 1);
+    });
 
     const populationRecords = allInhabitants.map((inh) => {
       if (inh.isRegisteredVoter) votersCount++;
       else nonVotersCount++;
 
-      const roleLower = (inh.householdRole || '').toLowerCase();
-      let housingCategory = 'Homeowner (May-ari ng Bahay)';
-      if (roleLower.includes('rent') || roleLower.includes('tenant') || roleLower.includes('upa')) {
+      const roleRaw = inh.householdRole || 'Member';
+      const roleLower = roleRaw.toLowerCase();
+
+      // Determine Head of Family status
+      const isHeadOfFamily =
+        roleLower.startsWith('head') ||
+        roleLower.includes('head |') ||
+        roleLower === 'homeowner (may-ari ng bahay)';
+      if (isHeadOfFamily) {
+        headsOfFamilyCount++;
+      }
+
+      // Parse explicit family member count if encoded as Family:N, otherwise use household address count
+      const familyMatch = roleRaw.match(/Family:(\d+)/i);
+      const addrKey = `${inh.houseNumber || ''} ${inh.street}`.trim().toLowerCase() || inh.id;
+      const familyMembersCount = familyMatch
+        ? Math.max(1, parseInt(familyMatch[1], 10))
+        : Math.max(1, householdAddressCountMap.get(addrKey) || 1);
+
+      let housingCategory = 'Homeowner / Permanent Resident';
+      if (roleLower.includes('commercial')) {
+        commercialCount++;
+        housingCategory = 'Commercial Space';
+      } else if (roleLower.includes('rent') || roleLower.includes('tenant') || roleLower.includes('upa')) {
         rentersCount++;
-        housingCategory = 'Renter / Tenant (Nangungupahan)';
+        housingCategory = 'Tenant / Renter';
       } else if (roleLower.includes('boarder') || roleLower.includes('dorm')) {
         boardersCount++;
         housingCategory = 'Boarder / Student Dorm';
@@ -420,7 +457,7 @@ export async function GET(req: Request) {
         housingCategory = 'Living with Relatives / Family Member';
       } else {
         homeownersCount++;
-        housingCategory = 'Homeowner (May-ari ng Bahay)';
+        housingCategory = 'Homeowner / Permanent Resident';
       }
 
       if ((inh.sex || '').toLowerCase() === 'female') femaleCount++;
@@ -445,13 +482,23 @@ export async function GET(req: Request) {
       if (inh.is4psBeneficiary) fourPsCount++;
 
       const emp = (inh.employmentStatus || '').toLowerCase();
-      if (emp.includes('student')) studentsCount++;
-      else if (emp.includes('employ') || emp.includes('ofw')) employedCount++;
+      if (emp.includes('unemploy')) {
+        unemployedCount++;
+      } else if (emp.includes('student')) {
+        studentsCount++;
+        unemployedCount++;
+      } else if (emp.includes('retire')) {
+        unemployedCount++;
+      } else {
+        employedCount++;
+      }
 
       const sectors: string[] = [];
+      if (isHeadOfFamily) sectors.push('Head of Family');
       if (inh.isRegisteredVoter) sectors.push('Voter');
       else sectors.push('Non-Voter');
       if (isSenior) sectors.push('Senior Citizen');
+      if (age < 18) sectors.push('Minor (<18)');
       if (inh.isPwd) sectors.push('PWD');
       if (inh.isSoloParent) sectors.push('Solo Parent');
       if (inh.is4psBeneficiary) sectors.push('4Ps');
@@ -460,13 +507,18 @@ export async function GET(req: Request) {
         id: inh.id,
         rbiNumber: inh.rbiNumber,
         fullName: `${inh.firstName} ${inh.middleName ? inh.middleName + ' ' : ''}${inh.lastName}${inh.suffix ? ' ' + inh.suffix : ''}`.trim(),
+        firstName: inh.firstName,
+        middleName: inh.middleName || '',
+        lastName: inh.lastName,
         age,
         sex: inh.sex || 'Male',
         civilStatus: inh.civilStatus || 'Single',
         housingStatus: housingCategory,
+        isHeadOfFamily,
+        familyMembersCount,
         rawHouseholdRole: inh.householdRole,
         isRegisteredVoter: inh.isRegisteredVoter,
-        employmentStatus: inh.employmentStatus || 'Specified',
+        employmentStatus: inh.employmentStatus || 'Employed',
         yearsOfResidency: inh.yearsOfResidency || 1,
         address: `${inh.houseNumber ? inh.houseNumber + ' ' : ''}${inh.street}`.trim(),
         sectors,
@@ -475,6 +527,9 @@ export async function GET(req: Request) {
         registeredAt: formatPhCompactDateTime(inh.createdAt),
       };
     });
+
+    const familiesCount = Math.max(headsOfFamilyCount, householdAddressCountMap.size, 1);
+    const avgMembersPerHousehold = Number((totalPopulation / familiesCount).toFixed(1));
 
     // Service Performance SLA & Satisfaction Metrics
     const ratedRequests = filteredRequests.filter((r) => typeof r.rating === 'number' && r.rating > 0);
@@ -526,9 +581,16 @@ export async function GET(req: Request) {
         votersCount,
         nonVotersCount,
         voterPercentage: totalPopulation > 0 ? Math.round((votersCount / totalPopulation) * 100) : 0,
+        familiesCount,
+        headsOfFamilyCount,
+        avgMembersPerHousehold,
+        employedCount,
+        unemployedCount,
+        minorsUnder18: youthUnder18,
         housingBreakdown: {
           homeowners: homeownersCount,
           renters: rentersCount,
+          commercialSpaces: commercialCount,
           livingWithRelatives: relativesCount,
           boarders: boardersCount,
         },
@@ -555,6 +617,7 @@ export async function GET(req: Request) {
           fourPs: fourPsCount,
           students: studentsCount,
           employed: employedCount,
+          unemployed: unemployedCount,
         },
         records: populationRecords,
       },

@@ -62,7 +62,7 @@ export default function PrivacyPage() {
           {/* Section 1: Declaration of Policy */}
           <section className="space-y-3">
             <h2 className="text-base sm:text-lg font-black text-slate-900 uppercase flex items-center gap-2 border-b border-slate-100 pb-2">
-              <Scale className="w-5 h-5 text-[#9C2007]" />
+              <Scale className="w-5 h-5 text-emerald-700" />
               <span>1. Declaration of Policy &amp; Legal Basis</span>
             </h2>
             <p>
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
           {/* Section 2: Personal Data Collected */}
           <section className="space-y-3">
             <h2 className="text-base sm:text-lg font-black text-slate-900 uppercase flex items-center gap-2 border-b border-slate-100 pb-2">
-              <FileText className="w-5 h-5 text-[#9C2007]" />
+              <FileText className="w-5 h-5 text-blue-700" />
               <span>2. Categories of Personal Data Collected</span>
             </h2>
             <p>
@@ -105,7 +105,7 @@ export default function PrivacyPage() {
           {/* Section 3: Purpose of Processing */}
           <section className="space-y-3">
             <h2 className="text-base sm:text-lg font-black text-slate-900 uppercase flex items-center gap-2 border-b border-slate-100 pb-2">
-              <Building2 className="w-5 h-5 text-[#9C2007]" />
+              <Building2 className="w-5 h-5 text-blue-700" />
               <span>3. Lawful Purpose &amp; Use of Information</span>
             </h2>
             <p>
@@ -149,7 +149,7 @@ export default function PrivacyPage() {
           {/* Section 5: Statutory Rights of Data Subjects */}
           <section className="space-y-3">
             <h2 className="text-base sm:text-lg font-black text-slate-900 uppercase flex items-center gap-2 border-b border-slate-100 pb-2">
-              <Eye className="w-5 h-5 text-[#9C2007]" />
+              <Eye className="w-5 h-5 text-emerald-700" />
               <span>5. Rights of the Citizen (Data Subject)</span>
             </h2>
             <p>

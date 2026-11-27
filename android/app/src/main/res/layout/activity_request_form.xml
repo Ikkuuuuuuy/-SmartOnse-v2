@@ -122,7 +122,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="1. SELECT CERTIFICATE / CLEARANCE TYPE *"
-                            android:textColor="#9C2007"
+                            android:textColor="#1E293B"
                             android:textSize="11sp"
                             android:textStyle="bold" />
 
@@ -136,29 +136,78 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
-                            android:text="2. APPLICANT FULL NAME (FIRST, MIDDLE, LAST) *"
-                            android:textColor="#9C2007"
+                            android:text="2. APPLICANT NAME (LAST NAME, FIRST NAME, MIDDLE NAME) *"
+                            android:textColor="#1E293B"
                             android:textSize="11sp"
                             android:textStyle="bold" />
 
-                        <EditText
-                            android:id="@+id/etFullName"
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="48dp"
+                            android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:background="@drawable/bg_input_box"
-                            android:hint="e.g., Juan M. Dela Cruz"
-                            android:inputType="textPersonName"
-                            android:paddingHorizontal="12dp"
-                            android:textColor="#0F172A"
-                            android:textSize="14sp" />
+                            android:orientation="horizontal">
+
+                            <EditText
+                                android:id="@+id/etLastName"
+                                android:layout_width="0dp"
+                                android:layout_height="46dp"
+                                android:layout_marginEnd="4dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_input_box"
+                                android:hint="Last Name *"
+                                android:inputType="textPersonName"
+                                android:paddingHorizontal="10dp"
+                                android:textColor="#0F172A"
+                                android:textSize="13sp" />
+
+                            <EditText
+                                android:id="@+id/etFirstName"
+                                android:layout_width="0dp"
+                                android:layout_height="46dp"
+                                android:layout_marginHorizontal="4dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_input_box"
+                                android:hint="First Name *"
+                                android:inputType="textPersonName"
+                                android:paddingHorizontal="10dp"
+                                android:textColor="#0F172A"
+                                android:textSize="13sp" />
+
+                            <EditText
+                                android:id="@+id/etMiddleName"
+                                android:layout_width="0dp"
+                                android:layout_height="46dp"
+                                android:layout_marginStart="4dp"
+                                android:layout_weight="0.85"
+                                android:background="@drawable/bg_input_box"
+                                android:hint="Middle"
+                                android:inputType="textPersonName"
+                                android:paddingHorizontal="10dp"
+                                android:textColor="#0F172A"
+                                android:textSize="13sp" />
+                        </LinearLayout>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
-                            android:text="3. MOBILE CONTACT NUMBER (11 DIGITS STARTING WITH 09) *"
-                            android:textColor="#9C2007"
+                            android:text="3. RESIDENCY TYPE *"
+                            android:textColor="#1E293B"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <Spinner
+                            android:id="@+id/spinnerResidencyType"
+                            android:layout_width="match_parent"
+                            android:layout_height="46dp"
+                            android:layout_marginTop="4dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:text="4. MOBILE CONTACT NUMBER (11 DIGITS STARTING WITH 09) *"
+                            android:textColor="#1E293B"
                             android:textSize="11sp"
                             android:textStyle="bold" />
 
@@ -179,8 +228,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
-                            android:text="4. BARANGAY ONSE RESIDENTIAL ADDRESS *"
-                            android:textColor="#9C2007"
+                            android:text="5. BARANGAY ONSE RESIDENTIAL ADDRESS *"
+                            android:textColor="#1E293B"
                             android:textSize="11sp"
                             android:textStyle="bold" />
 
@@ -212,8 +261,8 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="5. CIVIL STATUS *"
-                                    android:textColor="#9C2007"
+                                    android:text="6. CIVIL STATUS *"
+                                    android:textColor="#1E293B"
                                     android:textSize="11sp"
                                     android:textStyle="bold" />
 
@@ -234,8 +283,8 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="6. RESIDENCY (YEARS) *"
-                                    android:textColor="#9C2007"
+                                    android:text="7. RESIDENCY (YEARS) *"
+                                    android:textColor="#1E293B"
                                     android:textSize="11sp"
                                     android:textStyle="bold" />
 
@@ -257,8 +306,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
-                            android:text="7. PURPOSE OF REQUEST *"
-                            android:textColor="#9C2007"
+                            android:text="8. PURPOSE OF REQUEST *"
+                            android:textColor="#1E293B"
                             android:textSize="11sp"
                             android:textStyle="bold" />
 
@@ -278,8 +327,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
-                            android:text="8. NUMBER OF COPIES (MAX 5 COPIES) *"
-                            android:textColor="#9C2007"
+                            android:text="9. NUMBER OF COPIES (MAX 5 COPIES) *"
+                            android:textColor="#1E293B"
                             android:textSize="11sp"
                             android:textStyle="bold" />
 
