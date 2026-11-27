@@ -39,12 +39,12 @@ object NavigationShellHelper {
         activeBottomTab: String,
         activeTopLink: String
     ) {
-        // Resolve which of the 5 merged Bottom Bar tabs should be highlighted
+        // Resolve which of the 5 Bottom Bar tabs should be highlighted
         val resolvedActiveTab = when {
-            activeTopLink.equals("CONTACT", true) || activeBottomTab.equals("CONTACT", true) -> "CONTACT"
-            activeTopLink.equals("ABOUT", true) || activeTopLink.equals("OFFICIALS", true) || activeBottomTab.equals("ABOUT", true) -> "ABOUT"
+            activeBottomTab.equals("TRACK", true) || activeTopLink.equals("TRACK", true) -> "TRACK"
+            activeTopLink.equals("ABOUT", true) || activeTopLink.equals("OFFICIALS", true) || activeTopLink.equals("CONTACT", true) || activeBottomTab.equals("ABOUT", true) || activeBottomTab.equals("CONTACT", true) -> "ABOUT"
             activeTopLink.equals("TRANSPARENCY", true) || activeTopLink.equals("SK", true) || activeTopLink.equals("EVENTS", true) || activeBottomTab.equals("DISCLOSURE", true) -> "TRANSPARENCY"
-            activeBottomTab.equals("SERVICES", true) || activeTopLink.equals("SERVICES", true) || activeBottomTab.equals("REQUEST", true) || activeBottomTab.equals("TRACK", true) -> "SERVICES"
+            activeBottomTab.equals("SERVICES", true) || activeTopLink.equals("SERVICES", true) || activeBottomTab.equals("REQUEST", true) -> "SERVICES"
             else -> "HOME"
         }
 
@@ -57,18 +57,18 @@ object NavigationShellHelper {
             }
         }
 
-        // 2. Hamburger Menu Button (`☰`) -> Tracking, Request, Profile, Role Switcher, Sign Out
+        // 2. Hamburger Menu Button (`☰`) -> Profile, Role Switcher, Sign Out
         activity.findViewById<ImageView?>(R.id.btnNavbarAccount)?.setOnClickListener {
             showHamburgerAccountDrawer(activity)
         }
 
-        // 3. Persistent 5-Tab Bottom Bar (Home | About | Services | Transparency | Contact)
+        // 3. Persistent 5-Tab Bottom Bar (Home | About | Services | Transparency | Track)
         val bottomTabs = listOf(
             BottomNavTab("HOME", R.id.bottomNavHome, R.id.ivNavHome, R.id.tvNavHome, R.id.indNavHome),
             BottomNavTab("ABOUT", R.id.bottomNavAbout, R.id.ivNavAbout, R.id.tvNavAbout, R.id.indNavAbout),
             BottomNavTab("SERVICES", R.id.bottomNavServices, R.id.ivNavServices, R.id.tvNavServices, R.id.indNavServices),
             BottomNavTab("TRANSPARENCY", R.id.bottomNavTransparency, R.id.ivNavTransparency, R.id.tvNavTransparency, R.id.indNavTransparency),
-            BottomNavTab("CONTACT", R.id.bottomNavContact, R.id.ivNavContact, R.id.tvNavContact, R.id.indNavContact)
+            BottomNavTab("TRACK", R.id.bottomNavTrack, R.id.ivNavTrack, R.id.tvNavTrack, R.id.indNavTrack)
         )
 
         val activeColor = 0xFF9C2007.toInt()
@@ -91,7 +91,7 @@ object NavigationShellHelper {
                     "ABOUT" -> navigateWithExplicitIntent(activity, AboutOfficialsActivity::class.java, "EXTRA_SECTION" to "ABOUT")
                     "SERVICES" -> navigateWithExplicitIntent(activity, ServicesActivity::class.java)
                     "TRANSPARENCY" -> navigateWithExplicitIntent(activity, TransparencySkActivity::class.java, "EXTRA_TAB" to "TRANSPARENCY")
-                    "CONTACT" -> navigateWithExplicitIntent(activity, AboutOfficialsActivity::class.java, "EXTRA_SECTION" to "CONTACT")
+                    "TRACK" -> navigateWithExplicitIntent(activity, TrackDocumentActivity::class.java)
                 }
             }
         }
@@ -129,20 +129,14 @@ object NavigationShellHelper {
 
         val items = if (SampleDataRepository.isLoggedIn) {
             arrayOf(
-                "🔍 Track My Document Application Status",
-                "✍️ Request Barangay Certificate Online",
                 "👤 My Resident Profile & Account Settings",
                 "⚡ Switch Demo Role (Captain / Staff / Kagawad / SK / Resident)",
-                "🤖 Ask OnseBot AI Virtual Desk (24/7)",
                 "🚪 Sign Out of SmartOnse"
             )
         } else {
             arrayOf(
                 "🔐 Sign In / Register Resident Account",
-                "🔍 Track Document Application Status",
-                "✍️ Request Barangay Certificate Online",
-                "⚡ Switch Demo Role (1-Click Capstone Login)",
-                "🤖 Ask OnseBot AI Virtual Desk (24/7)"
+                "⚡ Switch Demo Role (1-Click Capstone Login)"
             )
         }
 
@@ -151,12 +145,9 @@ object NavigationShellHelper {
             .setItems(items) { _, which ->
                 if (SampleDataRepository.isLoggedIn) {
                     when (which) {
-                        0 -> navigateWithExplicitIntent(activity, TrackDocumentActivity::class.java)
-                        1 -> navigateWithExplicitIntent(activity, RequestFormActivity::class.java)
-                        2 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
-                        3 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
-                        4 -> activity.startActivity(Intent(activity, ChatbotActivity::class.java))
-                        5 -> {
+                        0 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
+                        1 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
+                        2 -> {
                             SampleDataRepository.isLoggedIn = false
                             Toast.makeText(activity, "Signed out successfully.", Toast.LENGTH_SHORT).show()
                             activity.recreate()
@@ -165,10 +156,7 @@ object NavigationShellHelper {
                 } else {
                     when (which) {
                         0 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
-                        1 -> navigateWithExplicitIntent(activity, TrackDocumentActivity::class.java)
-                        2 -> navigateWithExplicitIntent(activity, RequestFormActivity::class.java)
-                        3 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
-                        4 -> activity.startActivity(Intent(activity, ChatbotActivity::class.java))
+                        1 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
                     }
                 }
             }

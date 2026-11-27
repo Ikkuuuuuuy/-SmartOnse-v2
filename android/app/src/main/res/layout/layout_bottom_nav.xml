@@ -164,9 +164,9 @@
             android:visibility="invisible" />
     </LinearLayout>
 
-    <!-- 5. CONTACT & HOTLINES -->
+    <!-- 5. TRACK DOCUMENT -->
     <LinearLayout
-        android:id="@+id/bottomNavContact"
+        android:id="@+id/bottomNavTrack"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -176,26 +176,26 @@
         android:orientation="vertical">
 
         <ImageView
-            android:id="@+id/ivNavContact"
+            android:id="@+id/ivNavTrack"
             android:layout_width="21dp"
             android:layout_height="21dp"
-            android:contentDescription="Contact"
-            android:src="@drawable/ic_vec_building"
+            android:contentDescription="Track Document"
+            android:src="@drawable/ic_vec_search"
             app:tint="#64748B" />
 
         <TextView
-            android:id="@+id/tvNavContact"
+            android:id="@+id/tvNavTrack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:fontFamily="sans-serif-black"
-            android:text="Contact"
+            android:text="Track"
             android:textColor="#64748B"
             android:textSize="10sp"
             android:textStyle="bold" />
 
         <View
-            android:id="@+id/indNavContact"
+            android:id="@+id/indNavTrack"
             android:layout_width="26dp"
             android:layout_height="2.5dp"
             android:layout_marginTop="2dp"
