@@ -90,14 +90,6 @@ class ChatbotActivity : AppCompatActivity() {
             etChatInput.text.clear()
             handleUserQuestion(msg)
         }
-
-        // Quick Action Footer Shortcuts (Explicit Intents)
-        findViewById<Button>(R.id.btnChatGoRequest).setOnClickListener {
-            startActivity(Intent(this, RequestFormActivity::class.java))
-        }
-        findViewById<Button>(R.id.btnChatGoTrack).setOnClickListener {
-            startActivity(Intent(this, TrackDocumentActivity::class.java))
-        }
     }
 
     private fun handleUserQuestion(question: String) {
