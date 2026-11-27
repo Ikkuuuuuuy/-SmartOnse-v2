@@ -17,10 +17,12 @@ import androidx.appcompat.app.AlertDialog
  *  1. Clean Top Header Bar (Barangay Onse Seal + SMARTONSE + Hamburger Menu `☰`)
  *  2. Hamburger Account & Resident Action Menu (`☰` -> Track Document, Request Certificate,
  *     My Profile, 1-Click Role Switcher, Sign Out)
- *  3. Persistent Bottom Navigation Bar containing the Website's Navigation Pages:
- *     (Home | About | Officials | Services | Transparency | Events | SK Programs | Contact)
- *     which stays at the bottom on every screen and highlights the active page in #9C2007 Maroon!
- *  4. Floating OnseBot AI Robot Button at the bottom-right corner
+ *  3. Persistent 5-Tab Bottom Navigation Bar (Fits 100% on screen with no horizontal scrolling!):
+ *     - Home
+ *     - About (Merged About Barangay Onse + Barangay Officials & SK Officials)
+ *     - Services (E-Services Catalog, Request & Details)
+ *     - Transparency (Merged COA Disclosure + SK Programs + Brgy Events)
+ *     - Contact (24/7 Emergency Hotlines & Barangay Hall Contact)
  */
 object NavigationShellHelper {
 
@@ -37,16 +39,12 @@ object NavigationShellHelper {
         activeBottomTab: String,
         activeTopLink: String
     ) {
-        // Resolve which of the 8 Website Bottom Bar items should be highlighted
+        // Resolve which of the 5 merged Bottom Bar tabs should be highlighted
         val resolvedActiveTab = when {
-            activeTopLink.equals("ABOUT", true) -> "ABOUT"
-            activeTopLink.equals("OFFICIALS", true) -> "OFFICIALS"
-            activeTopLink.equals("TRANSPARENCY", true) -> "TRANSPARENCY"
-            activeTopLink.equals("EVENTS", true) -> "EVENTS"
-            activeTopLink.equals("SK", true) -> "SK"
-            activeTopLink.equals("CONTACT", true) -> "CONTACT"
-            activeBottomTab.equals("SERVICES", true) || activeTopLink.equals("SERVICES", true) -> "SERVICES"
-            activeBottomTab.equals("DISCLOSURE", true) -> "TRANSPARENCY"
+            activeTopLink.equals("CONTACT", true) || activeBottomTab.equals("CONTACT", true) -> "CONTACT"
+            activeTopLink.equals("ABOUT", true) || activeTopLink.equals("OFFICIALS", true) || activeBottomTab.equals("ABOUT", true) -> "ABOUT"
+            activeTopLink.equals("TRANSPARENCY", true) || activeTopLink.equals("SK", true) || activeTopLink.equals("EVENTS", true) || activeBottomTab.equals("DISCLOSURE", true) -> "TRANSPARENCY"
+            activeBottomTab.equals("SERVICES", true) || activeTopLink.equals("SERVICES", true) || activeBottomTab.equals("REQUEST", true) || activeBottomTab.equals("TRACK", true) -> "SERVICES"
             else -> "HOME"
         }
 
@@ -64,15 +62,12 @@ object NavigationShellHelper {
             showHamburgerAccountDrawer(activity)
         }
 
-        // 3. Persistent Bottom Bar (Home | About | Officials | Services | Transparency | Events | SK Programs | Contact)
+        // 3. Persistent 5-Tab Bottom Bar (Home | About | Services | Transparency | Contact)
         val bottomTabs = listOf(
             BottomNavTab("HOME", R.id.bottomNavHome, R.id.ivNavHome, R.id.tvNavHome, R.id.indNavHome),
             BottomNavTab("ABOUT", R.id.bottomNavAbout, R.id.ivNavAbout, R.id.tvNavAbout, R.id.indNavAbout),
-            BottomNavTab("OFFICIALS", R.id.bottomNavOfficials, R.id.ivNavOfficials, R.id.tvNavOfficials, R.id.indNavOfficials),
             BottomNavTab("SERVICES", R.id.bottomNavServices, R.id.ivNavServices, R.id.tvNavServices, R.id.indNavServices),
             BottomNavTab("TRANSPARENCY", R.id.bottomNavTransparency, R.id.ivNavTransparency, R.id.tvNavTransparency, R.id.indNavTransparency),
-            BottomNavTab("EVENTS", R.id.bottomNavEvents, R.id.ivNavEvents, R.id.tvNavEvents, R.id.indNavEvents),
-            BottomNavTab("SK", R.id.bottomNavSk, R.id.ivNavSk, R.id.tvNavSk, R.id.indNavSk),
             BottomNavTab("CONTACT", R.id.bottomNavContact, R.id.ivNavContact, R.id.tvNavContact, R.id.indNavContact)
         )
 
@@ -94,11 +89,8 @@ object NavigationShellHelper {
                 when (tab.key) {
                     "HOME" -> navigateWithExplicitIntent(activity, MainActivity::class.java)
                     "ABOUT" -> navigateWithExplicitIntent(activity, AboutOfficialsActivity::class.java, "EXTRA_SECTION" to "ABOUT")
-                    "OFFICIALS" -> navigateWithExplicitIntent(activity, AboutOfficialsActivity::class.java, "EXTRA_SECTION" to "OFFICIALS")
                     "SERVICES" -> navigateWithExplicitIntent(activity, ServicesActivity::class.java)
                     "TRANSPARENCY" -> navigateWithExplicitIntent(activity, TransparencySkActivity::class.java, "EXTRA_TAB" to "TRANSPARENCY")
-                    "EVENTS" -> navigateWithExplicitIntent(activity, TransparencySkActivity::class.java, "EXTRA_TAB" to "EVENTS")
-                    "SK" -> navigateWithExplicitIntent(activity, TransparencySkActivity::class.java, "EXTRA_TAB" to "SK")
                     "CONTACT" -> navigateWithExplicitIntent(activity, AboutOfficialsActivity::class.java, "EXTRA_SECTION" to "CONTACT")
                 }
             }

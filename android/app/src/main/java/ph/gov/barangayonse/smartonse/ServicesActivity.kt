@@ -59,6 +59,11 @@ class ServicesActivity : AppCompatActivity() {
         categoryButtons.forEach { (btn, categoryKey) ->
             btn.setOnClickListener {
                 selectedCategory = categoryKey
+                categoryButtons.forEach { (otherBtn, otherKey) ->
+                    otherBtn.setBackgroundResource(
+                        if (otherKey == selectedCategory) R.drawable.bg_btn_maroon else R.drawable.bg_btn_dark
+                    )
+                }
                 renderServicesList(etSearchServices.text.toString())
             }
         }

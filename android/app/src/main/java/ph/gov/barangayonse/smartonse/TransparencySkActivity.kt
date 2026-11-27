@@ -19,6 +19,9 @@ class TransparencySkActivity : AppCompatActivity() {
 
     private lateinit var containerContent: LinearLayout
     private lateinit var tvSectionSubheader: TextView
+    private lateinit var btnTabTransparency: Button
+    private lateinit var btnTabSkPrograms: Button
+    private lateinit var btnTabEvents: Button
     private var activeTab = "TRANSPARENCY"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,9 +34,9 @@ class TransparencySkActivity : AppCompatActivity() {
 
         activeTab = intent.getStringExtra("EXTRA_TAB") ?: "TRANSPARENCY"
 
-        val btnTabTransparency = findViewById<Button>(R.id.btnTabTransparency)
-        val btnTabSkPrograms = findViewById<Button>(R.id.btnTabSkPrograms)
-        val btnTabEvents = findViewById<Button>(R.id.btnTabEvents)
+        btnTabTransparency = findViewById(R.id.btnTabTransparency)
+        btnTabSkPrograms = findViewById(R.id.btnTabSkPrograms)
+        btnTabEvents = findViewById(R.id.btnTabEvents)
 
         btnTabTransparency.setOnClickListener {
             activeTab = "TRANSPARENCY"
@@ -64,6 +67,18 @@ class TransparencySkActivity : AppCompatActivity() {
             activeBottomTab = "DISCLOSURE",
             activeTopLink = activeTab
         )
+
+        // Dynamically highlight the selected button (COA Disclosure | SK Programs | Brgy Events) in #9C2007 Maroon!
+        btnTabTransparency.setBackgroundResource(
+            if (activeTab == "TRANSPARENCY") R.drawable.bg_btn_maroon else R.drawable.bg_btn_dark
+        )
+        btnTabSkPrograms.setBackgroundResource(
+            if (activeTab == "SK") R.drawable.bg_btn_maroon else R.drawable.bg_btn_dark
+        )
+        btnTabEvents.setBackgroundResource(
+            if (activeTab == "EVENTS") R.drawable.bg_btn_maroon else R.drawable.bg_btn_dark
+        )
+
         containerContent.removeAllViews()
         val inflater = LayoutInflater.from(this)
 

@@ -25,7 +25,8 @@ data class OfficialItem(
     val position: String,
     val committee: String,
     val contact: String,
-    val council: String // "Barangay Council" or "Sangguniang Kabataan (SK)"
+    val council: String, // "Barangay Council" or "Sangguniang Kabataan (SK)"
+    val avatarResName: String
 )
 
 data class TrackingRecord(
@@ -193,26 +194,26 @@ object SampleDataRepository {
     )
 
     val officialsList = listOf(
-        OfficialItem("Hon. Roberto B. Alba", "Barangay Chairman", "Executive & Peace and Order", "0917-888-0011", "Barangay Council"),
-        OfficialItem("Elena V. Gutierrez", "Barangay Treasurer", "Finance, Budget & Appropriations", "0917-888-0029", "Barangay Council"),
-        OfficialItem("Maria Elena C. Gomez", "Barangay Secretary", "Secretariat & Administrative Records", "0917-888-0030", "Barangay Council"),
-        OfficialItem("Hon. Danilo A. Florano", "Barangay Kagawad", "Committee on Public Works", "0917-888-0012", "Barangay Council"),
-        OfficialItem("Hon. Zenaida C. Casao", "Barangay Kagawad", "Committee on Health & Sanitation", "0917-888-0013", "Barangay Council"),
-        OfficialItem("Hon. Ryan Lopez Lorbes", "Barangay Kagawad", "Committee on Cleanliness & Environment", "0917-888-0014", "Barangay Council"),
-        OfficialItem("Hon. John Mark Cortez Daradal", "Barangay Kagawad", "Committee on Ways and Means", "0917-888-0015", "Barangay Council"),
-        OfficialItem("Hon. Federico Soller Deniega", "Barangay Kagawad", "Committee on Peace and Order", "0917-888-0016", "Barangay Council"),
-        OfficialItem("Hon. Miguel Arguelles Zamora Jr.", "Barangay Kagawad", "Committee on Education", "0917-888-0017", "Barangay Council"),
-        OfficialItem("Hon. Rafael Lasin Borjal Jr.", "Barangay Kagawad", "Committee on Transportation & Traffic", "0917-888-0018", "Barangay Council"),
-        OfficialItem("Hon. John Michael D. Permato", "SK Chairperson", "Youth Leadership & Sports", "0917-888-0019", "Sangguniang Kabataan (SK)"),
-        OfficialItem("Michaelito Bongalos", "SK Treasurer", "Youth Budget & Appropriations", "0917-888-0020", "Sangguniang Kabataan (SK)"),
-        OfficialItem("Jonathan D. Sorio", "SK Secretary", "Youth Records & Secretariat", "0917-888-0021", "Sangguniang Kabataan (SK)"),
-        OfficialItem("Hon. Abigail A. Reyes", "SK Kagawad", "Committee on Health & Nutrition", "0917-888-0022", "Sangguniang Kabataan (SK)"),
-        OfficialItem("Hon. Ethan Jetter D.G. Garcia", "SK Kagawad", "Committee on Education & Culture", "0917-888-0023", "Sangguniang Kabataan (SK)"),
-        OfficialItem("Hon. Alexis Adrianne R. Luciano", "SK Kagawad", "Committee on Digital Arts & Innovation", "0917-888-0024", "Sangguniang Kabataan (SK)"),
-        OfficialItem("Hon. Sherric Q. Pantaleon", "SK Kagawad", "Committee on Sports Development", "0917-888-0025", "Sangguniang Kabataan (SK)"),
-        OfficialItem("Hon. Sherwin Reyes", "SK Kagawad", "Committee on Environmental Protection", "0917-888-0026", "Sangguniang Kabataan (SK)"),
-        OfficialItem("Hon. Ian Jeffrey L. Cadiang", "SK Kagawad", "Committee on Anti-Drug Abuse Youth Campaign", "0917-888-0027", "Sangguniang Kabataan (SK)"),
-        OfficialItem("Hon. Joshua D. Munsayac", "SK Kagawad", "Committee on Disaster Preparedness", "0917-888-0028", "Sangguniang Kabataan (SK)")
+        OfficialItem("Hon. Roberto B. Alba", "Punong Barangay (Captain)", "Executive & Peace and Order", "0917-888-0011", "Barangay Council", "off_chairman"),
+        OfficialItem("Elena V. Gutierrez", "Barangay Treasurer", "Finance, Budget & Appropriations", "0917-888-0029", "Barangay Council", "barangay_seal"),
+        OfficialItem("Maria Elena C. Gomez", "Barangay Secretary", "Secretariat & Administrative Records", "0917-888-0030", "Barangay Council", "barangay_seal"),
+        OfficialItem("Hon. Danilo A. Florano", "Barangay Kagawad", "Committee on Public Works & Infrastructure", "0917-888-0012", "Barangay Council", "off_dan"),
+        OfficialItem("Hon. Zenaida C. Casao", "Barangay Kagawad", "Committee on Health & Sanitation", "0917-888-0013", "Barangay Council", "off_zenaida"),
+        OfficialItem("Hon. Ryan Lopez Lorbes", "Barangay Kagawad", "Committee on Cleanliness & Environment", "0917-888-0014", "Barangay Council", "off_ryan"),
+        OfficialItem("Hon. John Mark Cortez Daradal", "Barangay Kagawad", "Committee on Ways and Means", "0917-888-0015", "Barangay Council", "off_jm"),
+        OfficialItem("Hon. Federico Soller Deniega", "Barangay Kagawad", "Committee on Peace and Order", "0917-888-0016", "Barangay Council", "off_federico"),
+        OfficialItem("Hon. Miguel Arguelles Zamora Jr.", "Barangay Kagawad", "Committee on Education & Culture", "0917-888-0017", "Barangay Council", "off_miguel"),
+        OfficialItem("Hon. Rafael Lasin Borjal Jr.", "Barangay Kagawad", "Committee on Transportation & Traffic", "0917-888-0018", "Barangay Council", "off_raf"),
+        OfficialItem("Hon. John Michael D. Permato", "SK Chairperson", "Youth Leadership & Sports Development", "0917-888-0019", "Sangguniang Kabataan (SK)", "off_permato"),
+        OfficialItem("Michaelito Bongalos", "SK Treasurer", "Youth Budget & Appropriations", "0917-888-0020", "Sangguniang Kabataan (SK)", "off_bongalos"),
+        OfficialItem("Jonathan D. Sorio", "SK Secretary", "Youth Records & Secretariat", "0917-888-0021", "Sangguniang Kabataan (SK)", "off_sorio"),
+        OfficialItem("Hon. Abigail A. Reyes", "SK Kagawad", "Committee on Health & Nutrition", "0917-888-0022", "Sangguniang Kabataan (SK)", "off_abigail"),
+        OfficialItem("Hon. Ethan Jetter D.G. Garcia", "SK Kagawad", "Committee on Education & Culture", "0917-888-0023", "Sangguniang Kabataan (SK)", "off_garcia"),
+        OfficialItem("Hon. Alexis Adrianne R. Luciano", "SK Kagawad", "Committee on Digital Arts & Innovation", "0917-888-0024", "Sangguniang Kabataan (SK)", "off_luciano"),
+        OfficialItem("Hon. Sherric Q. Pantaleon", "SK Kagawad", "Committee on Sports Development", "0917-888-0025", "Sangguniang Kabataan (SK)", "off_pantaleon"),
+        OfficialItem("Hon. Sherwin Reyes", "SK Kagawad", "Committee on Environmental Protection", "0917-888-0026", "Sangguniang Kabataan (SK)", "off_reyes"),
+        OfficialItem("Hon. Ian Jeffrey L. Cadiang", "SK Kagawad", "Committee on Anti-Drug Abuse Youth Campaign", "0917-888-0027", "Sangguniang Kabataan (SK)", "off_cadiang"),
+        OfficialItem("Hon. Joshua D. Munsayac", "SK Kagawad", "Committee on Disaster Preparedness", "0917-888-0028", "Sangguniang Kabataan (SK)", "off_munsayac")
     )
 
     val transparencyDocs = listOf(
