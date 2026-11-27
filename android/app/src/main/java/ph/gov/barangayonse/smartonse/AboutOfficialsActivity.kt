@@ -55,6 +55,18 @@ class AboutOfficialsActivity : AppCompatActivity() {
         renderOfficials()
     }
 
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val section = intent.getStringExtra("EXTRA_SECTION") ?: "OFFICIALS"
+        NavigationShellHelper.setupPersistentShell(
+            activity = this,
+            activeBottomTab = "HOME",
+            activeTopLink = section
+        )
+        renderOfficials()
+    }
+
     private fun renderOfficials() {
         containerOfficials.removeAllViews()
         val inflater = LayoutInflater.from(this)

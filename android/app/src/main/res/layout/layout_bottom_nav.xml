@@ -1,157 +1,339 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="62dp"
+    android:layout_height="64dp"
     android:background="#FFFFFF"
-    android:elevation="14dp"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingHorizontal="6dp">
+    android:clipToPadding="false"
+    android:elevation="16dp"
+    android:fillViewport="true"
+    android:paddingHorizontal="6dp"
+    android:scrollbars="none">
 
     <LinearLayout
-        android:id="@+id/navTabHome"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/ivBottomHome"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:contentDescription="Home"
-            android:src="@drawable/ic_vec_home"
-            app:tint="#9C2007" />
-
-        <TextView
-            android:id="@+id/tvBottomHome"
+        <!-- 1. HOME -->
+        <LinearLayout
+            android:id="@+id/bottomNavHome"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Home"
-            android:textColor="#9C2007"
-            android:textSize="10.5sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="68dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
 
-    <LinearLayout
-        android:id="@+id/navTabServices"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:orientation="vertical">
+            <ImageView
+                android:id="@+id/ivNavHome"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:contentDescription="Home"
+                android:src="@drawable/ic_vec_home"
+                app:tint="#9C2007" />
 
-        <ImageView
-            android:id="@+id/ivBottomServices"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:contentDescription="Services"
-            android:src="@drawable/ic_vec_doc"
-            app:tint="#64748B" />
+            <TextView
+                android:id="@+id/tvNavHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Home"
+                android:textColor="#9C2007"
+                android:textSize="10sp"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvBottomServices"
+            <View
+                android:id="@+id/indNavHome"
+                android:layout_width="24dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="3dp"
+                android:background="#9C2007" />
+        </LinearLayout>
+
+        <!-- 2. ABOUT -->
+        <LinearLayout
+            android:id="@+id/bottomNavAbout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Services"
-            android:textColor="#64748B"
-            android:textSize="10.5sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="68dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
 
-    <LinearLayout
-        android:id="@+id/navTabRequest"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:orientation="vertical">
+            <ImageView
+                android:id="@+id/ivNavAbout"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:contentDescription="About"
+                android:src="@drawable/ic_vec_building"
+                app:tint="#64748B" />
 
-        <ImageView
-            android:id="@+id/ivBottomRequest"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:contentDescription="Request"
-            android:src="@drawable/ic_vec_add_box"
-            app:tint="#64748B" />
+            <TextView
+                android:id="@+id/tvNavAbout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:fontFamily="sans-serif-black"
+                android:text="About"
+                android:textColor="#64748B"
+                android:textSize="10sp"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvBottomRequest"
+            <View
+                android:id="@+id/indNavAbout"
+                android:layout_width="24dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="3dp"
+                android:background="#9C2007"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <!-- 3. OFFICIALS -->
+        <LinearLayout
+            android:id="@+id/bottomNavOfficials"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Request"
-            android:textColor="#64748B"
-            android:textSize="10.5sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="72dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
 
-    <LinearLayout
-        android:id="@+id/navTabTrack"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:orientation="vertical">
+            <ImageView
+                android:id="@+id/ivNavOfficials"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:contentDescription="Officials"
+                android:src="@drawable/ic_vec_users"
+                app:tint="#64748B" />
 
-        <ImageView
-            android:id="@+id/ivBottomTrack"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:contentDescription="Track"
-            android:src="@drawable/ic_vec_search"
-            app:tint="#64748B" />
+            <TextView
+                android:id="@+id/tvNavOfficials"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Officials"
+                android:textColor="#64748B"
+                android:textSize="10sp"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvBottomTrack"
+            <View
+                android:id="@+id/indNavOfficials"
+                android:layout_width="28dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="3dp"
+                android:background="#9C2007"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <!-- 4. SERVICES -->
+        <LinearLayout
+            android:id="@+id/bottomNavServices"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Track"
-            android:textColor="#64748B"
-            android:textSize="10.5sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="72dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
 
-    <LinearLayout
-        android:id="@+id/navTabMore"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:orientation="vertical">
+            <ImageView
+                android:id="@+id/ivNavServices"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:contentDescription="Services"
+                android:src="@drawable/ic_vec_doc"
+                app:tint="#64748B" />
 
-        <ImageView
-            android:id="@+id/ivBottomMore"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:contentDescription="Disclosure"
-            android:src="@drawable/ic_vec_shield"
-            app:tint="#64748B" />
+            <TextView
+                android:id="@+id/tvNavServices"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Services"
+                android:textColor="#64748B"
+                android:textSize="10sp"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvBottomMore"
+            <View
+                android:id="@+id/indNavServices"
+                android:layout_width="28dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="3dp"
+                android:background="#9C2007"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <!-- 5. TRANSPARENCY -->
+        <LinearLayout
+            android:id="@+id/bottomNavTransparency"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Disclosure"
-            android:textColor="#64748B"
-            android:textSize="10.5sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="86dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
 
-</LinearLayout>
+            <ImageView
+                android:id="@+id/ivNavTransparency"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:contentDescription="Transparency"
+                android:src="@drawable/ic_vec_shield"
+                app:tint="#64748B" />
+
+            <TextView
+                android:id="@+id/tvNavTransparency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Transparency"
+                android:textColor="#64748B"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <View
+                android:id="@+id/indNavTransparency"
+                android:layout_width="36dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="3dp"
+                android:background="#9C2007"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <!-- 6. ANNOUNCEMENTS / EVENTS -->
+        <LinearLayout
+            android:id="@+id/bottomNavEvents"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="72dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
+
+            <ImageView
+                android:id="@+id/ivNavEvents"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:contentDescription="Events"
+                android:src="@drawable/ic_vec_add_box"
+                app:tint="#64748B" />
+
+            <TextView
+                android:id="@+id/tvNavEvents"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Events"
+                android:textColor="#64748B"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <View
+                android:id="@+id/indNavEvents"
+                android:layout_width="28dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="3dp"
+                android:background="#9C2007"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <!-- 7. SK PROGRAMS -->
+        <LinearLayout
+            android:id="@+id/bottomNavSk"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="84dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
+
+            <ImageView
+                android:id="@+id/ivNavSk"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:contentDescription="SK Programs"
+                android:src="@drawable/ic_vec_users"
+                app:tint="#64748B" />
+
+            <TextView
+                android:id="@+id/tvNavSk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:fontFamily="sans-serif-black"
+                android:text="SK Programs"
+                android:textColor="#64748B"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <View
+                android:id="@+id/indNavSk"
+                android:layout_width="36dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="3dp"
+                android:background="#9C2007"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <!-- 8. CONTACT -->
+        <LinearLayout
+            android:id="@+id/bottomNavContact"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="72dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
+
+            <ImageView
+                android:id="@+id/ivNavContact"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:contentDescription="Contact"
+                android:src="@drawable/ic_vec_person"
+                app:tint="#64748B" />
+
+            <TextView
+                android:id="@+id/tvNavContact"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Contact"
+                android:textColor="#64748B"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <View
+                android:id="@+id/indNavContact"
+                android:layout_width="28dp"
+                android:layout_height="2.5dp"
+                android:layout_marginTop="3dp"
+                android:background="#9C2007"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+    </LinearLayout>
+</HorizontalScrollView>

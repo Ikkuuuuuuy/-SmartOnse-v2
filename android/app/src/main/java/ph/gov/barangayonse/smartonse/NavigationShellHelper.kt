@@ -13,20 +13,44 @@ import androidx.appcompat.app.AlertDialog
 /**
  * NavigationShellHelper.kt
  *
- * Powers the persistent SmartOnse Top Navbar + Scrollable Website Nav Strip
- * (HOME | ABOUT | OFFICIALS | SERVICES | TRANSPARENCY | ANNOUNCEMENTS/EVENTS | SK PROGRAMS | CONTACT),
- * the Persistent 5-Tab Bottom Navigation Bar (which stays visible on every screen and highlights
- * the active tab in #9C2007 Maroon!), the Floating OnseBot AI Robot Button, and the Hamburger
- * Account/Portal Drawer (Request Certificate, Track Document, Profile, 1-Click Role Switcher, Sign Out).
+ * Powers:
+ *  1. Clean Top Header Bar (Barangay Onse Seal + SMARTONSE + Hamburger Menu `☰`)
+ *  2. Hamburger Account & Resident Action Menu (`☰` -> Track Document, Request Certificate,
+ *     My Profile, 1-Click Role Switcher, Sign Out)
+ *  3. Persistent Bottom Navigation Bar containing the Website's Navigation Pages:
+ *     (Home | About | Officials | Services | Transparency | Events | SK Programs | Contact)
+ *     which stays at the bottom on every screen and highlights the active page in #9C2007 Maroon!
+ *  4. Floating OnseBot AI Robot Button at the bottom-right corner
  */
 object NavigationShellHelper {
 
+    private data class BottomNavTab(
+        val key: String,
+        val containerId: Int,
+        val iconId: Int,
+        val labelId: Int,
+        val indicatorId: Int
+    )
+
     fun setupPersistentShell(
         activity: Activity,
-        activeBottomTab: String, // "HOME", "SERVICES", "REQUEST", "TRACK", "DISCLOSURE"
-        activeTopLink: String    // "HOME", "ABOUT", "OFFICIALS", "SERVICES", "TRANSPARENCY", "EVENTS", "SK", "CONTACT"
+        activeBottomTab: String,
+        activeTopLink: String
     ) {
-        // 1. Top Seal Click
+        // Resolve which of the 8 Website Bottom Bar items should be highlighted
+        val resolvedActiveTab = when {
+            activeTopLink.equals("ABOUT", true) -> "ABOUT"
+            activeTopLink.equals("OFFICIALS", true) -> "OFFICIALS"
+            activeTopLink.equals("TRANSPARENCY", true) -> "TRANSPARENCY"
+            activeTopLink.equals("EVENTS", true) -> "EVENTS"
+            activeTopLink.equals("SK", true) -> "SK"
+            activeTopLink.equals("CONTACT", true) -> "CONTACT"
+            activeBottomTab.equals("SERVICES", true) || activeTopLink.equals("SERVICES", true) -> "SERVICES"
+            activeBottomTab.equals("DISCLOSURE", true) -> "TRANSPARENCY"
+            else -> "HOME"
+        }
+
+        // 1. Top Seal Click -> Home
         activity.findViewById<ImageView?>(R.id.ivBarangaySeal)?.setOnClickListener {
             if (activity !is MainActivity) {
                 navigateWithExplicitIntent(activity, MainActivity::class.java)
@@ -35,31 +59,39 @@ object NavigationShellHelper {
             }
         }
 
-        // 2. Hamburger Menu Button (`☰`) -> Account, Profile, Tracking, Request, Role Switcher, Sign Out
+        // 2. Hamburger Menu Button (`☰`) -> Tracking, Request, Profile, Role Switcher, Sign Out
         activity.findViewById<ImageView?>(R.id.btnNavbarAccount)?.setOnClickListener {
             showHamburgerAccountDrawer(activity)
         }
 
-        // 3. Top Website Nav Links Strip (HOME | ABOUT | OFFICIALS | SERVICES | TRANSPARENCY | EVENTS | SK | CONTACT)
-        val topNavMap = mapOf(
-            "HOME" to (activity.findViewById<TextView?>(R.id.topNavHome) to activity.findViewById<View?>(R.id.topIndHome)),
-            "ABOUT" to (activity.findViewById<TextView?>(R.id.topNavAbout) to activity.findViewById<View?>(R.id.topIndAbout)),
-            "OFFICIALS" to (activity.findViewById<TextView?>(R.id.topNavOfficials) to activity.findViewById<View?>(R.id.topIndOfficials)),
-            "SERVICES" to (activity.findViewById<TextView?>(R.id.topNavServices) to activity.findViewById<View?>(R.id.topIndServices)),
-            "TRANSPARENCY" to (activity.findViewById<TextView?>(R.id.topNavTransparency) to activity.findViewById<View?>(R.id.topIndTransparency)),
-            "EVENTS" to (activity.findViewById<TextView?>(R.id.topNavEvents) to activity.findViewById<View?>(R.id.topIndEvents)),
-            "SK" to (activity.findViewById<TextView?>(R.id.topNavSk) to activity.findViewById<View?>(R.id.topIndSk)),
-            "CONTACT" to (activity.findViewById<TextView?>(R.id.topNavContact) to activity.findViewById<View?>(R.id.topIndContact))
+        // 3. Persistent Bottom Bar (Home | About | Officials | Services | Transparency | Events | SK Programs | Contact)
+        val bottomTabs = listOf(
+            BottomNavTab("HOME", R.id.bottomNavHome, R.id.ivNavHome, R.id.tvNavHome, R.id.indNavHome),
+            BottomNavTab("ABOUT", R.id.bottomNavAbout, R.id.ivNavAbout, R.id.tvNavAbout, R.id.indNavAbout),
+            BottomNavTab("OFFICIALS", R.id.bottomNavOfficials, R.id.ivNavOfficials, R.id.tvNavOfficials, R.id.indNavOfficials),
+            BottomNavTab("SERVICES", R.id.bottomNavServices, R.id.ivNavServices, R.id.tvNavServices, R.id.indNavServices),
+            BottomNavTab("TRANSPARENCY", R.id.bottomNavTransparency, R.id.ivNavTransparency, R.id.tvNavTransparency, R.id.indNavTransparency),
+            BottomNavTab("EVENTS", R.id.bottomNavEvents, R.id.ivNavEvents, R.id.tvNavEvents, R.id.indNavEvents),
+            BottomNavTab("SK", R.id.bottomNavSk, R.id.ivNavSk, R.id.tvNavSk, R.id.indNavSk),
+            BottomNavTab("CONTACT", R.id.bottomNavContact, R.id.ivNavContact, R.id.tvNavContact, R.id.indNavContact)
         )
 
-        topNavMap.forEach { (key, pair) ->
-            val (tv, indicator) = pair
-            val isActive = key.equals(activeTopLink, ignoreCase = true)
-            tv?.setTextColor(if (isActive) 0xFFFFCCCC.toInt() else 0xDDFFFFFF.toInt())
-            indicator?.visibility = if (isActive) View.VISIBLE else View.INVISIBLE
+        val activeColor = 0xFF9C2007.toInt()
+        val inactiveColor = 0xFF64748B.toInt()
 
-            tv?.setOnClickListener {
-                when (key) {
+        for (tab in bottomTabs) {
+            val container = activity.findViewById<LinearLayout?>(tab.containerId)
+            val icon = activity.findViewById<ImageView?>(tab.iconId)
+            val label = activity.findViewById<TextView?>(tab.labelId)
+            val indicator = activity.findViewById<View?>(tab.indicatorId)
+
+            val isSelected = tab.key.equals(resolvedActiveTab, ignoreCase = true)
+            icon?.setColorFilter(if (isSelected) activeColor else inactiveColor)
+            label?.setTextColor(if (isSelected) activeColor else inactiveColor)
+            indicator?.visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
+
+            container?.setOnClickListener {
+                when (tab.key) {
                     "HOME" -> navigateWithExplicitIntent(activity, MainActivity::class.java)
                     "ABOUT" -> navigateWithExplicitIntent(activity, AboutOfficialsActivity::class.java, "EXTRA_SECTION" to "ABOUT")
                     "OFFICIALS" -> navigateWithExplicitIntent(activity, AboutOfficialsActivity::class.java, "EXTRA_SECTION" to "OFFICIALS")
@@ -72,39 +104,7 @@ object NavigationShellHelper {
             }
         }
 
-        // 4. Persistent Bottom Navigation Bar (Highlights the currently active screen!)
-        val bottomTabs = listOf(
-            Triple("HOME", R.id.navTabHome, R.id.ivBottomHome to R.id.tvBottomHome),
-            Triple("SERVICES", R.id.navTabServices, R.id.ivBottomServices to R.id.tvBottomServices),
-            Triple("REQUEST", R.id.navTabRequest, R.id.ivBottomRequest to R.id.tvBottomRequest),
-            Triple("TRACK", R.id.navTabTrack, R.id.ivBottomTrack to R.id.tvBottomTrack),
-            Triple("DISCLOSURE", R.id.navTabMore, R.id.ivBottomMore to R.id.tvBottomMore)
-        )
-
-        val activeColor = 0xFF9C2007.toInt()
-        val inactiveColor = 0xFF64748B.toInt()
-
-        for ((tabKey, containerId, viewsPair) in bottomTabs) {
-            val container = activity.findViewById<LinearLayout?>(containerId)
-            val icon = activity.findViewById<ImageView?>(viewsPair.first)
-            val label = activity.findViewById<TextView?>(viewsPair.second)
-
-            val isSelected = tabKey.equals(activeBottomTab, ignoreCase = true)
-            icon?.setColorFilter(if (isSelected) activeColor else inactiveColor)
-            label?.setTextColor(if (isSelected) activeColor else inactiveColor)
-
-            container?.setOnClickListener {
-                when (tabKey) {
-                    "HOME" -> navigateWithExplicitIntent(activity, MainActivity::class.java)
-                    "SERVICES" -> navigateWithExplicitIntent(activity, ServicesActivity::class.java)
-                    "REQUEST" -> navigateWithExplicitIntent(activity, RequestFormActivity::class.java)
-                    "TRACK" -> navigateWithExplicitIntent(activity, TrackDocumentActivity::class.java)
-                    "DISCLOSURE" -> navigateWithExplicitIntent(activity, TransparencySkActivity::class.java, "EXTRA_TAB" to "TRANSPARENCY")
-                }
-            }
-        }
-
-        // 5. Floating OnseBot AI Chatbot Button
+        // 4. Floating OnseBot AI Chatbot Button
         activity.findViewById<FrameLayout?>(R.id.fabOnseBotChatbot)?.setOnClickListener {
             if (activity !is ChatbotActivity) {
                 activity.startActivity(Intent(activity, ChatbotActivity::class.java))
@@ -137,22 +137,20 @@ object NavigationShellHelper {
 
         val items = if (SampleDataRepository.isLoggedIn) {
             arrayOf(
-                "My Resident Profile & Account (${SampleDataRepository.currentUserName})",
-                "Request Barangay Certificate Online",
-                "Track My Document Request Status",
-                "Switch Demo Role (Captain / Staff / Kagawad / SK / Resident)",
-                "Ask OnseBot AI Virtual Desk (24/7)",
-                "Emergency Hotlines & Barangay Hall Contact",
-                "Sign Out of SmartOnse"
+                "🔍 Track My Document Application Status",
+                "✍️ Request Barangay Certificate Online",
+                "👤 My Resident Profile & Account Settings",
+                "⚡ Switch Demo Role (Captain / Staff / Kagawad / SK / Resident)",
+                "🤖 Ask OnseBot AI Virtual Desk (24/7)",
+                "🚪 Sign Out of SmartOnse"
             )
         } else {
             arrayOf(
-                "Sign In / Register Resident Account",
-                "Request Barangay Certificate Online",
-                "Track Document Request Status",
-                "Switch Demo Role (1-Click Capstone Login)",
-                "Ask OnseBot AI Virtual Desk (24/7)",
-                "Emergency Hotlines & Barangay Hall Contact"
+                "🔐 Sign In / Register Resident Account",
+                "🔍 Track Document Application Status",
+                "✍️ Request Barangay Certificate Online",
+                "⚡ Switch Demo Role (1-Click Capstone Login)",
+                "🤖 Ask OnseBot AI Virtual Desk (24/7)"
             )
         }
 
@@ -161,13 +159,12 @@ object NavigationShellHelper {
             .setItems(items) { _, which ->
                 if (SampleDataRepository.isLoggedIn) {
                     when (which) {
-                        0 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
+                        0 -> navigateWithExplicitIntent(activity, TrackDocumentActivity::class.java)
                         1 -> navigateWithExplicitIntent(activity, RequestFormActivity::class.java)
-                        2 -> navigateWithExplicitIntent(activity, TrackDocumentActivity::class.java)
+                        2 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
                         3 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
                         4 -> activity.startActivity(Intent(activity, ChatbotActivity::class.java))
-                        5 -> navigateWithExplicitIntent(activity, AboutOfficialsActivity::class.java, "EXTRA_SECTION" to "CONTACT")
-                        6 -> {
+                        5 -> {
                             SampleDataRepository.isLoggedIn = false
                             Toast.makeText(activity, "Signed out successfully.", Toast.LENGTH_SHORT).show()
                             activity.recreate()
@@ -176,11 +173,10 @@ object NavigationShellHelper {
                 } else {
                     when (which) {
                         0 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
-                        1 -> navigateWithExplicitIntent(activity, RequestFormActivity::class.java)
-                        2 -> navigateWithExplicitIntent(activity, TrackDocumentActivity::class.java)
+                        1 -> navigateWithExplicitIntent(activity, TrackDocumentActivity::class.java)
+                        2 -> navigateWithExplicitIntent(activity, RequestFormActivity::class.java)
                         3 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
                         4 -> activity.startActivity(Intent(activity, ChatbotActivity::class.java))
-                        5 -> navigateWithExplicitIntent(activity, AboutOfficialsActivity::class.java, "EXTRA_SECTION" to "CONTACT")
                     }
                 }
             }

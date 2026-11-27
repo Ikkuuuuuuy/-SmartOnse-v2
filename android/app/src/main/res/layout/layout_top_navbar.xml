@@ -1,273 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="64dp"
     android:background="#800000"
     android:elevation="8dp"
-    android:orientation="vertical">
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="16dp">
 
-    <!-- Row 1: Seal + SMARTONSE + Hamburger Menu (`☰`) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp">
+    <ImageView
+        android:id="@+id/ivBarangaySeal"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:background="@drawable/bg_circle_seal"
+        android:contentDescription="Barangay Onse Seal"
+        android:padding="2dp"
+        android:src="@drawable/barangay_seal" />
 
-        <ImageView
-            android:id="@+id/ivBarangaySeal"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:background="@drawable/bg_circle_seal"
-            android:contentDescription="Barangay Onse Seal"
-            android:padding="2dp"
-            android:src="@drawable/barangay_seal" />
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:fontFamily="sans-serif-black"
+        android:letterSpacing="0.02"
+        android:text="SMARTONSE"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_weight="1"
-            android:fontFamily="sans-serif-black"
-            android:letterSpacing="0.02"
-            android:text="SMARTONSE"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+    <!-- Hamburger Menu (`☰`) for Request, Tracking, Profile, Role Switcher, Sign Out -->
+    <ImageView
+        android:id="@+id/btnNavbarAccount"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:clickable="true"
+        android:contentDescription="Open Account &amp; Portal Menu"
+        android:focusable="true"
+        android:padding="8dp"
+        android:src="@drawable/ic_vec_menu" />
 
-        <ImageView
-            android:id="@+id/btnNavbarAccount"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:clickable="true"
-            android:contentDescription="Open Account &amp; Portal Menu"
-            android:focusable="true"
-            android:padding="7dp"
-            android:src="@drawable/ic_vec_menu" />
-    </LinearLayout>
-
-    <!-- Row 2: Horizontal Website Navigation Strip (HOME | ABOUT | OFFICIALS | SERVICES | TRANSPARENCY | ANNOUNCEMENTS/EVENTS | SK PROGRAMS | CONTACT) -->
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="38dp"
-        android:background="#700000"
-        android:clipToPadding="false"
-        android:paddingHorizontal="12dp"
-        android:scrollbars="none">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <!-- HOME -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="18dp"
-                android:gravity="center"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/topNavHome"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:letterSpacing="0.08"
-                    android:paddingVertical="4dp"
-                    android:text="HOME"
-                    android:textColor="#FFCCCC"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-                <View
-                    android:id="@+id/topIndHome"
-                    android:layout_width="match_parent"
-                    android:layout_height="2.5dp"
-                    android:background="#FFCCCC" />
-            </LinearLayout>
-
-            <!-- ABOUT -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="18dp"
-                android:gravity="center"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/topNavAbout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:letterSpacing="0.08"
-                    android:paddingVertical="4dp"
-                    android:text="ABOUT"
-                    android:textColor="#DDFFFFFF"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-                <View
-                    android:id="@+id/topIndAbout"
-                    android:layout_width="match_parent"
-                    android:layout_height="2.5dp"
-                    android:background="#FFCCCC"
-                    android:visibility="invisible" />
-            </LinearLayout>
-
-            <!-- OFFICIALS -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="18dp"
-                android:gravity="center"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/topNavOfficials"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:letterSpacing="0.08"
-                    android:paddingVertical="4dp"
-                    android:text="OFFICIALS"
-                    android:textColor="#DDFFFFFF"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-                <View
-                    android:id="@+id/topIndOfficials"
-                    android:layout_width="match_parent"
-                    android:layout_height="2.5dp"
-                    android:background="#FFCCCC"
-                    android:visibility="invisible" />
-            </LinearLayout>
-
-            <!-- SERVICES -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="18dp"
-                android:gravity="center"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/topNavServices"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:letterSpacing="0.08"
-                    android:paddingVertical="4dp"
-                    android:text="SERVICES"
-                    android:textColor="#DDFFFFFF"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-                <View
-                    android:id="@+id/topIndServices"
-                    android:layout_width="match_parent"
-                    android:layout_height="2.5dp"
-                    android:background="#FFCCCC"
-                    android:visibility="invisible" />
-            </LinearLayout>
-
-            <!-- TRANSPARENCY -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="18dp"
-                android:gravity="center"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/topNavTransparency"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:letterSpacing="0.08"
-                    android:paddingVertical="4dp"
-                    android:text="TRANSPARENCY"
-                    android:textColor="#DDFFFFFF"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-                <View
-                    android:id="@+id/topIndTransparency"
-                    android:layout_width="match_parent"
-                    android:layout_height="2.5dp"
-                    android:background="#FFCCCC"
-                    android:visibility="invisible" />
-            </LinearLayout>
-
-            <!-- ANNOUNCEMENTS/EVENTS -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="18dp"
-                android:gravity="center"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/topNavEvents"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:letterSpacing="0.08"
-                    android:paddingVertical="4dp"
-                    android:text="ANNOUNCEMENTS/EVENTS"
-                    android:textColor="#DDFFFFFF"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-                <View
-                    android:id="@+id/topIndEvents"
-                    android:layout_width="match_parent"
-                    android:layout_height="2.5dp"
-                    android:background="#FFCCCC"
-                    android:visibility="invisible" />
-            </LinearLayout>
-
-            <!-- SK PROGRAMS -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="18dp"
-                android:gravity="center"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/topNavSk"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:letterSpacing="0.08"
-                    android:paddingVertical="4dp"
-                    android:text="SK PROGRAMS"
-                    android:textColor="#DDFFFFFF"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-                <View
-                    android:id="@+id/topIndSk"
-                    android:layout_width="match_parent"
-                    android:layout_height="2.5dp"
-                    android:background="#FFCCCC"
-                    android:visibility="invisible" />
-            </LinearLayout>
-
-            <!-- CONTACT -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="8dp"
-                android:gravity="center"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/topNavContact"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:letterSpacing="0.08"
-                    android:paddingVertical="4dp"
-                    android:text="CONTACT"
-                    android:textColor="#DDFFFFFF"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-                <View
-                    android:id="@+id/topIndContact"
-                    android:layout_width="match_parent"
-                    android:layout_height="2.5dp"
-                    android:background="#FFCCCC"
-                    android:visibility="invisible" />
-            </LinearLayout>
-
-        </LinearLayout>
-    </HorizontalScrollView>
 </LinearLayout>
