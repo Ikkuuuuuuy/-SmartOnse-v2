@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Persistent Top Website Navbar + Links Strip -->
+        <!-- Persistent Top Header Bar -->
         <include layout="@layout/layout_top_navbar" />
 
         <ScrollView
@@ -27,10 +27,11 @@
                 android:paddingTop="14dp"
                 android:paddingBottom="90dp">
 
+                <!-- Top Section Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginBottom="12dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -39,7 +40,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:fontFamily="sans-serif-black"
-                        android:text="ABOUT, OFFICIALS &amp; CONTACT"
+                        android:text="ABOUT &amp; BARANGAY OFFICIALS"
                         android:textColor="#0F172A"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -49,7 +50,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="32dp"
                         android:background="@drawable/bg_btn_white"
-                        android:paddingHorizontal="10dp"
+                        android:paddingHorizontal="12dp"
                         android:text="← Home"
                         android:textAllCaps="false"
                         android:textColor="#9C2007"
@@ -57,24 +58,62 @@
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- About Barangay Onse & Emergency Contact Card -->
+                <!-- 1. HERO CIVIC PROFILE CARD (Matches Website /about Hero) -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="2dp">
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="3dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="22dp">
+
+                        <ImageView
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:background="@drawable/bg_circle_seal"
+                            android:contentDescription="Barangay Onse Seal"
+                            android:padding="5dp"
+                            android:src="@drawable/barangay_seal" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="BARANGAY ONSE, SAN JUAN CITY"
+                            android:layout_marginTop="10dp"
+                            android:background="@drawable/bg_pill_maroon"
+                            android:fontFamily="sans-serif-black"
+                            android:letterSpacing="0.06"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="4dp"
+                            android:text="● HISTORICAL &amp; CIVIC PROFILE"
+                            android:textColor="#9C2007"
+                            android:textSize="9.5sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:fontFamily="sans-serif-black"
+                            android:gravity="center"
+                            android:text="ABOUT BARANGAY ONSE"
+                            android:textColor="#0F172A"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-black"
+                            android:gravity="center"
+                            android:letterSpacing="0.05"
+                            android:text="CITY OF SAN JUAN • METRO MANILA"
                             android:textColor="#9C2007"
                             android:textSize="11sp"
                             android:textStyle="bold" />
@@ -82,28 +121,254 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:lineSpacingExtra="3dp"
-                            android:text="SmartOnse is the Digital E-Governance and Resident Services Portal of Barangay Onse, San Juan City. Compliant with R.A. 11032 (Ease of Doing Business) and R.A. 10173 (Data Privacy Act of 2012)."
-                            android:textColor="#334155"
-                            android:textSize="12sp" />
+                            android:layout_marginTop="10dp"
+                            android:gravity="center"
+                            android:lineSpacingExtra="4dp"
+                            android:text="SmartOnse is the Official Digital E-Governance and Resident Services Portal of Barangay Onse, San Juan City — delivering fast, transparent, and paperless frontline governance compliant with R.A. 11032 (Ease of Doing Business) and R.A. 10173 (Data Privacy Act of 2012)."
+                            android:textColor="#475569"
+                            android:textSize="12.5sp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- 2. KEY COMMUNITY METRICS (2x2 Grid Matching AboutClient.tsx #key-metrics) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="14dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-black"
+                                android:text="3,824"
+                                android:textColor="#9C2007"
+                                android:textSize="22sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:fontFamily="sans-serif-black"
+                                android:text="POPULATION"
+                                android:textColor="#0F172A"
+                                android:textSize="10.5sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="San Juan City Census"
+                                android:textColor="#64748B"
+                                android:textSize="10sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="14dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-black"
+                                android:text="1,250"
+                                android:textColor="#9C2007"
+                                android:textSize="22sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:fontFamily="sans-serif-black"
+                                android:text="REGISTERED VOTERS"
+                                android:textColor="#0F172A"
+                                android:textSize="10.5sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="COMELEC Precincts"
+                                android:textColor="#64748B"
+                                android:textSize="10sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+
+                <!-- 3. MANDATE, VISION & MISSION CARDS (Matches AboutClient.tsx #mandate-vision-mission) -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-black"
+                            android:letterSpacing="0.08"
+                            android:text="GUIDING PRINCIPLES &amp; LEGAL FRAMEWORK"
+                            android:textColor="#9C2007"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+
+                        <!-- Mandate -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:background="@drawable/bg_input_box"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-black"
+                                android:text="🏛️ OUR MANDATE (R.A. 7160 &amp; R.A. 11032)"
+                                android:textColor="#9C2007"
+                                android:textSize="11.5sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="3dp"
+                                android:text="Deliver responsive, transparent, and citizen-centric frontline public services under the Local Government Code and Ease of Doing Business Act."
+                                android:textColor="#475569"
+                                android:textSize="11.5sp" />
+                        </LinearLayout>
+
+                        <!-- Vision & Mission -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/bg_input_box"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-black"
+                                android:text="✨ VISION &amp; MISSION"
+                                android:textColor="#1D4ED8"
+                                android:textSize="11.5sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="3dp"
+                                android:text="A peaceful, progressive, and digitally empowered Barangay Onse that upholds integrity, youth leadership, disaster resilience, and citizen data privacy."
+                                android:textColor="#475569"
+                                android:textSize="11.5sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- 4. BARANGAY HALL & CIVIC CENTER CARD (Matches AboutClient.tsx #civic-hub) -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:cardBackgroundColor="#800000"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="3dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_pill_amber"
+                            android:fontFamily="sans-serif-black"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="3dp"
+                            android:text="PHYSICAL CIVIC CENTER &amp; HOTLINES"
+                            android:textColor="#92400E"
+                            android:textSize="9.5sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="📍 Barangay Hall: Ibuna corner P. Guevarra St., Barangay Onse, San Juan City\n📞 Barangay Hotline: (02) 8723-0011 / 0917-888-0011\n🚨 San Juan CDRRMO Rescue: (02) 8722-9837 | PNP: (02) 8724-2509 | BFP: 160"
-                            android:textColor="#0F172A"
-                            android:textSize="11.5sp"
+                            android:fontFamily="sans-serif-black"
+                            android:text="BARANGAY ONSE HALL"
+                            android:textColor="#FFFFFF"
+                            android:textSize="17sp"
                             android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:lineSpacingExtra="3dp"
+                            android:text="📍 Ibuna corner P. Guevarra St., Barangay Onse, San Juan City\n🕒 Office Hours: Monday – Friday (8:00 AM – 5:00 PM)\n📞 Barangay Landline: (02) 8723-0011\n🚨 San Juan CDRRMO: (02) 8722-9837 | PNP: (02) 8724-2509 | BFP: 160"
+                            android:textColor="#FFE4E6"
+                            android:textSize="11.5sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Council Filter Buttons -->
+                <!-- 5. OFFICIALS DIRECTORY FILTER PILLS -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:fontFamily="sans-serif-black"
+                    android:letterSpacing="0.06"
+                    android:text="ELECTED &amp; APPOINTED COUNCIL DIRECTORY"
+                    android:textColor="#9C2007"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="8dp"
                     android:orientation="horizontal">
 
                     <Button
@@ -150,7 +415,7 @@
                     android:id="@+id/containerOfficialsList"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:orientation="vertical" />
             </LinearLayout>
         </ScrollView>

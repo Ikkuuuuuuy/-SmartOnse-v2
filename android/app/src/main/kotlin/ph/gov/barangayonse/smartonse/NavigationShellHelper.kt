@@ -121,46 +121,57 @@ object NavigationShellHelper {
     }
 
     fun showHamburgerAccountDrawer(activity: Activity) {
-        val statusHeader = if (SampleDataRepository.isLoggedIn) {
-            "👤 ${SampleDataRepository.currentUserName}\n${SampleDataRepository.currentUserRole} (${SampleDataRepository.currentUserEmail})"
-        } else {
-            "👤 Guest Citizen (Not Signed In)"
+        val dialog = android.app.Dialog(activity)
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+        val view = android.view.LayoutInflater.from(activity).inflate(R.layout.dialog_hamburger_menu, null)
+        dialog.setContentView(view)
+        dialog.window?.apply {
+            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+            val params = attributes
+            params.gravity = android.view.Gravity.TOP or android.view.Gravity.END
+            params.x = 24
+            params.y = 140
+            attributes = params
         }
 
-        val items = if (SampleDataRepository.isLoggedIn) {
-            arrayOf(
-                "👤 My Resident Profile & Account Settings",
-                "⚡ Switch Demo Role (Captain / Staff / Kagawad / SK / Resident)",
-                "🚪 Sign Out of SmartOnse"
-            )
+        val tvRoleBadge = view.findViewById<TextView>(R.id.tvMenuUserRoleBadge)
+        val tvUserName = view.findViewById<TextView>(R.id.tvMenuUserName)
+        val tvUserEmail = view.findViewById<TextView>(R.id.tvMenuUserEmail)
+        val btnProfile = view.findViewById< android.widget.Button>(R.id.btnMenuProfile)
+        val btnSwitchRole = view.findViewById<android.widget.Button>(R.id.btnMenuSwitchRole)
+        val btnSignOut = view.findViewById<android.widget.Button>(R.id.btnMenuSignOut)
+
+        if (SampleDataRepository.isLoggedIn) {
+            tvRoleBadge.text = SampleDataRepository.currentUserRole.uppercase()
+            tvUserName.text = SampleDataRepository.currentUserName
+            tvUserEmail.text = SampleDataRepository.currentUserEmail
+            btnProfile.text = "👤 My Resident Profile & Account"
+            btnSignOut.visibility = View.VISIBLE
         } else {
-            arrayOf(
-                "🔐 Sign In / Register Resident Account",
-                "⚡ Switch Demo Role (1-Click Capstone Login)"
-            )
+            tvRoleBadge.text = "GUEST CITIZEN"
+            tvUserName.text = "Not Signed In"
+            tvUserEmail.text = "Tap below to sign in to SmartOnse"
+            btnProfile.text = "🔐 Sign In to Resident / Staff Portal"
+            btnSignOut.visibility = View.GONE
         }
 
-        AlertDialog.Builder(activity)
-            .setTitle(statusHeader)
-            .setItems(items) { _, which ->
-                if (SampleDataRepository.isLoggedIn) {
-                    when (which) {
-                        0 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
-                        1 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
-                        2 -> {
-                            SampleDataRepository.isLoggedIn = false
-                            Toast.makeText(activity, "Signed out successfully.", Toast.LENGTH_SHORT).show()
-                            activity.recreate()
-                        }
-                    }
-                } else {
-                    when (which) {
-                        0 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
-                        1 -> activity.startActivity(Intent(activity, LoginActivity::class.java))
-                    }
-                }
-            }
-            .setNegativeButton("Close", null)
-            .show()
+        btnProfile.setOnClickListener {
+            dialog.dismiss()
+            activity.startActivity(Intent(activity, LoginActivity::class.java))
+        }
+
+        btnSwitchRole.setOnClickListener {
+            dialog.dismiss()
+            activity.startActivity(Intent(activity, LoginActivity::class.java))
+        }
+
+        btnSignOut.setOnClickListener {
+            dialog.dismiss()
+            SampleDataRepository.isLoggedIn = false
+            Toast.makeText(activity, "Signed out of SmartOnse.", Toast.LENGTH_SHORT).show()
+            activity.recreate()
+        }
+
+        dialog.show()
     }
 }
