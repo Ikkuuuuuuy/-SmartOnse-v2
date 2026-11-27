@@ -79,12 +79,6 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="false" />
 
-        <activity
-            android:name=".WebMirrorActivity"
-            android:label="SmartOnse System View"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:exported="false" />
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
