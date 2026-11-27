@@ -4,11 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 
@@ -28,26 +23,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         tvHeroAccountBtn = findViewById(R.id.btnHeroLoginPortal)
-
-        // Setup Persistent Top Website Nav Strip + Persistent Bottom Bar (Highlights HOME) + Hamburger Account Drawer
-        NavigationShellHelper.setupPersistentShell(
-            activity = this,
-            activeBottomTab = "HOME",
-            activeTopLink = "HOME"
-        )
-
-        refreshUserSessionUI()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        NavigationShellHelper.setupPersistentShell(
-            activity = this,
-            activeBottomTab = "HOME",
-            activeTopLink = "HOME"
-        )
-        refreshUserSessionUI()
-    }
 
         // Hero Section CTAs (Exact match with website Hero buttons)
         findViewById<Button>(R.id.btnHeroRequest).setOnClickListener {
@@ -120,6 +95,25 @@ class MainActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
+
+        // Setup Persistent Top Website Nav Strip + Persistent Bottom Bar (Highlights HOME) + Hamburger Account Drawer
+        NavigationShellHelper.setupPersistentShell(
+            activity = this,
+            activeBottomTab = "HOME",
+            activeTopLink = "HOME"
+        )
+
+        refreshUserSessionUI()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        NavigationShellHelper.setupPersistentShell(
+            activity = this,
+            activeBottomTab = "HOME",
+            activeTopLink = "HOME"
+        )
+        refreshUserSessionUI()
     }
 
     private fun refreshUserSessionUI() {
@@ -129,35 +123,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             tvHeroAccountBtn.text = "LOG IN"
         }
-    }
-
-    private fun showMobileNavigationMenu() {
-        val menuItems = arrayOf(
-            "🏠 Home Dashboard",
-            "📄 Barangay Services & Clearances",
-            "✍️ Request Certificate Online",
-            "🔍 Track Application Status",
-            "📊 Transparency, SK Programs & Events",
-            "🏛️ About & Barangay Officials (20)",
-            "🤖 Ask OnseBot AI Assistant (24/7)",
-            "🔐 Account & 1-Click Role Switcher (${SampleDataRepository.currentUserName})"
-        )
-
-        AlertDialog.Builder(this)
-            .setTitle("SMARTONSE • Navigation Menu")
-            .setItems(menuItems) { _, which ->
-                when (which) {
-                    1 -> startActivity(Intent(this, ServicesActivity::class.java))
-                    2 -> startActivity(Intent(this, RequestFormActivity::class.java))
-                    3 -> startActivity(Intent(this, TrackDocumentActivity::class.java))
-                    4 -> startActivity(Intent(this, TransparencySkActivity::class.java))
-                    5 -> startActivity(Intent(this, AboutOfficialsActivity::class.java))
-                    6 -> startActivity(Intent(this, ChatbotActivity::class.java))
-                    7 -> startActivity(Intent(this, LoginActivity::class.java))
-                }
-            }
-            .setNegativeButton("Close", null)
-            .show()
     }
 
     private fun openServiceDetail(serviceId: String) {
