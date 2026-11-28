@@ -26,13 +26,40 @@ import TablePagination from '@/components/ui/TablePagination';
 interface PendingUser {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   phone: string | null;
   address: string | null;
   avatarUrl: string | null;
   isVerified: boolean;
   createdAt: string;
-  inhabitant: { rbiNumber: string } | null;
+  inhabitant: {
+    rbiNumber: string;
+    householdRole?: string | null;
+    employmentStatus?: string | null;
+    isRegisteredVoter?: boolean;
+    age?: number | null;
+  } | null;
+}
+
+function parseHouseholdMeta(roleStr?: string | null) {
+  const raw = roleStr || 'Member | Homeowner / Permanent Resident | Family:1';
+  const parts = raw.split('|').map((p) => p.trim());
+  const headStatus = parts[0] === 'Head' ? 'Head of Family' : 'Family Member';
+  const residencyType = parts[1] || 'Homeowner / Permanent Resident';
+  const familyMatch = raw.match(/Family:(\d+)/i);
+  const familyCount = familyMatch ? Number(familyMatch[1]) : 1;
+  const isTenantOrCommercial =
+    residencyType.toLowerCase().includes('tenant') ||
+    residencyType.toLowerCase().includes('renter') ||
+    residencyType.toLowerCase().includes('commercial') ||
+    residencyType.toLowerCase().includes('boarder');
+
+  return {
+    headStatus,
+    residencyType,
+    familyCount,
+    isTenantOrCommercial,
+  };
 }
 
 export default function AdminVerificationsPage() {
@@ -117,7 +144,8 @@ export default function AdminVerificationsPage() {
         const q = searchTerm.toLowerCase();
         return (
           u.name.toLowerCase().includes(q) ||
-          u.email.toLowerCase().includes(q) ||
+          (u.email ?? '').toLowerCase().includes(q) ||
+          (u.phone ?? '').toLowerCase().includes(q) ||
           (u.address ?? '').toLowerCase().includes(q)
         );
       })
@@ -315,6 +343,7 @@ export default function AdminVerificationsPage() {
             {paginatedUsers.map((u) => {
               const isApproving = actionLoading === u.id + 'approve';
               const isRejecting = actionLoading === u.id + 'reject';
+              const meta = parseHouseholdMeta(u.inhabitant?.householdRole);
               return (
                 <div
                   key={u.id}
@@ -325,7 +354,13 @@ export default function AdminVerificationsPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-black text-slate-900 dark:text-white">{u.name}</span>
                       <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700/50 text-amber-800 dark:text-amber-300 text-[10px] font-black uppercase">
-                        Pending Census Enrollment
+                        Pending ID Verification
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/80 border border-blue-300 dark:border-blue-800/50 text-blue-800 dark:text-blue-300 text-[10px] font-bold">
+                        {meta.residencyType}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold">
+                        {meta.headStatus} ({meta.familyCount} {meta.familyCount === 1 ? 'member' : 'members'})
                       </span>
                       {u.avatarUrl ? (
                         <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold flex items-center gap-1">
@@ -337,10 +372,15 @@ export default function AdminVerificationsPage() {
                         </span>
                       )}
                     </div>
+                    {meta.isTenantOrCommercial && (
+                      <div className="text-[11px] text-blue-700 dark:text-blue-300 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 rounded-xl px-2.5 py-1.5 inline-block">
+                        <strong>ID Address Tolerance Policy:</strong> Applicant is a <strong>{meta.residencyType}</strong> — a provincial or previous address printed on their Government/School ID is permitted.
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] text-slate-500 dark:text-slate-400">
                       <div className="flex items-center gap-1.5">
                         <Mail className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                        <span className="truncate font-mono">{u.email}</span>
+                        <span className="truncate font-mono">{u.email || 'No email (SMS-verified)'}</span>
                       </div>
                       {u.phone && (
                         <div className="flex items-center gap-1.5">
@@ -450,20 +490,42 @@ export default function AdminVerificationsPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 dark:bg-[#152747] p-3.5 rounded-2xl">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Applicant</span>
-                <p className="font-black text-slate-900 dark:text-white">{selectedUserForId.name}</p>
-              </div>
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Contact Phone</span>
-                <p className="font-bold text-slate-800 dark:text-slate-200">{selectedUserForId.phone || 'N/A'}</p>
-              </div>
-              <div className="col-span-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Address Provided</span>
-                <p className="font-bold text-slate-800 dark:text-slate-200">{selectedUserForId.address || 'Barangay Onse, San Juan City'}</p>
-              </div>
-            </div>
+            {(() => {
+              const modalMeta = parseHouseholdMeta(selectedUserForId.inhabitant?.householdRole);
+              return (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 dark:bg-[#152747] p-3.5 rounded-2xl">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Applicant</span>
+                      <p className="font-black text-slate-900 dark:text-white">{selectedUserForId.name}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Contact Phone</span>
+                      <p className="font-bold text-slate-800 dark:text-slate-200">{selectedUserForId.phone || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Residency Type</span>
+                      <p className="font-bold text-blue-700 dark:text-blue-300">{modalMeta.residencyType}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Household Status</span>
+                      <p className="font-bold text-slate-800 dark:text-slate-200">
+                        {modalMeta.headStatus} ({modalMeta.familyCount} {modalMeta.familyCount === 1 ? 'member' : 'members'})
+                      </p>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Barangay Onse Residence Provided</span>
+                      <p className="font-bold text-slate-800 dark:text-slate-200">{selectedUserForId.address || 'Barangay Onse, San Juan City'}</p>
+                    </div>
+                  </div>
+                  {modalMeta.isTenantOrCommercial && (
+                    <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 text-xs text-blue-800 dark:text-blue-200">
+                      <strong>ID Address Tolerance Note:</strong> Because this applicant registered as a <strong>{modalMeta.residencyType}</strong>, their Government/Student ID address is permitted to show a provincial or previous residence outside Barangay Onse.
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             <div className="flex items-center justify-end gap-3 pt-2">
               <button

@@ -11,9 +11,13 @@
 
 export interface ScanInput {
   fullName: string;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
   birthDate?: string;
   gender?: string;
   address?: string;
+  residencyType?: string;
   idType?: string;
   imageBase64?: string;
   imageDimensions?: { width: number; height: number };
@@ -24,6 +28,7 @@ export interface ScanInput {
 
 export interface ScanResult {
   isValidId: boolean;
+  needsManualReview?: boolean;
   idType: string;
   idTypeLabel: string;
   confidenceScore: number; // 0 - 100
@@ -55,11 +60,11 @@ export const SUPPORTED_ID_TYPES: Record<string, { label: string; isSchool: boole
   OTHER_VALID_ID: { label: 'Other Valid Photo ID (TIN, PhilHealth, OWWA, NBI)', isSchool: false, isGovt: true },
 };
 
-// Known meme / junk filename keywords
+// Known meme / junk filename keywords (excluding 'download'/'screenshot' since phone photos often have those names)
 const SUSPICIOUS_FILENAME_KEYWORDS = [
-  'meme', 'funny', 'download', 'screenshot', 'wallpaper', 'cat', 'dog', 'pet',
+  'meme', 'funny', 'wallpaper', 'cat', 'dog', 'pet',
   'anime', 'tiktok', 'discord', 'roblox', 'genshin', 'food', 'snack', 'avatar',
-  'random', 'temp', 'untitled', 'test', 'sample', 'fake', 'joke', 'troll'
+  'fake', 'joke', 'troll'
 ];
 
 /**
@@ -188,45 +193,62 @@ export function scanIdentityDocument(input: ScanInput): ScanResult {
   // 4. Real OCR Inspection: Match Name on ID Card vs Applicant Input
   let nameMatchScore = 0;
   let nameMatchPassed = false;
+  let needsManualReview = false;
 
   const rawOcr = (input.ocrText || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ');
   const applicantNameClean = (input.fullName || '').toLowerCase().trim();
   const applicantTokens = applicantNameClean.split(/\s+/).filter(t => t.length > 1);
 
+  const cleanFirst = (input.firstName || '').toLowerCase().trim();
+  const cleanLast = (input.lastName || '').toLowerCase().trim();
+
   if (rawOcr.length > 5 && applicantTokens.length > 0) {
     let matchedTokensCount = 0;
-    const ocrWords = rawOcr.split(/\s+/).filter(w => w.length > 2);
+    const ocrWords = rawOcr.split(/\s+/).filter(w => w.length > 1);
 
     for (const token of applicantTokens) {
       if (rawOcr.includes(token)) {
         matchedTokensCount++;
       } else {
-        // Fuzzy token match against OCR words
-        const hasFuzzy = ocrWords.some(w => calculateSimilarity(token, w) >= 75);
+        // Fuzzy token match against OCR words (tolerates camera glare/OCR typos like l/1, o/0)
+        const hasFuzzy = ocrWords.some(w => calculateSimilarity(token, w) >= 68);
         if (hasFuzzy) {
           matchedTokensCount++;
         }
       }
     }
 
+    // Explicit First Name + Last Name check (handles "DELA CRUZ, JUAN M." where middle name is just an initial on the ID)
+    const firstTokens = cleanFirst.split(/\s+/).filter(t => t.length > 1);
+    const lastTokens = cleanLast.split(/\s+/).filter(t => t.length > 1);
+    const firstMatched = firstTokens.length > 0 && firstTokens.some(ft => rawOcr.includes(ft) || ocrWords.some(w => calculateSimilarity(ft, w) >= 70));
+    const lastMatched = lastTokens.length > 0 && lastTokens.some(lt => rawOcr.includes(lt) || ocrWords.some(w => calculateSimilarity(lt, w) >= 70));
+
     nameMatchScore = Math.round((matchedTokensCount / applicantTokens.length) * 100);
+    if (firstMatched && lastMatched) {
+      nameMatchScore = Math.max(nameMatchScore, 90);
+    } else if (lastMatched || firstMatched) {
+      nameMatchScore = Math.max(nameMatchScore, 55);
+    }
 
     if (nameMatchScore >= 50) {
       nameMatchPassed = true;
       detectedFeatures.push(`Applicant Name verified on ID document (${nameMatchScore}% Match)`);
     } else {
       nameMatchPassed = false;
-      reasons.push(
-        `Different Person ID Detected (${nameMatchScore}% Match): The name printed on this ID does not match "${input.fullName}". Please upload your own official ID.`
+      needsManualReview = true;
+      warnings.push(
+        `Low OCR Name Match (${nameMatchScore}%): Camera glare or ID font prevented automatic text match for "${input.fullName}". Queued for Barangay Admin visual ID inspection.`
       );
-      confidenceScore -= 50;
+      confidenceScore -= 20;
     }
   } else {
-    // If OCR could not read any text at all from the image
-    nameMatchScore = 10;
+    // If OCR could not read text clearly due to lighting/hologram glare, queue for manual admin inspection instead of hard-blocking legitimate photos
+    nameMatchScore = 40;
     nameMatchPassed = false;
-    reasons.push('Could not detect legible name or text on this document. Please ensure the ID is clear, focused, and well-lit.');
-    confidenceScore -= 40;
+    needsManualReview = true;
+    warnings.push('ID text had low OCR contrast (hologram or lighting glare). Document attached for Barangay Admin visual verification.');
+    confidenceScore -= 15;
   }
 
   // 5. Official ID & Philippine Government/School Marker Detection in OCR
@@ -240,17 +262,18 @@ export function scanIdentityDocument(input: ScanInput): ScanResult {
       'comelec', 'voter', 'election',
       'prc', 'professional regulation',
       'student', 'university', 'college', 'school', 'academy', 'deped', 'ched', 'campus', 'high school',
-      'barangay', 'onse', 'resident', 'clearance',
-      'senior citizen', 'osca', 'pwd', 'tin', 'philhealth', 'republic'
+      'barangay', 'onse', 'resident', 'clearance', 'san juan',
+      'senior citizen', 'osca', 'pwd', 'tin', 'philhealth', 'republic', 'national', 'card', 'id', 'no', 'date', 'birth', 'sex', 'address', 'signature'
     ];
 
     const matchedKeywords = idKeywords.filter(k => rawOcr.includes(k));
     if (matchedKeywords.length > 0) {
-      detectedFeatures.push(`ID Headers Found: ${matchedKeywords.slice(0, 3).join(', ')}`);
+      detectedFeatures.push(`ID Markers Found: ${matchedKeywords.slice(0, 4).join(', ')}`);
       confidenceScore += 10;
     } else {
-      reasons.push('Uploaded image does not appear to be an official ID card (no government or school headers found).');
-      confidenceScore -= 30;
+      needsManualReview = true;
+      warnings.push('Standard government/school text headers were not detected by OCR; flagged for Barangay Admin inspection.');
+      confidenceScore -= 10;
     }
   }
 
@@ -261,7 +284,7 @@ export function scanIdentityDocument(input: ScanInput): ScanResult {
     const now = new Date();
     const age = now.getFullYear() - bdate.getFullYear();
 
-    if (isNaN(bdate.getTime()) || bdate > now || age < 10) {
+    if (isNaN(bdate.getTime()) || bdate > now || age < 5) {
       birthdateMatchPassed = false;
       reasons.push('Invalid birthdate provided in Step 1.');
     } else {
@@ -276,24 +299,26 @@ export function scanIdentityDocument(input: ScanInput): ScanResult {
       const monthIndex = bdate.getMonth();
       const monthName = monthNames[monthIndex];
       const monthAbbr = monthShort[monthIndex];
+      const monthNumPadded = String(monthIndex + 1).padStart(2, '0');
       const dayNum = bdate.getDate().toString();
+      const dayNumPadded = String(bdate.getDate()).padStart(2, '0');
 
       const hasYear = rawOcr.includes(birthYear);
-      const hasMonth = rawOcr.includes(monthName) || rawOcr.includes(monthAbbr);
-      const hasDatePattern = hasYear || (hasMonth && rawOcr.includes(dayNum));
+      const hasMonth = rawOcr.includes(monthName) || rawOcr.includes(monthAbbr) || rawOcr.includes(monthNumPadded);
+      const hasDay = rawOcr.includes(dayNum) || rawOcr.includes(dayNumPadded);
+      const hasDatePattern = hasYear || (hasMonth && hasDay);
 
       if (hasDatePattern) {
         birthdateMatchPassed = true;
         detectedFeatures.push(`Birthdate (${input.birthDate}) confirmed on document`);
       } else {
-        // Tolerated on school IDs ONLY if the applicant's name actually matched on the card
-        if (isSchoolId && nameMatchPassed) {
-          warnings.push(`Birthdate not printed on front of School ID (acceptable for student cards).`);
+        if (isSchoolId) {
+          warnings.push('Birthdate not printed on front of School ID (acceptable for student cards).');
           birthdateMatchPassed = true;
         } else {
           birthdateMatchPassed = false;
-          reasons.push(`Birthdate Mismatch: Birthdate (${input.birthDate}) was not found in the uploaded image.`);
-          confidenceScore -= 25;
+          needsManualReview = true;
+          warnings.push(`Birthdate (${input.birthDate}) not clearly read by OCR; Barangay Admin will verify on card image.`);
         }
       }
     }
@@ -312,17 +337,36 @@ export function scanIdentityDocument(input: ScanInput): ScanResult {
     }
   }
 
-  // 8. Smart Address Tolerance Policy
+  // 8. Smart Address Tolerance Policy (Respects Residency Type: Homeowner, Tenant/Renter, Commercial Space, Boarder)
   let addressStatus: 'MATCH_ONSE' | 'PROVINCIAL_PERMITTED' | 'UNVERIFIED' = 'MATCH_ONSE';
   let addressNote = 'Current address verified within Barangay Onse, San Juan City.';
 
-  if (input.address) {
+  const resType = (input.residencyType || '').toLowerCase();
+  const isTenantOrCommercial =
+    resType.includes('tenant') ||
+    resType.includes('renter') ||
+    resType.includes('commercial') ||
+    resType.includes('boarder') ||
+    resType.includes('relative');
+
+  const ocrMentionsOnse =
+    rawOcr.includes('onse') ||
+    rawOcr.includes('artiaga') ||
+    rawOcr.includes('ibuna') ||
+    rawOcr.includes('guevarra') ||
+    rawOcr.includes('san juan');
+
+  if (isTenantOrCommercial && !ocrMentionsOnse) {
+    addressStatus = 'PROVINCIAL_PERMITTED';
+    addressNote = `ID Address Tolerance Enabled (${input.residencyType}): Provincial or previous address on Government ID is permitted and flagged for Barangay Admin review.`;
+    detectedFeatures.push(`Residency Policy: ${input.residencyType} (Different ID Address Permitted)`);
+  } else if (input.address) {
     const addr = input.address.toLowerCase();
-    const mentionsOnse = addr.includes('onse') || addr.includes('lt. artiaga') || addr.includes('artiaga') || addr.includes('san juan');
+    const mentionsOnse = addr.includes('onse') || addr.includes('lt. artiaga') || addr.includes('artiaga') || addr.includes('san juan') || ocrMentionsOnse;
 
     if (mentionsOnse) {
       addressStatus = 'MATCH_ONSE';
-      addressNote = 'Address confirmed within Barangay Onse.';
+      addressNote = 'Address confirmed within Barangay Onse, San Juan City.';
     } else {
       addressStatus = 'PROVINCIAL_PERMITTED';
       addressNote = 'Provincial or prior address permitted for renters, boarding students, and new transferees residing in Barangay Onse.';
@@ -331,23 +375,30 @@ export function scanIdentityDocument(input: ScanInput): ScanResult {
     }
   }
 
-  // Determine overall validity
-  const isValidId = confidenceScore >= 50 && reasons.length === 0 && nameMatchPassed;
+  // Determine overall validity:
+  // Hard-reject only if reasons.length > 0 (e.g. corrupt/tiny <8KB file, extreme non-ID aspect ratio, or meme filename).
+  // If OCR had low contrast on a real camera photo, allow submission with needsManualReview = true so the Barangay Admin can inspect the uploaded ID in /admin/verifications.
+  const isValidId = reasons.length === 0 && confidenceScore >= 35;
 
   // Build Human-Readable Scan Log
   const scanLog = [
-    `ID Scanner Version: Native v3.0 (Client-Side Optical Character Recognition)`,
+    `ID Scanner Version: Native v3.2 (Client-Side Optical Character Recognition)`,
     `Document Type: ${typeConfig.label}`,
     `Authenticity Confidence: ${Math.max(10, Math.min(100, confidenceScore))}%`,
-    `Name Similarity: ${nameMatchScore}% (${nameMatchPassed ? 'MATCHED' : 'DIFFERENT PERSON'})`,
-    `Birthdate/Age: ${birthdateMatchPassed ? 'VALIDATED' : 'FLAGGED'}`,
+    `Name Similarity: ${nameMatchScore}% (${nameMatchPassed ? 'OCR MATCHED' : 'QUEUED FOR ADMIN VISUAL CHECK'})`,
+    `Birthdate/Age: ${birthdateMatchPassed ? 'VALIDATED' : 'ADMIN VISUAL CHECK'}`,
     `Address Policy: ${addressStatus} - ${addressNote}`,
     `Features Detected: ${detectedFeatures.join(', ')}`,
-    reasons.length > 0 ? `Issues: ${reasons.join('; ')}` : 'Status: ACCEPTED FOR REGISTRATION'
+    reasons.length > 0
+      ? `Issues: ${reasons.join('; ')}`
+      : needsManualReview
+      ? 'Status: ACCEPTED FOR MANUAL ADMIN ID VERIFICATION'
+      : 'Status: ACCEPTED & OCR VERIFIED'
   ].join('\n');
 
   return {
     isValidId,
+    needsManualReview,
     idType: idTypeKey,
     idTypeLabel: typeConfig.label,
     confidenceScore: Math.max(10, Math.min(100, confidenceScore)),

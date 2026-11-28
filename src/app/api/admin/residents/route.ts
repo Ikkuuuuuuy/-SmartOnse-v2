@@ -34,6 +34,10 @@ export async function GET(req: Request) {
           inhabitant: {
             select: {
               rbiNumber: true,
+              householdRole: true,
+              employmentStatus: true,
+              isRegisteredVoter: true,
+              age: true,
             },
           },
         },

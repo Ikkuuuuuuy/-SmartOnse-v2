@@ -85,6 +85,9 @@ export default function RegisterPage() {
   const [idType, setIdType] = useState('PHILSYS');
   const [idImageBase64, setIdImageBase64] = useState<string | null>(null);
   const [idFileName, setIdFileName] = useState('');
+  const [idFileSize, setIdFileSize] = useState<number>(0);
+  const [idDimensions, setIdDimensions] = useState<{ width: number; height: number } | undefined>(undefined);
+  const [lastOcrText, setLastOcrText] = useState<string>('');
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -257,6 +260,7 @@ export default function RegisterPage() {
 
     setError('');
     setIdFileName(file.name);
+    setIdFileSize(file.size);
 
     // Read image as base64
     const reader = new FileReader();
@@ -269,6 +273,8 @@ export default function RegisterPage() {
       img.onload = async () => {
         setScanning(true);
         setError('');
+        const dims = { width: img.width, height: img.height };
+        setIdDimensions(dims);
 
         try {
           // Client-side OCR via Tesseract.js
@@ -278,16 +284,21 @@ export default function RegisterPage() {
           await worker.terminate();
 
           const ocrText = ret?.data?.text || '';
+          setLastOcrText(ocrText);
           console.log('[Native Client OCR Extracted Text]:', ocrText);
 
           const result = scanIdentityDocument({
             fullName: name,
+            firstName: firstName.trim(),
+            middleName: middleName.trim(),
+            lastName: lastName.trim(),
             birthDate,
             gender,
             address,
+            residencyType,
             idType,
             imageBase64: base64Data,
-            imageDimensions: { width: img.width, height: img.height },
+            imageDimensions: dims,
             fileName: file.name,
             fileSize: file.size,
             ocrText,
@@ -300,12 +311,16 @@ export default function RegisterPage() {
           // Fallback check
           const result = scanIdentityDocument({
             fullName: name,
+            firstName: firstName.trim(),
+            middleName: middleName.trim(),
+            lastName: lastName.trim(),
             birthDate,
             gender,
             address,
+            residencyType,
             idType,
             imageBase64: base64Data,
-            imageDimensions: { width: img.width, height: img.height },
+            imageDimensions: dims,
             fileName: file.name,
             fileSize: file.size,
             ocrText: '',
@@ -385,16 +400,23 @@ export default function RegisterPage() {
     const base64Data = canvas.toDataURL('image/png');
     setIdImageBase64(base64Data);
     setIdFileName(demoType === 'PHILSYS' ? 'Official_PhilSys_Card.png' : 'Official_Student_ID.png');
+    setIdFileSize(42000);
+    setIdDimensions({ width: 600, height: 380 });
     setIdType(demoType);
 
     setScanning(true);
     setTimeout(() => {
       const ocrText = `${demoType === 'PHILSYS' ? 'republika ng pilipinas philsys national id' : 'philippines student id university school'} ${name || 'Juan Martinez Dela Cruz'} ${birthDate || '2004-09-10'} ${gender || 'Male'} ${address || 'Barangay Onse'}`;
+      setLastOcrText(ocrText);
       const result = scanIdentityDocument({
         fullName: name || 'Juan Martinez Dela Cruz',
+        firstName: firstName.trim() || 'Juan',
+        middleName: middleName.trim() || 'Martinez',
+        lastName: lastName.trim() || 'Dela Cruz',
         birthDate: birthDate || '2004-09-10',
         gender: gender || 'Male',
         address: address || 'Barangay Onse, San Juan City',
+        residencyType,
         idType: demoType,
         imageBase64: base64Data,
         imageDimensions: { width: 600, height: 380 },
@@ -1411,22 +1433,30 @@ export default function RegisterPage() {
               <select
                 value={idType}
                 onChange={(e) => {
-                  setIdType(e.target.value);
+                  const nextIdType = e.target.value;
+                  setIdType(nextIdType);
                   if (idImageBase64) {
-                    // Re-run scanner with updated ID type
+                    // Re-run scanner with updated ID type & cached OCR text
                     const res = scanIdentityDocument({
                       fullName: name,
+                      firstName: firstName.trim(),
+                      middleName: middleName.trim(),
+                      lastName: lastName.trim(),
                       birthDate,
                       gender,
                       address,
-                      idType: e.target.value,
+                      residencyType,
+                      idType: nextIdType,
                       imageBase64: idImageBase64,
+                      imageDimensions: idDimensions,
                       fileName: idFileName,
+                      fileSize: idFileSize,
+                      ocrText: lastOcrText,
                     });
                     setScanResult(res);
                   }
                 }}
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-[#9C2007] outline-none cursor-pointer"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#152747] border border-slate-200 dark:border-blue-900/40 text-slate-900 dark:text-white rounded-xl focus:ring-1 focus:ring-blue-600 outline-none cursor-pointer"
               >
                 {Object.entries(SUPPORTED_ID_TYPES).map(([key, item]) => (
                   <option key={key} value={key}>
@@ -1526,26 +1556,36 @@ export default function RegisterPage() {
             {scanResult && !scanning && (
               <div
                 className={`p-4 rounded-2xl border space-y-3 animate-in fade-in-50 ${
-                  scanResult.isValidId
-                    ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40'
-                    : 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50'
+                  !scanResult.isValidId
+                    ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50'
+                    : scanResult.needsManualReview
+                    ? 'bg-blue-50/60 dark:bg-blue-950/25 border-blue-200 dark:border-blue-800/50'
+                    : 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {scanResult.isValidId ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    ) : (
+                    {!scanResult.isValidId ? (
                       <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                    ) : scanResult.needsManualReview ? (
+                      <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     )}
                     <span className="font-black uppercase tracking-wider text-[11px] text-slate-900 dark:text-white">
-                      {scanResult.isValidId ? 'ID Document Verified' : 'ID Validation Flagged'}
+                      {!scanResult.isValidId
+                        ? 'ID Validation Error'
+                        : scanResult.needsManualReview
+                        ? 'ID Accepted for Admin Visual Review'
+                        : 'ID Document Verified via OCR'}
                     </span>
                   </div>
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                    scanResult.isValidId
-                      ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300'
-                      : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300'
+                    !scanResult.isValidId
+                      ? 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300'
+                      : scanResult.needsManualReview
+                      ? 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300'
+                      : 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300'
                   }`}>
                     {scanResult.confidenceScore}% Confidence
                   </span>
@@ -1553,21 +1593,21 @@ export default function RegisterPage() {
 
                 {/* Validation Checklist */}
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <div className={`flex items-center gap-1.5 ${scanResult.nameMatchPassed ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-400 font-bold'}`}>
+                  <div className={`flex items-center gap-1.5 ${scanResult.nameMatchPassed ? 'text-emerald-700 dark:text-emerald-300' : 'text-blue-700 dark:text-blue-300 font-semibold'}`}>
                     {scanResult.nameMatchPassed ? (
                       <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     ) : (
-                      <X className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                      <Info className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                     )}
-                    <span>Name: <strong>{scanResult.nameMatchScore}% {scanResult.nameMatchPassed ? 'Match' : 'Mismatch'}</strong></span>
+                    <span>Name: <strong>{scanResult.nameMatchPassed ? `${scanResult.nameMatchScore}% Match` : 'Admin Check'}</strong></span>
                   </div>
-                  <div className={`flex items-center gap-1.5 ${scanResult.birthdateMatchPassed ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-400 font-bold'}`}>
+                  <div className={`flex items-center gap-1.5 ${scanResult.birthdateMatchPassed ? 'text-emerald-700 dark:text-emerald-300' : 'text-blue-700 dark:text-blue-300 font-semibold'}`}>
                     {scanResult.birthdateMatchPassed ? (
                       <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     ) : (
-                      <X className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                      <Info className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                     )}
-                    <span>Birthdate: <strong>{scanResult.birthdateMatchPassed ? 'Confirmed' : 'Not Found'}</strong></span>
+                    <span>Birthdate: <strong>{scanResult.birthdateMatchPassed ? 'Confirmed' : 'Admin Check'}</strong></span>
                   </div>
                   <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -1579,7 +1619,7 @@ export default function RegisterPage() {
                     ) : (
                       <X className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                     )}
-                    <span>ID Authenticity: <strong>{scanResult.isValidId ? 'Verified' : 'Flagged'}</strong></span>
+                    <span>Status: <strong>{scanResult.isValidId ? (scanResult.needsManualReview ? 'Queued for Admin' : 'Verified') : 'Rejected'}</strong></span>
                   </div>
                 </div>
 
@@ -1587,14 +1627,23 @@ export default function RegisterPage() {
                 <div className="p-2.5 rounded-xl bg-white/70 dark:bg-[#0E1B33]/80 border border-slate-200 dark:border-blue-900/40 text-[11px] text-slate-600 dark:text-slate-300">
                   <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
                     <Info className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Address Tolerance Policy:</span>
+                    <span>Residency &amp; ID Address Policy ({residencyType}):</span>
                   </div>
                   <p className="mt-0.5 text-slate-500 dark:text-slate-400">
                     {scanResult.addressNote}
                   </p>
                 </div>
 
-                {/* Warnings / Errors */}
+                {/* Informational Warnings (Blue/Slate - NOT Red) */}
+                {scanResult.warnings.length > 0 && (
+                  <div className="text-[11px] text-blue-700 dark:text-blue-300 space-y-0.5">
+                    {scanResult.warnings.map((w, i) => (
+                      <p key={i}>• {w}</p>
+                    ))}
+                  </div>
+                )}
+
+                {/* Genuine Validation Errors (Red) */}
                 {scanResult.reasons.length > 0 && (
                   <div className="text-[11px] text-rose-700 dark:text-rose-400 space-y-0.5">
                     {scanResult.reasons.map((r, i) => (
